@@ -1,27 +1,37 @@
 import type { D1Database } from '@cloudflare/workers-types'
 import type { AISearchSettings, IndexStatus } from '../types'
+import { CustomRAGService } from './custom-rag.service'
 
 /**
  * Index Manager Service
- * Handles indexing of content items into Cloudflare AI Search
+ * Handles indexing of content items using Custom RAG with Vectorize
  */
 export class IndexManager {
+  private customRAG?: CustomRAGService
+
   constructor(
     private db: D1Database,
-    private aiSearch?: any // Cloudflare AI Search binding
-  ) {}
+    private ai?: any, // Workers AI for embeddings
+    private vectorize?: any // Vectorize for vector search
+  ) {
+    // Initialize Custom RAG if bindings are available
+    if (this.ai && this.vectorize) {
+      this.customRAG = new CustomRAGService(db, ai, vectorize)
+      console.log('[IndexManager] Custom RAG initialized')
+    }
+  }
 
-      /**
-       * Index all content items within a collection
-       */
-      async indexCollection(collectionId: string): Promise<IndexStatus> {
+  /**
+   * Index all content items within a collection using Custom RAG
+   */
+  async indexCollection(collectionId: string): Promise<IndexStatus> {
     try {
       // Get collection info
       const collectionStmt = this.db.prepare(
         'SELECT id, name, display_name FROM collections WHERE id = ?'
       )
       const collection = await collectionStmt.bind(collectionId).first<{
-        id: number
+        id: string
         name: string
         display_name: string
       }>()
@@ -39,68 +49,43 @@ export class IndexManager {
         status: 'indexing',
       })
 
-          // Get all content items for this collection
-          const contentStmt = this.db.prepare(`
-            SELECT 
-              c.id, c.title, c.slug, c.data, c.status,
-              c.created_at, c.updated_at, c.author_id,
-              col.name as collection_name, col.display_name as collection_display_name
-            FROM content c
-            JOIN collections col ON c.collection_id = col.id
-            WHERE c.collection_id = ? AND c.status != 'deleted'
-          `)
-          const { results: contentItems } = await contentStmt.bind(collectionId).all<{
-            id: string
-            title: string
-            slug: string
-            data: string
-            status: string
-            created_at: number
-            updated_at: number
-            author_id?: string
-            collection_name: string
-            collection_display_name: string
-          }>()
+      // Use Custom RAG for indexing if available
+      if (this.customRAG?.isAvailable()) {
+        console.log(`[IndexManager] Using Custom RAG to index collection ${collectionId}`)
+        
+        const result = await this.customRAG.indexCollection(collectionId)
 
-      const totalItems = contentItems?.length || 0
-      let indexedItems = 0
-
-      // Index each content item
-      for (const item of contentItems || []) {
-        try {
-          await this.indexContentItem(item, collectionId)
-          indexedItems++
-
-          // Update progress every 10 items
-          if (indexedItems % 10 === 0) {
-            await this.updateIndexStatus(collectionId, {
-              collection_id: collectionId,
-              collection_name: collection.display_name,
-              total_items: totalItems,
-              indexed_items: indexedItems,
-              status: 'indexing',
-            })
-          }
-        } catch (error) {
-          console.error(`Error indexing content item ${item.id}:`, error)
+        const finalStatus: IndexStatus = {
+          collection_id: collectionId,
+          collection_name: collection.display_name,
+          total_items: result.total_items,
+          indexed_items: result.indexed_chunks,
+          last_sync_at: Date.now(),
+          status: result.errors > 0 ? 'error' : 'completed',
+          error_message: result.errors > 0 ? `${result.errors} errors during indexing` : undefined
         }
+
+        await this.updateIndexStatus(collectionId, finalStatus)
+        return finalStatus
       }
 
-      // Mark as completed
-      const finalStatus: IndexStatus = {
+      // Fallback: No indexing without Custom RAG
+      console.warn(`[IndexManager] Custom RAG not available, skipping indexing for ${collectionId}`)
+      
+      const fallbackStatus: IndexStatus = {
         collection_id: collectionId,
         collection_name: collection.display_name,
-        total_items: totalItems,
-        indexed_items: indexedItems,
+        total_items: 0,
+        indexed_items: 0,
         last_sync_at: Date.now(),
         status: 'completed',
+        error_message: 'Custom RAG not available - using keyword search only'
       }
 
-      await this.updateIndexStatus(collectionId, finalStatus)
-
-      return finalStatus
+      await this.updateIndexStatus(collectionId, fallbackStatus)
+      return fallbackStatus
     } catch (error) {
-      console.error(`Error indexing collection ${collectionId}:`, error)
+      console.error(`[IndexManager] Error indexing collection ${collectionId}:`, error)
       const errorStatus: IndexStatus = {
         collection_id: collectionId,
         collection_name: 'Unknown',
@@ -250,17 +235,19 @@ export class IndexManager {
     }
   }
 
-      /**
-       * Remove a content item from the index
-       */
-      async removeFromIndex(collectionId: string, contentId: string): Promise<void> {
+  /**
+   * Remove a content item from the index using Custom RAG
+   */
+  async removeFromIndex(collectionId: string, contentId: string): Promise<void> {
     try {
-      // TODO: Call AI Search API to remove document
-      // await this.aiSearch.delete(`content_${contentId}`)
-
-      console.log(`Removed content item ${contentId} from index`)
+      if (this.customRAG?.isAvailable()) {
+        console.log(`[IndexManager] Removing content ${contentId} from index`)
+        await this.customRAG.removeContentFromIndex(contentId)
+      } else {
+        console.warn(`[IndexManager] Custom RAG not available, skipping removal for ${contentId}`)
+      }
     } catch (error) {
-      console.error(`Error removing content ${contentId} from index:`, error)
+      console.error(`[IndexManager] Error removing content ${contentId} from index:`, error)
       throw error
     }
   }
