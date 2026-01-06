@@ -7,16 +7,29 @@ import type {
   CollectionInfo,
   NewCollectionNotification,
 } from '../types'
+import { CustomRAGService } from './custom-rag.service'
 
 /**
  * AI Search Service
  * Handles search operations, settings management, and collection detection
+ * Now uses Custom RAG with Vectorize for semantic search
  */
 export class AISearchService {
+  private customRAG?: CustomRAGService
+
   constructor(
     private db: D1Database,
-    private aiSearch?: any // Cloudflare AI Search binding
-  ) {}
+    private ai?: any, // Workers AI for embeddings
+    private vectorize?: any // Vectorize for vector search
+  ) {
+    // Initialize Custom RAG if bindings are available
+    if (this.ai && this.vectorize) {
+      this.customRAG = new CustomRAGService(db, ai, vectorize)
+      console.log('[AISearchService] Custom RAG initialized')
+    } else {
+      console.log('[AISearchService] Custom RAG not available, using keyword search only')
+    }
+  }
 
   /**
    * Get plugin settings
@@ -485,7 +498,20 @@ export class AISearchService {
         return []
       }
 
-      // Get recent searches that match
+      // If Custom RAG is available, use AI-powered suggestions
+      if (this.customRAG?.isAvailable()) {
+        try {
+          const aiSuggestions = await this.customRAG.getSuggestions(partial, 5)
+          if (aiSuggestions.length > 0) {
+            return aiSuggestions
+          }
+        } catch (error) {
+          console.error('[AISearchService] Error getting AI suggestions:', error)
+          // Fall through to history-based suggestions
+        }
+      }
+
+      // Fallback to history-based suggestions
       const stmt = this.db.prepare(`
         SELECT DISTINCT query 
         FROM ai_search_history 
@@ -589,9 +615,16 @@ export class AISearchService {
   }
 
   /**
-   * Verify AI Search binding is available
+   * Verify Custom RAG is available
    */
   verifyBinding(): boolean {
-    return !!this.aiSearch
+    return this.isCustomRAGAvailable()
+  }
+
+  /**
+   * Get Custom RAG service instance (for indexer)
+   */
+  getCustomRAG(): CustomRAGService | undefined {
+    return this.customRAG
   }
 }
