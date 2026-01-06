@@ -29,6 +29,7 @@ import { metricsMiddleware } from './middleware/metrics'
 import { createDatabaseToolsAdminRoutes } from './plugins/core-plugins/database-tools-plugin/admin-routes'
 import { emailPlugin } from './plugins/core-plugins/email-plugin'
 import { otpLoginPlugin } from './plugins/core-plugins/otp-login-plugin'
+import { aiSearchPlugin } from './plugins/core-plugins/ai-search-plugin'
 import { createMagicLinkAuthPlugin } from './plugins/available/magic-link-auth'
 
 // ============================================================================
@@ -181,6 +182,14 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
   app.route('/admin/database-tools', createDatabaseToolsAdminRoutes())
   app.route('/admin/content', adminContentRoutes)
   app.route('/admin/media', adminMediaRoutes)
+  // Plugin routes - AI Search (MUST be registered BEFORE admin/plugins to avoid route conflict)
+  // Register AI Search routes first so they take precedence over the generic /:id handler
+  if (aiSearchPlugin.routes && aiSearchPlugin.routes.length > 0) {
+    for (const route of aiSearchPlugin.routes) {
+      app.route(route.path, route.handler)
+    }
+  }
+
   app.route('/admin/plugins', adminPluginRoutes)
   app.route('/admin/logs', adminLogsRoutes)
   app.route('/admin', adminUsersRoutes)
