@@ -30,6 +30,7 @@ test.describe('Admin Collections API', () => {
       try {
         await deleteTestCollection(page, TEST_DATA.collection.name);
         await deleteTestCollection(page, 'api_test_collection');
+        await deleteTestCollection(page, 'duplicate_test');
       } catch {
         // Ignore cleanup errors
       }
@@ -225,6 +226,19 @@ test.describe('Admin Collections API', () => {
   });
 
   test.describe('DELETE /admin/api/collections/:id - Delete Collection', () => {
+    test.afterEach(async ({ browser }) => {
+      // Clean up test collection if it still exists
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      await loginAsAdmin(page);
+      try {
+        await deleteTestCollection(page, 'delete_test_collection');
+      } catch {
+        // Ignore cleanup errors
+      }
+      await context.close();
+    });
+
     test('should delete an existing collection', async ({ request, browser }) => {
       // Create a collection first
       const context = await browser.newContext();
@@ -394,6 +408,24 @@ test.describe('Admin Collections API', () => {
   });
 
   test.describe('API Rate Limiting & Security', () => {
+    test.afterEach(async ({ browser }) => {
+      // Clean up test collections created by concurrent and large payload tests
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      await loginAsAdmin(page);
+      try {
+        // Clean up concurrent test collections
+        for (let i = 0; i < 5; i++) {
+          await deleteTestCollection(page, `concurrent_test_${i}`);
+        }
+        // Clean up large payload test collection
+        await deleteTestCollection(page, 'large_payload_test');
+      } catch {
+        // Ignore cleanup errors
+      }
+      await context.close();
+    });
+
     test('should handle concurrent requests safely', async ({ request }) => {
       // Send multiple concurrent requests
       const promises = Array.from({ length: 5 }, (_, i) => 
