@@ -20,8 +20,9 @@ const apiRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 apiRoutes.post('/', async (c) => {
   try {
     const db = c.env.DB
-    const aiSearch = (c.env as any).AI_SEARCH
-    const service = new AISearchService(db, aiSearch)
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE
+    const service = new AISearchService(db, ai, vectorize)
 
     const body = await c.req.json()
 
@@ -69,8 +70,9 @@ apiRoutes.post('/', async (c) => {
 apiRoutes.get('/suggest', async (c) => {
   try {
     const db = c.env.DB
-    const aiSearch = (c.env as any).AI_SEARCH
-    const service = new AISearchService(db, aiSearch)
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE
+    const service = new AISearchService(db, ai, vectorize)
 
     const query = c.req.query('q') || ''
 
@@ -103,8 +105,9 @@ apiRoutes.get('/suggest', async (c) => {
 apiRoutes.get('/analytics', async (c) => {
   try {
     const db = c.env.DB
-    const aiSearch = (c.env as any).AI_SEARCH
-    const service = new AISearchService(db, aiSearch)
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE
+    const service = new AISearchService(db, ai, vectorize)
 
     const analytics = await service.getSearchAnalytics()
 

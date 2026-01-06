@@ -1839,12 +1839,489 @@ function createOTPLoginPlugin() {
 }
 var otpLoginPlugin = createOTPLoginPlugin();
 
+// src/plugins/core-plugins/ai-search-plugin/services/embedding.service.ts
+var EmbeddingService = class {
+  constructor(ai) {
+    this.ai = ai;
+  }
+  /**
+   * Generate embedding for a single text
+   */
+  async generateEmbedding(text) {
+    try {
+      const response = await this.ai.run("@cf/baai/bge-base-en-v1.5", {
+        text: this.preprocessText(text)
+      });
+      if (response.data && response.data.length > 0) {
+        return response.data[0];
+      }
+      throw new Error("No embedding data returned");
+    } catch (error) {
+      console.error("[EmbeddingService] Error generating embedding:", error);
+      throw error;
+    }
+  }
+  /**
+   * Generate embeddings for multiple texts (batch processing)
+   */
+  async generateBatch(texts) {
+    try {
+      const batchSize = 10;
+      const batches = [];
+      for (let i = 0; i < texts.length; i += batchSize) {
+        batches.push(texts.slice(i, i + batchSize));
+      }
+      const allEmbeddings = [];
+      for (const batch of batches) {
+        const batchEmbeddings = await Promise.all(
+          batch.map((text) => this.generateEmbedding(text))
+        );
+        allEmbeddings.push(...batchEmbeddings);
+      }
+      return allEmbeddings;
+    } catch (error) {
+      console.error("[EmbeddingService] Error generating batch embeddings:", error);
+      throw error;
+    }
+  }
+  /**
+   * Preprocess text before generating embedding
+   * - Trim whitespace
+   * - Limit length to avoid token limits
+   * - Remove special characters that might cause issues
+   */
+  preprocessText(text) {
+    if (!text) return "";
+    let processed = text.trim().replace(/\s+/g, " ");
+    if (processed.length > 8e3) {
+      processed = processed.substring(0, 8e3);
+    }
+    return processed;
+  }
+  /**
+   * Calculate cosine similarity between two embeddings
+   */
+  cosineSimilarity(a, b) {
+    if (a.length !== b.length) {
+      throw new Error("Embeddings must have same dimensions");
+    }
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    for (let i = 0; i < a.length; i++) {
+      dotProduct += a[i] * b[i];
+      normA += a[i] * a[i];
+      normB += b[i] * b[i];
+    }
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  }
+};
+
+// src/plugins/core-plugins/ai-search-plugin/services/chunking.service.ts
+var ChunkingService = class {
+  // Default chunk size (in approximate tokens)
+  CHUNK_SIZE = 500;
+  CHUNK_OVERLAP = 50;
+  /**
+   * Chunk a single content item
+   */
+  chunkContent(contentId, collectionId, title, data, metadata = {}) {
+    const text = this.extractText(data);
+    if (!text || text.trim().length === 0) {
+      console.warn(`[ChunkingService] No text found for content ${contentId}`);
+      return [];
+    }
+    const textChunks = this.splitIntoChunks(text);
+    return textChunks.map((chunkText, index) => ({
+      id: `${contentId}_chunk_${index}`,
+      content_id: contentId,
+      collection_id: collectionId,
+      title,
+      text: chunkText,
+      chunk_index: index,
+      metadata: {
+        ...metadata,
+        total_chunks: textChunks.length
+      }
+    }));
+  }
+  /**
+   * Chunk multiple content items
+   */
+  chunkContentBatch(items) {
+    const allChunks = [];
+    for (const item of items) {
+      const chunks = this.chunkContent(
+        item.id,
+        item.collection_id,
+        item.title,
+        item.data,
+        item.metadata
+      );
+      allChunks.push(...chunks);
+    }
+    return allChunks;
+  }
+  /**
+   * Extract all text from content data
+   */
+  extractText(data) {
+    const parts = [];
+    if (data.title) parts.push(String(data.title));
+    if (data.name) parts.push(String(data.name));
+    if (data.description) parts.push(String(data.description));
+    if (data.content) parts.push(String(data.content));
+    if (data.body) parts.push(String(data.body));
+    if (data.text) parts.push(String(data.text));
+    if (data.summary) parts.push(String(data.summary));
+    const extractRecursive = (obj) => {
+      if (typeof obj === "string") {
+        if (obj.length > 10 && !obj.startsWith("http")) {
+          parts.push(obj);
+        }
+      } else if (Array.isArray(obj)) {
+        obj.forEach(extractRecursive);
+      } else if (obj && typeof obj === "object") {
+        const skipKeys = ["id", "slug", "url", "image", "thumbnail", "metadata"];
+        Object.entries(obj).forEach(([key, value]) => {
+          if (!skipKeys.includes(key.toLowerCase())) {
+            extractRecursive(value);
+          }
+        });
+      }
+    };
+    extractRecursive(data);
+    return parts.join("\n\n").trim();
+  }
+  /**
+   * Split text into overlapping chunks
+   */
+  splitIntoChunks(text) {
+    const words = text.split(/\s+/);
+    if (words.length <= this.CHUNK_SIZE) {
+      return [text];
+    }
+    const chunks = [];
+    let startIndex = 0;
+    while (startIndex < words.length) {
+      const endIndex = Math.min(startIndex + this.CHUNK_SIZE, words.length);
+      const chunk = words.slice(startIndex, endIndex).join(" ");
+      chunks.push(chunk);
+      startIndex += this.CHUNK_SIZE - this.CHUNK_OVERLAP;
+      if (startIndex >= words.length - this.CHUNK_OVERLAP) {
+        break;
+      }
+    }
+    return chunks;
+  }
+  /**
+   * Get optimal chunk size based on content type
+   */
+  getOptimalChunkSize(contentType) {
+    switch (contentType) {
+      case "blog_posts":
+      case "articles":
+        return 600;
+      // Larger chunks for long-form content
+      case "products":
+      case "pages":
+        return 400;
+      // Medium chunks for structured content
+      case "messages":
+      case "comments":
+        return 200;
+      // Small chunks for short content
+      default:
+        return this.CHUNK_SIZE;
+    }
+  }
+};
+
+// src/plugins/core-plugins/ai-search-plugin/services/custom-rag.service.ts
+var CustomRAGService = class {
+  constructor(db, ai, vectorize) {
+    this.db = db;
+    this.ai = ai;
+    this.vectorize = vectorize;
+    this.embeddingService = new EmbeddingService(ai);
+    this.chunkingService = new ChunkingService();
+  }
+  embeddingService;
+  chunkingService;
+  /**
+   * Index all content from a collection
+   */
+  async indexCollection(collectionId) {
+    console.log(`[CustomRAG] Starting indexing for collection: ${collectionId}`);
+    try {
+      const { results: contentItems } = await this.db.prepare(`
+          SELECT c.id, c.title, c.data, c.collection_id, c.status,
+                 c.created_at, c.updated_at, c.author_id,
+                 col.name as collection_name, col.display_name as collection_display_name
+          FROM content c
+          JOIN collections col ON c.collection_id = col.id
+          WHERE c.collection_id = ? AND c.status = 'published'
+        `).bind(collectionId).all();
+      const totalItems = contentItems?.length || 0;
+      if (totalItems === 0) {
+        console.log(`[CustomRAG] No content found in collection ${collectionId}`);
+        return { total_items: 0, total_chunks: 0, indexed_chunks: 0, errors: 0 };
+      }
+      const items = (contentItems || []).map((item) => ({
+        id: item.id,
+        collection_id: item.collection_id,
+        title: item.title || "Untitled",
+        data: typeof item.data === "string" ? JSON.parse(item.data) : item.data,
+        metadata: {
+          status: item.status,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          author_id: item.author_id,
+          collection_name: item.collection_name,
+          collection_display_name: item.collection_display_name
+        }
+      }));
+      const chunks = this.chunkingService.chunkContentBatch(items);
+      const totalChunks = chunks.length;
+      console.log(`[CustomRAG] Generated ${totalChunks} chunks from ${totalItems} items`);
+      const embeddings = await this.embeddingService.generateBatch(
+        chunks.map((c) => `${c.title}
+
+${c.text}`)
+      );
+      console.log(`[CustomRAG] Generated ${embeddings.length} embeddings`);
+      let indexedChunks = 0;
+      let errors = 0;
+      const batchSize = 100;
+      for (let i = 0; i < chunks.length; i += batchSize) {
+        const chunkBatch = chunks.slice(i, i + batchSize);
+        const embeddingBatch = embeddings.slice(i, i + batchSize);
+        try {
+          await this.vectorize.upsert(
+            chunkBatch.map((chunk, idx) => ({
+              id: chunk.id,
+              values: embeddingBatch[idx],
+              metadata: {
+                content_id: chunk.content_id,
+                collection_id: chunk.collection_id,
+                title: chunk.title,
+                text: chunk.text.substring(0, 500),
+                // Store snippet for display
+                chunk_index: chunk.chunk_index,
+                ...chunk.metadata
+              }
+            }))
+          );
+          indexedChunks += chunkBatch.length;
+          console.log(`[CustomRAG] Indexed batch ${i / batchSize + 1}: ${chunkBatch.length} chunks`);
+        } catch (error) {
+          console.error(`[CustomRAG] Error indexing batch ${i / batchSize + 1}:`, error);
+          errors += chunkBatch.length;
+        }
+      }
+      console.log(`[CustomRAG] Indexing complete: ${indexedChunks}/${totalChunks} chunks indexed`);
+      return {
+        total_items: totalItems,
+        total_chunks: totalChunks,
+        indexed_chunks: indexedChunks,
+        errors
+      };
+    } catch (error) {
+      console.error(`[CustomRAG] Error indexing collection ${collectionId}:`, error);
+      throw error;
+    }
+  }
+  /**
+   * Search using RAG (semantic search with Vectorize)
+   */
+  async search(query, settings) {
+    const startTime = Date.now();
+    try {
+      console.log(`[CustomRAG] Searching for: "${query.query}"`);
+      const queryEmbedding = await this.embeddingService.generateEmbedding(query.query);
+      const filter = {};
+      if (query.filters?.collections && query.filters.collections.length > 0) {
+        filter.collection_id = { $in: query.filters.collections };
+      } else if (settings.selected_collections.length > 0) {
+        filter.collection_id = { $in: settings.selected_collections };
+      }
+      if (query.filters?.status && query.filters.status.length > 0) {
+        filter.status = { $in: query.filters.status };
+      }
+      const vectorResults = await this.vectorize.query(queryEmbedding, {
+        topK: query.limit || settings.results_limit || 20,
+        filter: Object.keys(filter).length > 0 ? filter : void 0,
+        returnMetadata: true
+      });
+      console.log(`[CustomRAG] Found ${vectorResults.matches?.length || 0} vector matches`);
+      if (!vectorResults.matches || vectorResults.matches.length === 0) {
+        return {
+          results: [],
+          total: 0,
+          query_time_ms: Date.now() - startTime,
+          mode: "ai"
+        };
+      }
+      const contentIds = [...new Set(
+        vectorResults.matches.map((m) => m.metadata.content_id)
+      )];
+      const placeholders = contentIds.map(() => "?").join(",");
+      const { results: contentItems } = await this.db.prepare(`
+          SELECT c.id, c.title, c.slug, c.collection_id, c.status,
+                 c.created_at, c.updated_at, c.author_id,
+                 col.display_name as collection_name
+          FROM content c
+          JOIN collections col ON c.collection_id = col.id
+          WHERE c.id IN (${placeholders})
+        `).bind(...contentIds).all();
+      const searchResults = (contentItems || []).map((item) => {
+        const matchingChunks = vectorResults.matches.filter(
+          (m) => m.metadata.content_id === item.id
+        );
+        const bestMatch = matchingChunks.reduce(
+          (best, current) => current.score > (best?.score || 0) ? current : best,
+          null
+        );
+        return {
+          id: item.id,
+          title: item.title || "Untitled",
+          slug: item.slug || "",
+          collection_id: item.collection_id,
+          collection_name: item.collection_name,
+          snippet: bestMatch?.metadata?.text || "",
+          relevance_score: bestMatch?.score || 0,
+          status: item.status,
+          created_at: item.created_at,
+          updated_at: item.updated_at
+        };
+      });
+      searchResults.sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0));
+      const queryTime = Date.now() - startTime;
+      console.log(`[CustomRAG] Search completed in ${queryTime}ms, ${searchResults.length} results`);
+      return {
+        results: searchResults,
+        total: searchResults.length,
+        query_time_ms: queryTime,
+        mode: "ai"
+      };
+    } catch (error) {
+      console.error("[CustomRAG] Search error:", error);
+      throw error;
+    }
+  }
+  /**
+   * Update index for a single content item
+   */
+  async updateContentIndex(contentId) {
+    try {
+      const content2 = await this.db.prepare(`
+          SELECT c.id, c.title, c.data, c.collection_id, c.status,
+                 c.created_at, c.updated_at, c.author_id,
+                 col.name as collection_name, col.display_name as collection_display_name
+          FROM content c
+          JOIN collections col ON c.collection_id = col.id
+          WHERE c.id = ?
+        `).bind(contentId).first();
+      if (!content2) {
+        console.warn(`[CustomRAG] Content ${contentId} not found`);
+        return;
+      }
+      if (content2.status !== "published") {
+        await this.removeContentFromIndex(contentId);
+        return;
+      }
+      const chunks = this.chunkingService.chunkContent(
+        content2.id,
+        content2.collection_id,
+        content2.title || "Untitled",
+        typeof content2.data === "string" ? JSON.parse(content2.data) : content2.data,
+        {
+          status: content2.status,
+          created_at: content2.created_at,
+          updated_at: content2.updated_at,
+          author_id: content2.author_id,
+          collection_name: content2.collection_name,
+          collection_display_name: content2.collection_display_name
+        }
+      );
+      const embeddings = await this.embeddingService.generateBatch(
+        chunks.map((c) => `${c.title}
+
+${c.text}`)
+      );
+      await this.vectorize.upsert(
+        chunks.map((chunk, idx) => ({
+          id: chunk.id,
+          values: embeddings[idx],
+          metadata: {
+            content_id: chunk.content_id,
+            collection_id: chunk.collection_id,
+            title: chunk.title,
+            text: chunk.text.substring(0, 500),
+            chunk_index: chunk.chunk_index,
+            ...chunk.metadata
+          }
+        }))
+      );
+      console.log(`[CustomRAG] Updated index for content ${contentId}: ${chunks.length} chunks`);
+    } catch (error) {
+      console.error(`[CustomRAG] Error updating index for ${contentId}:`, error);
+      throw error;
+    }
+  }
+  /**
+   * Remove content from index
+   */
+  async removeContentFromIndex(contentId) {
+    try {
+      console.log(`[CustomRAG] Removing content ${contentId} from index`);
+    } catch (error) {
+      console.error(`[CustomRAG] Error removing content ${contentId}:`, error);
+      throw error;
+    }
+  }
+  /**
+   * Get search suggestions based on query
+   */
+  async getSuggestions(partialQuery, limit = 5) {
+    try {
+      const queryEmbedding = await this.embeddingService.generateEmbedding(partialQuery);
+      const results = await this.vectorize.query(queryEmbedding, {
+        topK: limit * 2,
+        // Get more to filter
+        returnMetadata: true
+      });
+      const suggestions = [...new Set(
+        results.matches?.map((m) => m.metadata.title).filter(Boolean) || []
+      )].slice(0, limit);
+      return suggestions;
+    } catch (error) {
+      console.error("[CustomRAG] Error getting suggestions:", error);
+      return [];
+    }
+  }
+  /**
+   * Check if Vectorize is available and configured
+   */
+  isAvailable() {
+    return !!this.vectorize && !!this.ai;
+  }
+};
+
 // src/plugins/core-plugins/ai-search-plugin/services/ai-search.ts
 var AISearchService = class {
-  constructor(db, aiSearch) {
+  constructor(db, ai, vectorize) {
     this.db = db;
-    this.aiSearch = aiSearch;
+    this.ai = ai;
+    this.vectorize = vectorize;
+    if (this.ai && this.vectorize) {
+      this.customRAG = new CustomRAGService(db, ai, vectorize);
+      console.log("[AISearchService] Custom RAG initialized");
+    } else {
+      console.log("[AISearchService] Custom RAG not available, using keyword search only");
+    }
   }
+  customRAG;
   /**
    * Get plugin settings
    */

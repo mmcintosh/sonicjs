@@ -27,10 +27,11 @@ adminRoutes.get('/', async (c) => {
   try {
     const user = c.get('user')
     const db = c.env.DB
-    const aiSearch = (c.env as any).AI_SEARCH // Cloudflare AI Search binding
+    const ai = (c.env as any).AI // Workers AI for embeddings
+    const vectorize = (c.env as any).VECTORIZE // Vectorize for vector search
 
-    const service = new AISearchService(db, aiSearch)
-    const indexer = new IndexManager(db, aiSearch)
+    const service = new AISearchService(db, ai, vectorize)
+    const indexer = new IndexManager(db, ai, vectorize)
 
     // Get settings
     const settings = await service.getSettings()
@@ -93,9 +94,10 @@ adminRoutes.get('/', async (c) => {
 adminRoutes.post('/', async (c) => {
   try {
     const db = c.env.DB
-    const aiSearch = (c.env as any).AI_SEARCH
-    const service = new AISearchService(db, aiSearch)
-    const indexer = new IndexManager(db, aiSearch)
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE
+    const service = new AISearchService(db, ai, vectorize)
+    const indexer = new IndexManager(db, ai, vectorize)
 
     const body = await c.req.json()
     console.log('[AI Search POST] Received body:', JSON.stringify(body, null, 2))
@@ -149,8 +151,9 @@ adminRoutes.post('/', async (c) => {
 adminRoutes.get('/api/settings', async (c) => {
   try {
     const db = c.env.DB
-    const aiSearch = (c.env as any).AI_SEARCH
-    const service = new AISearchService(db, aiSearch)
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE
+    const service = new AISearchService(db, ai, vectorize)
 
     const settings = await service.getSettings()
     return c.json({ success: true, data: settings })
@@ -167,8 +170,9 @@ adminRoutes.get('/api/settings', async (c) => {
 adminRoutes.get('/api/new-collections', async (c) => {
   try {
     const db = c.env.DB
-    const aiSearch = (c.env as any).AI_SEARCH
-    const service = new AISearchService(db, aiSearch)
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE
+    const service = new AISearchService(db, ai, vectorize)
 
     const notifications = await service.detectNewCollections()
     return c.json({ success: true, data: notifications })
@@ -185,8 +189,9 @@ adminRoutes.get('/api/new-collections', async (c) => {
 adminRoutes.get('/api/status', async (c) => {
   try {
     const db = c.env.DB
-    const aiSearch = (c.env as any).AI_SEARCH
-    const indexer = new IndexManager(db, aiSearch)
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE
+    const indexer = new IndexManager(db, ai, vectorize)
 
     const status = await indexer.getAllIndexStatus()
     return c.json({ success: true, data: status })
@@ -201,10 +206,11 @@ adminRoutes.get('/api/status', async (c) => {
  * Trigger re-indexing for a collection
  */
 adminRoutes.post('/api/reindex', async (c) => {
-    try {
-      const db = c.env.DB
-      const aiSearch = (c.env as any).AI_SEARCH
-      const indexer = new IndexManager(db, aiSearch)
+  try {
+    const db = c.env.DB
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE
+    const indexer = new IndexManager(db, ai, vectorize)
 
       const body = await c.req.json()
       const collectionIdRaw: unknown = body.collection_id
