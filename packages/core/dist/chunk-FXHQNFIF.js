@@ -1,3 +1,4 @@
+import { PluginBuilder } from './chunk-GRGGQZR2.js';
 import { HOOKS } from './chunk-LOUJRBXV.js';
 import { __commonJS, __toESM } from './chunk-V4OQ3NZ2.js';
 import { z } from 'zod';
@@ -3081,6 +3082,279 @@ var PluginManager = class {
   }
 };
 
-export { HookSystemImpl, HookUtils, PluginManager, PluginRegistryImpl, PluginValidator, ScopedHookSystem };
-//# sourceMappingURL=chunk-CPXAVWCU.js.map
-//# sourceMappingURL=chunk-CPXAVWCU.js.map
+// src/plugins/core-plugins/turnstile-plugin/manifest.json
+var manifest_default = {
+  id: "turnstile",
+  name: "Cloudflare Turnstile",
+  description: "CAPTCHA-free bot protection using Cloudflare Turnstile. Provides reusable verification for any form.",
+  version: "1.0.0",
+  author: "SonicJS",
+  category: "security",
+  icon: "shield-check",
+  homepage: "https://developers.cloudflare.com/turnstile/",
+  repository: "https://github.com/sonicjs/sonicjs",
+  license: "MIT",
+  permissions: ["settings:write", "admin:access"],
+  dependencies: [],
+  configSchema: {
+    siteKey: {
+      type: "string",
+      label: "Site Key",
+      description: "Your Cloudflare Turnstile site key (public)",
+      required: true
+    },
+    secretKey: {
+      type: "string",
+      label: "Secret Key",
+      description: "Your Cloudflare Turnstile secret key (private)",
+      required: true,
+      sensitive: true
+    },
+    theme: {
+      type: "select",
+      label: "Widget Theme",
+      description: "Visual theme for the Turnstile widget",
+      default: "auto",
+      options: [
+        { value: "light", label: "Light" },
+        { value: "dark", label: "Dark" },
+        { value: "auto", label: "Auto" }
+      ]
+    },
+    size: {
+      type: "select",
+      label: "Widget Size",
+      description: "Size of the Turnstile widget",
+      default: "normal",
+      options: [
+        { value: "normal", label: "Normal" },
+        { value: "compact", label: "Compact" }
+      ]
+    },
+    mode: {
+      type: "select",
+      label: "Widget Mode",
+      description: "Managed: Adaptive challenge. Non-Interactive: Always visible, minimal friction. Invisible: No visible widget",
+      default: "managed",
+      options: [
+        { value: "managed", label: "Managed (Recommended)" },
+        { value: "non-interactive", label: "Non-Interactive" },
+        { value: "invisible", label: "Invisible" }
+      ]
+    },
+    appearance: {
+      type: "select",
+      label: "Appearance",
+      description: "When the Turnstile challenge is executed. Always: Verifies immediately. Execute: Challenge on form submit. Interaction Only: Only after user interaction",
+      default: "always",
+      options: [
+        { value: "always", label: "Always" },
+        { value: "execute", label: "Execute" },
+        { value: "interaction-only", label: "Interaction Only" }
+      ]
+    },
+    preClearance: {
+      type: "boolean",
+      label: "Enable Pre-clearance",
+      description: "Issue a clearance cookie that bypasses Cloudflare Firewall Rules (as if the user passed a challenge on your proxied site)",
+      default: false
+    },
+    preClearanceLevel: {
+      type: "select",
+      label: "Pre-clearance Level",
+      description: "Controls which Cloudflare Firewall Rules the clearance cookie bypasses. Only applies if Pre-clearance is enabled",
+      default: "managed",
+      options: [
+        { value: "interactive", label: "Interactive - Bypasses Interactive, Managed & JS Challenge Rules" },
+        { value: "managed", label: "Managed - Bypasses Managed & JS Challenge Rules" },
+        { value: "non-interactive", label: "Non-interactive - Bypasses JS Challenge Rules only" }
+      ]
+    },
+    enabled: {
+      type: "boolean",
+      label: "Enable Turnstile",
+      description: "Enable or disable Turnstile verification globally",
+      default: true
+    }
+  },
+  adminMenu: {
+    label: "Turnstile",
+    icon: "shield-check",
+    href: "/admin/plugins/turnstile/settings",
+    parentId: "plugins",
+    order: 100
+  }
+};
+
+// src/plugins/core-plugins/turnstile-plugin/services/turnstile.ts
+var TurnstileService = class {
+  db;
+  VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+  constructor(db) {
+    this.db = db;
+  }
+  /**
+   * Get Turnstile settings from database
+   */
+  async getSettings() {
+    try {
+      const plugin = await this.db.prepare(`SELECT settings FROM plugins WHERE id = ? LIMIT 1`).bind(manifest_default.id).first();
+      if (!plugin || !plugin.settings) {
+        return null;
+      }
+      return JSON.parse(plugin.settings);
+    } catch (error) {
+      console.error("Error getting Turnstile settings:", error);
+      return null;
+    }
+  }
+  /**
+   * Verify a Turnstile token with Cloudflare
+   */
+  async verifyToken(token, remoteIp) {
+    try {
+      const settings = await this.getSettings();
+      if (!settings) {
+        return { success: false, error: "Turnstile not configured" };
+      }
+      if (!settings.enabled) {
+        return { success: true };
+      }
+      if (!settings.secretKey) {
+        return { success: false, error: "Turnstile secret key not configured" };
+      }
+      const formData = new FormData();
+      formData.append("secret", settings.secretKey);
+      formData.append("response", token);
+      if (remoteIp) {
+        formData.append("remoteip", remoteIp);
+      }
+      const response = await fetch(this.VERIFY_URL, {
+        method: "POST",
+        body: formData
+      });
+      if (!response.ok) {
+        return { success: false, error: "Turnstile verification request failed" };
+      }
+      const result = await response.json();
+      if (!result.success) {
+        const errorCode = result["error-codes"]?.[0] || "unknown-error";
+        return { success: false, error: `Turnstile verification failed: ${errorCode}` };
+      }
+      return { success: true };
+    } catch (error) {
+      console.error("Error verifying Turnstile token:", error);
+      return { success: false, error: "Turnstile verification error" };
+    }
+  }
+  /**
+   * Save Turnstile settings to database
+   */
+  async saveSettings(settings) {
+    try {
+      await this.db.prepare(`UPDATE plugins SET settings = ?, updated_at = ? WHERE id = ?`).bind(JSON.stringify(settings), Date.now(), manifest_default.id).run();
+      console.log("Turnstile settings saved successfully");
+    } catch (error) {
+      console.error("Error saving Turnstile settings:", error);
+      throw new Error("Failed to save Turnstile settings");
+    }
+  }
+  /**
+   * Check if Turnstile is enabled
+   */
+  async isEnabled() {
+    const settings = await this.getSettings();
+    return settings?.enabled === true && !!settings.siteKey && !!settings.secretKey;
+  }
+};
+
+// src/plugins/core-plugins/turnstile-plugin/middleware/verify.ts
+async function verifyTurnstile(c, next) {
+  const db = c.get("db") || c.env?.DB;
+  if (!db) {
+    console.error("Turnstile middleware: Database not available");
+    return c.json({ error: "Database not available" }, 500);
+  }
+  const turnstileService = new TurnstileService(db);
+  const isEnabled = await turnstileService.isEnabled();
+  if (!isEnabled) {
+    return next();
+  }
+  let token;
+  let body;
+  if (c.req.method === "POST") {
+    const contentType = c.req.header("content-type") || "";
+    if (contentType.includes("application/json")) {
+      body = await c.req.json();
+      token = body["cf-turnstile-response"] || body["turnstile-token"];
+      c.set("requestBody", body);
+    } else if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+      const formData = await c.req.formData();
+      token = formData.get("cf-turnstile-response")?.toString() || formData.get("turnstile-token")?.toString();
+    }
+  }
+  if (!token) {
+    return c.json({
+      error: "Turnstile token missing",
+      message: "Please complete the verification challenge"
+    }, 400);
+  }
+  const remoteIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for");
+  const result = await turnstileService.verifyToken(token, remoteIp);
+  if (!result.success) {
+    return c.json({
+      error: "Turnstile verification failed",
+      message: result.error || "Verification failed. Please try again."
+    }, 403);
+  }
+  return next();
+}
+function createTurnstileMiddleware(options) {
+  return async (c, next) => {
+    const db = c.get("db") || c.env?.DB;
+    if (!db) {
+      return options?.onError?.(c, "Database not available") || c.json({ error: "Database not available" }, 500);
+    }
+    const turnstileService = new TurnstileService(db);
+    const isEnabled = await turnstileService.isEnabled();
+    if (!isEnabled) {
+      return next();
+    }
+    let token;
+    const contentType = c.req.header("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const body = await c.req.json();
+      token = body["cf-turnstile-response"] || body["turnstile-token"];
+    } else if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+      const formData = await c.req.formData();
+      token = formData.get("cf-turnstile-response")?.toString() || formData.get("turnstile-token")?.toString();
+    }
+    if (!token) {
+      return options?.onMissing?.(c) || c.json({ error: "Turnstile token missing" }, 400);
+    }
+    const remoteIp = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for");
+    const result = await turnstileService.verifyToken(token, remoteIp);
+    if (!result.success) {
+      return options?.onError?.(c, result.error || "Verification failed") || c.json({ error: "Turnstile verification failed", message: result.error }, 403);
+    }
+    return next();
+  };
+}
+
+// src/plugins/core-plugins/turnstile-plugin/index.ts
+new PluginBuilder({
+  name: manifest_default.name,
+  version: manifest_default.version,
+  description: manifest_default.description,
+  author: { name: manifest_default.author }
+}).metadata({
+  description: manifest_default.description,
+  author: { name: manifest_default.author }
+}).addService("turnstile", TurnstileService).addSingleMiddleware("verifyTurnstile", verifyTurnstile, {
+  description: "Verify Cloudflare Turnstile token",
+  global: false
+}).build();
+
+export { HookSystemImpl, HookUtils, PluginManager, PluginRegistryImpl, PluginValidator, ScopedHookSystem, TurnstileService, createTurnstileMiddleware, verifyTurnstile };
+//# sourceMappingURL=chunk-FXHQNFIF.js.map
+//# sourceMappingURL=chunk-FXHQNFIF.js.map

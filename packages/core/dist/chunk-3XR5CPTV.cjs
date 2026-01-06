@@ -1,10 +1,11 @@
 'use strict';
 
 var chunk7FOAMNTI_cjs = require('./chunk-7FOAMNTI.cjs');
-var chunkMMGAIKPS_cjs = require('./chunk-MMGAIKPS.cjs');
+var chunk7KCNAJH7_cjs = require('./chunk-7KCNAJH7.cjs');
 var chunkILZ3DP4I_cjs = require('./chunk-ILZ3DP4I.cjs');
-var chunkSONXVJQU_cjs = require('./chunk-SONXVJQU.cjs');
+var chunk25OAPYGE_cjs = require('./chunk-25OAPYGE.cjs');
 var chunkAZLU3ROK_cjs = require('./chunk-AZLU3ROK.cjs');
+var chunkQBKCBF7C_cjs = require('./chunk-QBKCBF7C.cjs');
 var chunkSZE3XVET_cjs = require('./chunk-SZE3XVET.cjs');
 var chunkRCQ2HIQD_cjs = require('./chunk-RCQ2HIQD.cjs');
 var hono = require('hono');
@@ -44,7 +45,7 @@ apiContentCrudRoutes.get("/:id", async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.post("/", chunkMMGAIKPS_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.post("/", chunk7KCNAJH7_cjs.requireAuth(), async (c) => {
   try {
     const db = c.env.DB;
     const user = c.get("user");
@@ -110,7 +111,7 @@ apiContentCrudRoutes.post("/", chunkMMGAIKPS_cjs.requireAuth(), async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.put("/:id", chunkMMGAIKPS_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.put("/:id", chunk7KCNAJH7_cjs.requireAuth(), async (c) => {
   try {
     const id = c.req.param("id");
     const db = c.env.DB;
@@ -174,7 +175,7 @@ apiContentCrudRoutes.put("/:id", chunkMMGAIKPS_cjs.requireAuth(), async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.delete("/:id", chunkMMGAIKPS_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.delete("/:id", chunk7KCNAJH7_cjs.requireAuth(), async (c) => {
   try {
     const id = c.req.param("id");
     const db = c.env.DB;
@@ -210,7 +211,7 @@ apiRoutes.use("*", async (c, next) => {
   c.header("X-Response-Time", `${totalTime}ms`);
 });
 apiRoutes.use("*", async (c, next) => {
-  const cacheEnabled = await chunkMMGAIKPS_cjs.isPluginActive(c.env.DB, "core-cache");
+  const cacheEnabled = await chunk7KCNAJH7_cjs.isPluginActive(c.env.DB, "core-cache");
   c.set("cacheEnabled", cacheEnabled);
   await next();
 });
@@ -568,7 +569,7 @@ var fileValidationSchema = zod.z.object({
   // 50MB max
 });
 var apiMediaRoutes = new hono.Hono();
-apiMediaRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
+apiMediaRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
 apiMediaRoutes.post("/upload", async (c) => {
   try {
     const user = c.get("user");
@@ -1312,8 +1313,8 @@ apiSystemRoutes.get("/env", (c) => {
 });
 var api_system_default = apiSystemRoutes;
 var adminApiRoutes = new hono.Hono();
-adminApiRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
-adminApiRoutes.use("*", chunkMMGAIKPS_cjs.requireRole(["admin", "editor"]));
+adminApiRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
+adminApiRoutes.use("*", chunk7KCNAJH7_cjs.requireRole(["admin", "editor"]));
 adminApiRoutes.get("/stats", async (c) => {
   try {
     const db = c.env.DB;
@@ -1722,7 +1723,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-ANKU5SGM.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-HS2OWVBV.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -1747,7 +1748,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-ANKU5SGM.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-HS2OWVBV.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -1766,7 +1767,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-ANKU5SGM.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-HS2OWVBV.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -2248,7 +2249,7 @@ authRoutes.post(
       if (existingUser) {
         return c.json({ error: "User with this email or username already exists" }, 400);
       }
-      const passwordHash = await chunkMMGAIKPS_cjs.AuthManager.hashPassword(password);
+      const passwordHash = await chunk7KCNAJH7_cjs.AuthManager.hashPassword(password);
       const userId = crypto.randomUUID();
       const now = /* @__PURE__ */ new Date();
       await db.prepare(`
@@ -2268,7 +2269,7 @@ authRoutes.post(
         now.getTime(),
         now.getTime()
       ).run();
-      const token = await chunkMMGAIKPS_cjs.AuthManager.generateToken(userId, normalizedEmail, "viewer");
+      const token = await chunk7KCNAJH7_cjs.AuthManager.generateToken(userId, normalizedEmail, "viewer");
       cookie.setCookie(c, "auth_token", token, {
         httpOnly: true,
         secure: true,
@@ -2321,11 +2322,11 @@ authRoutes.post("/login", async (c) => {
     if (!user) {
       return c.json({ error: "Invalid email or password" }, 401);
     }
-    const isValidPassword = await chunkMMGAIKPS_cjs.AuthManager.verifyPassword(password, user.password_hash);
+    const isValidPassword = await chunk7KCNAJH7_cjs.AuthManager.verifyPassword(password, user.password_hash);
     if (!isValidPassword) {
       return c.json({ error: "Invalid email or password" }, 401);
     }
-    const token = await chunkMMGAIKPS_cjs.AuthManager.generateToken(user.id, user.email, user.role);
+    const token = await chunk7KCNAJH7_cjs.AuthManager.generateToken(user.id, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: true,
@@ -2374,7 +2375,7 @@ authRoutes.get("/logout", (c) => {
   });
   return c.redirect("/auth/login?message=You have been logged out successfully");
 });
-authRoutes.get("/me", chunkMMGAIKPS_cjs.requireAuth(), async (c) => {
+authRoutes.get("/me", chunk7KCNAJH7_cjs.requireAuth(), async (c) => {
   try {
     const user = c.get("user");
     if (!user) {
@@ -2391,13 +2392,13 @@ authRoutes.get("/me", chunkMMGAIKPS_cjs.requireAuth(), async (c) => {
     return c.json({ error: "Failed to get user" }, 500);
   }
 });
-authRoutes.post("/refresh", chunkMMGAIKPS_cjs.requireAuth(), async (c) => {
+authRoutes.post("/refresh", chunk7KCNAJH7_cjs.requireAuth(), async (c) => {
   try {
     const user = c.get("user");
     if (!user) {
       return c.json({ error: "Not authenticated" }, 401);
     }
-    const token = await chunkMMGAIKPS_cjs.AuthManager.generateToken(user.userId, user.email, user.role);
+    const token = await chunk7KCNAJH7_cjs.AuthManager.generateToken(user.userId, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: true,
@@ -2457,7 +2458,7 @@ authRoutes.post("/register/form", async (c) => {
         </div>
       `);
     }
-    const passwordHash = await chunkMMGAIKPS_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunk7KCNAJH7_cjs.AuthManager.hashPassword(password);
     const role = isFirstUser ? "admin" : "viewer";
     const userId = crypto.randomUUID();
     const now = /* @__PURE__ */ new Date();
@@ -2477,7 +2478,7 @@ authRoutes.post("/register/form", async (c) => {
       now.getTime(),
       now.getTime()
     ).run();
-    const token = await chunkMMGAIKPS_cjs.AuthManager.generateToken(userId, normalizedEmail, role);
+    const token = await chunk7KCNAJH7_cjs.AuthManager.generateToken(userId, normalizedEmail, role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: false,
@@ -2529,7 +2530,7 @@ authRoutes.post("/login/form", async (c) => {
         </div>
       `);
     }
-    const isValidPassword = await chunkMMGAIKPS_cjs.AuthManager.verifyPassword(password, user.password_hash);
+    const isValidPassword = await chunk7KCNAJH7_cjs.AuthManager.verifyPassword(password, user.password_hash);
     if (!isValidPassword) {
       return c.html(html.html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -2537,7 +2538,7 @@ authRoutes.post("/login/form", async (c) => {
         </div>
       `);
     }
-    const token = await chunkMMGAIKPS_cjs.AuthManager.generateToken(user.id, user.email, user.role);
+    const token = await chunk7KCNAJH7_cjs.AuthManager.generateToken(user.id, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: false,
@@ -2596,7 +2597,7 @@ authRoutes.post("/seed-admin", async (c) => {
     `).run();
     const existingAdmin = await db.prepare("SELECT id FROM users WHERE email = ? OR username = ?").bind("admin@sonicjs.com", "admin").first();
     if (existingAdmin) {
-      const passwordHash2 = await chunkMMGAIKPS_cjs.AuthManager.hashPassword("sonicjs!");
+      const passwordHash2 = await chunk7KCNAJH7_cjs.AuthManager.hashPassword("sonicjs!");
       await db.prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?").bind(passwordHash2, Date.now(), existingAdmin.id).run();
       return c.json({
         message: "Admin user already exists (password updated)",
@@ -2608,7 +2609,7 @@ authRoutes.post("/seed-admin", async (c) => {
         }
       });
     }
-    const passwordHash = await chunkMMGAIKPS_cjs.AuthManager.hashPassword("sonicjs!");
+    const passwordHash = await chunk7KCNAJH7_cjs.AuthManager.hashPassword("sonicjs!");
     const userId = "admin-user-id";
     const now = Date.now();
     const adminEmail = "admin@sonicjs.com".toLowerCase();
@@ -2828,7 +2829,7 @@ authRoutes.post("/accept-invitation", async (c) => {
     if (existingUsername) {
       return c.json({ error: "Username is already taken" }, 400);
     }
-    const passwordHash = await chunkMMGAIKPS_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunk7KCNAJH7_cjs.AuthManager.hashPassword(password);
     const updateStmt = db.prepare(`
       UPDATE users SET 
         username = ?,
@@ -2847,7 +2848,7 @@ authRoutes.post("/accept-invitation", async (c) => {
       Date.now(),
       invitedUser.id
     ).run();
-    const authToken = await chunkMMGAIKPS_cjs.AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role);
+    const authToken = await chunk7KCNAJH7_cjs.AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role);
     cookie.setCookie(c, "auth_token", authToken, {
       httpOnly: true,
       secure: true,
@@ -3077,7 +3078,7 @@ authRoutes.post("/reset-password", async (c) => {
     if (Date.now() > user.password_reset_expires) {
       return c.json({ error: "Reset token has expired" }, 400);
     }
-    const newPasswordHash = await chunkMMGAIKPS_cjs.AuthManager.hashPassword(password);
+    const newPasswordHash = await chunk7KCNAJH7_cjs.AuthManager.hashPassword(password);
     try {
       const historyStmt = db.prepare(`
         INSERT INTO password_history (id, user_id, password_hash, created_at)
@@ -3785,210 +3786,9 @@ function escapeHtml2(text) {
     "'": "&#39;"
   })[char] || char);
 }
-var PluginBuilder = class _PluginBuilder {
-  plugin;
-  constructor(options) {
-    this.plugin = {
-      name: options.name,
-      version: options.version,
-      description: options.description,
-      author: options.author,
-      dependencies: options.dependencies,
-      routes: [],
-      middleware: [],
-      models: [],
-      services: [],
-      adminPages: [],
-      adminComponents: [],
-      menuItems: [],
-      hooks: []
-    };
-  }
-  /**
-   * Create a new plugin builder
-   */
-  static create(options) {
-    return new _PluginBuilder(options);
-  }
-  /**
-   * Add metadata to the plugin
-   */
-  metadata(metadata) {
-    Object.assign(this.plugin, metadata);
-    return this;
-  }
-  /**
-   * Add routes to plugin
-   */
-  addRoutes(routes) {
-    this.plugin.routes = [...this.plugin.routes || [], ...routes];
-    return this;
-  }
-  /**
-   * Add a single route to plugin
-   */
-  addRoute(path, handler, options) {
-    const route = {
-      path,
-      handler,
-      ...options
-    };
-    this.plugin.routes = [...this.plugin.routes || [], route];
-    return this;
-  }
-  /**
-   * Add middleware to plugin
-   */
-  addMiddleware(middleware) {
-    this.plugin.middleware = [...this.plugin.middleware || [], ...middleware];
-    return this;
-  }
-  /**
-   * Add a single middleware to plugin
-   */
-  addSingleMiddleware(name, handler, options) {
-    const middleware = {
-      name,
-      handler,
-      ...options
-    };
-    this.plugin.middleware = [...this.plugin.middleware || [], middleware];
-    return this;
-  }
-  /**
-   * Add models to plugin
-   */
-  addModels(models) {
-    this.plugin.models = [...this.plugin.models || [], ...models];
-    return this;
-  }
-  /**
-   * Add a single model to plugin
-   */
-  addModel(name, options) {
-    const model = {
-      name,
-      ...options
-    };
-    this.plugin.models = [...this.plugin.models || [], model];
-    return this;
-  }
-  /**
-   * Add services to plugin
-   */
-  addServices(services) {
-    this.plugin.services = [...this.plugin.services || [], ...services];
-    return this;
-  }
-  /**
-   * Add a single service to plugin
-   */
-  addService(name, implementation, options) {
-    const service = {
-      name,
-      implementation,
-      ...options
-    };
-    this.plugin.services = [...this.plugin.services || [], service];
-    return this;
-  }
-  /**
-   * Add admin pages to plugin
-   */
-  addAdminPages(pages) {
-    this.plugin.adminPages = [...this.plugin.adminPages || [], ...pages];
-    return this;
-  }
-  /**
-   * Add a single admin page to plugin
-   */
-  addAdminPage(path, title, component, options) {
-    const page = {
-      path,
-      title,
-      component,
-      ...options
-    };
-    this.plugin.adminPages = [...this.plugin.adminPages || [], page];
-    return this;
-  }
-  /**
-   * Add admin components to plugin
-   */
-  addComponents(components) {
-    this.plugin.adminComponents = [...this.plugin.adminComponents || [], ...components];
-    return this;
-  }
-  /**
-   * Add a single admin component to plugin
-   */
-  addComponent(name, template, options) {
-    const component = {
-      name,
-      template,
-      ...options
-    };
-    this.plugin.adminComponents = [...this.plugin.adminComponents || [], component];
-    return this;
-  }
-  /**
-   * Add menu items to plugin
-   */
-  addMenuItems(items) {
-    this.plugin.menuItems = [...this.plugin.menuItems || [], ...items];
-    return this;
-  }
-  /**
-   * Add a single menu item to plugin
-   */
-  addMenuItem(label, path, options) {
-    const menuItem = {
-      label,
-      path,
-      ...options
-    };
-    this.plugin.menuItems = [...this.plugin.menuItems || [], menuItem];
-    return this;
-  }
-  /**
-   * Add hooks to plugin
-   */
-  addHooks(hooks) {
-    this.plugin.hooks = [...this.plugin.hooks || [], ...hooks];
-    return this;
-  }
-  /**
-   * Add a single hook to plugin
-   */
-  addHook(name, handler, options) {
-    const hook = {
-      name,
-      handler,
-      ...options
-    };
-    this.plugin.hooks = [...this.plugin.hooks || [], hook];
-    return this;
-  }
-  /**
-   * Add lifecycle hooks
-   */
-  lifecycle(hooks) {
-    Object.assign(this.plugin, hooks);
-    return this;
-  }
-  /**
-   * Build the plugin
-   */
-  build() {
-    if (!this.plugin.name || !this.plugin.version) {
-      throw new Error("Plugin name and version are required");
-    }
-    return this.plugin;
-  }
-};
 
 // src/plugins/available/tinymce-plugin/index.ts
-var builder = PluginBuilder.create({
+var builder = chunkQBKCBF7C_cjs.PluginBuilder.create({
   name: "tinymce-plugin",
   version: "1.0.0",
   description: "Powerful WYSIWYG rich text editor for content creation"
@@ -4271,7 +4071,7 @@ function getQuillCDN(version = "2.0.2") {
   `;
 }
 function createQuillEditorPlugin() {
-  const builder3 = PluginBuilder.create({
+  const builder3 = chunkQBKCBF7C_cjs.PluginBuilder.create({
     name: "quill-editor",
     version: "1.0.0",
     description: "Quill rich text editor integration for SonicJS"
@@ -4297,7 +4097,7 @@ function createQuillEditorPlugin() {
 createQuillEditorPlugin();
 
 // src/plugins/available/easy-mdx/index.ts
-var builder2 = PluginBuilder.create({
+var builder2 = chunkQBKCBF7C_cjs.PluginBuilder.create({
   name: "easy-mdx",
   version: "1.0.0",
   description: "Lightweight markdown editor with live preview"
@@ -5979,7 +5779,7 @@ async function isPluginActive2(db, pluginId) {
 
 // src/routes/admin-content.ts
 var adminContentRoutes = new hono.Hono();
-adminContentRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
+adminContentRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
 async function getCollectionFields(db, collectionId) {
   const cache = chunk7FOAMNTI_cjs.getCacheService(chunk7FOAMNTI_cjs.CACHE_CONFIGS.collection);
   return cache.getOrSet(
@@ -9014,7 +8814,7 @@ function renderUsersListPage(data) {
 
 // src/routes/admin-users.ts
 var userRoutes = new hono.Hono();
-userRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
+userRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
 userRoutes.get("/", (c) => {
   return c.redirect("/admin/dashboard");
 });
@@ -9169,7 +8969,7 @@ userRoutes.put("/profile", async (c) => {
       Date.now(),
       user.userId
     ).run();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "profile.update",
@@ -9232,7 +9032,7 @@ userRoutes.post("/profile/avatar", async (c) => {
       SELECT first_name, last_name FROM users WHERE id = ?
     `);
     const userData = await userStmt.bind(user.userId).first();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "profile.avatar_update",
@@ -9303,7 +9103,7 @@ userRoutes.post("/profile/password", async (c) => {
         dismissible: true
       }));
     }
-    const validPassword = await chunkMMGAIKPS_cjs.AuthManager.verifyPassword(currentPassword, userData.password_hash);
+    const validPassword = await chunk7KCNAJH7_cjs.AuthManager.verifyPassword(currentPassword, userData.password_hash);
     if (!validPassword) {
       return c.html(renderAlert2({
         type: "error",
@@ -9311,7 +9111,7 @@ userRoutes.post("/profile/password", async (c) => {
         dismissible: true
       }));
     }
-    const newPasswordHash = await chunkMMGAIKPS_cjs.AuthManager.hashPassword(newPassword);
+    const newPasswordHash = await chunk7KCNAJH7_cjs.AuthManager.hashPassword(newPassword);
     const historyStmt = db.prepare(`
       INSERT INTO password_history (id, user_id, password_hash, created_at)
       VALUES (?, ?, ?, ?)
@@ -9327,7 +9127,7 @@ userRoutes.post("/profile/password", async (c) => {
       WHERE id = ?
     `);
     await updateStmt.bind(newPasswordHash, Date.now(), user.userId).run();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "profile.password_change",
@@ -9394,7 +9194,7 @@ userRoutes.get("/users", async (c) => {
     `);
     const countResult = await countStmt.bind(...params).first();
     const totalUsers = countResult?.total || 0;
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "users.list_view",
@@ -9548,7 +9348,7 @@ userRoutes.post("/users/new", async (c) => {
         dismissible: true
       }));
     }
-    const passwordHash = await chunkMMGAIKPS_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunk7KCNAJH7_cjs.AuthManager.hashPassword(password);
     const userId = crypto.randomUUID();
     const createStmt = db.prepare(`
       INSERT INTO users (
@@ -9571,7 +9371,7 @@ userRoutes.post("/users/new", async (c) => {
       Date.now(),
       Date.now()
     ).run();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "user!.create",
@@ -9609,7 +9409,7 @@ userRoutes.get("/users/:id", async (c) => {
     if (!userRecord) {
       return c.json({ error: "User not found" }, 404);
     }
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "user!.view",
@@ -9758,7 +9558,7 @@ userRoutes.put("/users/:id", async (c) => {
       Date.now(),
       userId
     ).run();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "user!.update",
@@ -9803,7 +9603,7 @@ userRoutes.post("/users/:id/toggle", async (c) => {
       UPDATE users SET is_active = ?, updated_at = ? WHERE id = ?
     `);
     await toggleStmt.bind(active ? 1 : 0, Date.now(), userId).run();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       active ? "user.activate" : "user.deactivate",
@@ -9844,7 +9644,7 @@ userRoutes.delete("/users/:id", async (c) => {
         DELETE FROM users WHERE id = ?
       `);
       await deleteStmt.bind(userId).run();
-      await chunkMMGAIKPS_cjs.logActivity(
+      await chunk7KCNAJH7_cjs.logActivity(
         db,
         user.userId,
         "user!.hard_delete",
@@ -9863,7 +9663,7 @@ userRoutes.delete("/users/:id", async (c) => {
         UPDATE users SET is_active = 0, updated_at = ? WHERE id = ?
       `);
       await deleteStmt.bind(Date.now(), userId).run();
-      await chunkMMGAIKPS_cjs.logActivity(
+      await chunk7KCNAJH7_cjs.logActivity(
         db,
         user.userId,
         "user!.soft_delete",
@@ -9929,7 +9729,7 @@ userRoutes.post("/invite-user", async (c) => {
       Date.now(),
       Date.now()
     ).run();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "user!.invite_sent",
@@ -9986,7 +9786,7 @@ userRoutes.post("/resend-invitation/:id", async (c) => {
       Date.now(),
       userId
     ).run();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "user!.invitation_resent",
@@ -10022,7 +9822,7 @@ userRoutes.delete("/cancel-invitation/:id", async (c) => {
     }
     const deleteStmt = db.prepare(`DELETE FROM users WHERE id = ?`);
     await deleteStmt.bind(userId).run();
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "user!.invitation_cancelled",
@@ -10105,7 +9905,7 @@ userRoutes.get("/activity-logs", async (c) => {
       ...log,
       details: log.details ? JSON.parse(log.details) : null
     }));
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "activity.logs_viewed",
@@ -10212,7 +10012,7 @@ userRoutes.get("/activity-logs/export", async (c) => {
       csvRows.push(row.join(","));
     }
     const csvContent = csvRows.join("\n");
-    await chunkMMGAIKPS_cjs.logActivity(
+    await chunk7KCNAJH7_cjs.logActivity(
       db,
       user.userId,
       "activity.logs_exported",
@@ -11551,7 +11351,7 @@ var fileValidationSchema2 = zod.z.object({
   // 50MB max
 });
 var adminMediaRoutes = new hono.Hono();
-adminMediaRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
+adminMediaRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
 adminMediaRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -12137,7 +11937,7 @@ adminMediaRoutes.put("/:id", async (c) => {
     `);
   }
 });
-adminMediaRoutes.delete("/cleanup", chunkMMGAIKPS_cjs.requireRole("admin"), async (c) => {
+adminMediaRoutes.delete("/cleanup", chunk7KCNAJH7_cjs.requireRole("admin"), async (c) => {
   try {
     const db = c.env.DB;
     const allMediaStmt = db.prepare("SELECT id, r2_key, filename FROM media WHERE deleted_at IS NULL");
@@ -13548,6 +13348,7 @@ function renderSettingsTab(plugin) {
   const settings = plugin.settings || {};
   const isSeedDataPlugin = plugin.id === "seed-data" || plugin.name === "seed-data";
   const isAuthPlugin = plugin.id === "core-auth" || plugin.name === "core-auth";
+  const isTurnstilePlugin = plugin.id === "turnstile" || plugin.name === "turnstile";
   return `
     ${isSeedDataPlugin ? `
       <div class="backdrop-blur-md bg-black/20 rounded-xl border border-white/10 shadow-xl p-6 mb-6">
@@ -13574,12 +13375,15 @@ function renderSettingsTab(plugin) {
       ${isAuthPlugin ? `
         <h2 class="text-xl font-semibold text-white mb-4">Authentication Settings</h2>
         <p class="text-gray-400 mb-6">Configure user registration fields and validation rules.</p>
+      ` : isTurnstilePlugin ? `
+        <h2 class="text-xl font-semibold text-white mb-4">Cloudflare Turnstile Settings</h2>
+        <p class="text-gray-400 mb-6">Configure CAPTCHA-free bot protection for your forms.</p>
       ` : `
         <h2 class="text-xl font-semibold text-white mb-4">Plugin Settings</h2>
       `}
 
       <form id="settings-form" class="space-y-6">
-        ${isAuthPlugin && Object.keys(settings).length > 0 ? renderAuthSettingsForm(settings) : Object.keys(settings).length > 0 ? renderSettingsFields(settings) : renderNoSettings(plugin)}
+        ${isAuthPlugin && Object.keys(settings).length > 0 ? renderAuthSettingsForm(settings) : isTurnstilePlugin && Object.keys(settings).length > 0 ? renderTurnstileSettingsForm(settings) : Object.keys(settings).length > 0 ? renderSettingsFields(settings) : renderNoSettings(plugin)}
 
         ${Object.keys(settings).length > 0 ? `
         <div class="flex items-center justify-end pt-6 border-t border-white/10">
@@ -13642,6 +13446,80 @@ function renderSettingsFields(settings) {
       `;
     }
   }).join("");
+}
+function renderTurnstileSettingsForm(settings) {
+  const inputClass = "backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none transition-colors w-full";
+  const selectClass = "backdrop-blur-sm bg-zinc-800 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-blue-400 focus:outline-none transition-colors w-full [&>option]:bg-zinc-800 [&>option]:text-white";
+  return `
+    <!-- Enable Toggle -->
+    <div class="flex items-center justify-between">
+      <div>
+        <label for="setting_enabled" class="text-sm font-medium text-gray-300">Enable Turnstile</label>
+        <p class="text-xs text-gray-400">Enable or disable Turnstile verification globally</p>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" name="setting_enabled" id="setting_enabled" ${settings.enabled ? "checked" : ""} class="sr-only peer">
+        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+      </label>
+    </div>
+
+    <!-- Site Key -->
+    <div>
+      <label for="setting_siteKey" class="block text-sm font-medium text-gray-300 mb-2">Site Key</label>
+      <input type="text" name="setting_siteKey" id="setting_siteKey" value="${settings.siteKey || ""}" placeholder="0x4AAAAAAAA..." class="${inputClass}">
+      <p class="text-xs text-gray-400 mt-1">Your Cloudflare Turnstile site key (public)</p>
+    </div>
+
+    <!-- Secret Key -->
+    <div>
+      <label for="setting_secretKey" class="block text-sm font-medium text-gray-300 mb-2">Secret Key</label>
+      <input type="password" name="setting_secretKey" id="setting_secretKey" value="${settings.secretKey || ""}" placeholder="0x4AAAAAAAA..." class="${inputClass}">
+      <p class="text-xs text-gray-400 mt-1">Your Cloudflare Turnstile secret key (private)</p>
+    </div>
+
+    <!-- Theme -->
+    <div>
+      <label for="setting_theme" class="block text-sm font-medium text-gray-300 mb-2">Widget Theme</label>
+      <select name="setting_theme" id="setting_theme" class="${selectClass}" style="color: white; background-color: rgb(39, 39, 42);">
+        <option value="auto" ${settings.theme === "auto" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Auto (matches page theme)</option>
+        <option value="light" ${settings.theme === "light" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Light</option>
+        <option value="dark" ${settings.theme === "dark" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Dark</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-1">Visual appearance of the Turnstile widget</p>
+    </div>
+
+    <!-- Size -->
+    <div>
+      <label for="setting_size" class="block text-sm font-medium text-gray-300 mb-2">Widget Size</label>
+      <select name="setting_size" id="setting_size" class="${selectClass}" style="color: white; background-color: rgb(39, 39, 42);">
+        <option value="normal" ${settings.size === "normal" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Normal (300x65px)</option>
+        <option value="compact" ${settings.size === "compact" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Compact (130x120px)</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-1">Size of the Turnstile challenge widget</p>
+    </div>
+
+    <!-- Widget Mode -->
+    <div>
+      <label for="setting_mode" class="block text-sm font-medium text-gray-300 mb-2">Widget Mode</label>
+      <select name="setting_mode" id="setting_mode" class="${selectClass}" style="color: white; background-color: rgb(39, 39, 42);">
+        <option value="managed" ${!settings.mode || settings.mode === "managed" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Managed (Recommended) - Adaptive challenge</option>
+        <option value="non-interactive" ${settings.mode === "non-interactive" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Non-Interactive - Always visible, minimal friction</option>
+        <option value="invisible" ${settings.mode === "invisible" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Invisible - No visible widget</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-1"><strong>Managed:</strong> Shows challenge only when needed. <strong>Non-Interactive:</strong> Always shows but doesn't require interaction. <strong>Invisible:</strong> Runs in background without UI.</p>
+    </div>
+
+    <!-- Appearance (Pre-clearance) -->
+    <div>
+      <label for="setting_appearance" class="block text-sm font-medium text-gray-300 mb-2">Pre-clearance / Appearance</label>
+      <select name="setting_appearance" id="setting_appearance" class="${selectClass}" style="color: white; background-color: rgb(39, 39, 42);">
+        <option value="always" ${!settings.appearance || settings.appearance === "always" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Always - Pre-clearance enabled (verifies immediately)</option>
+        <option value="execute" ${settings.appearance === "execute" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Execute - Challenge on form submit</option>
+        <option value="interaction-only" ${settings.appearance === "interaction-only" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Interaction Only - Only after user interaction</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-1">Controls when Turnstile verification occurs. <strong>Always:</strong> Verifies immediately (pre-clearance). <strong>Execute:</strong> Verifies on form submit. <strong>Interaction Only:</strong> Only after user interaction.</p>
+    </div>
+  `;
 }
 function renderNoSettings(plugin) {
   if (plugin.id === "seed-data" || plugin.name === "seed-data") {
@@ -13782,7 +13660,7 @@ function formatTimestamp(timestamp) {
 
 // src/routes/admin-plugins.ts
 var adminPluginRoutes = new hono.Hono();
-adminPluginRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
+adminPluginRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
 var AVAILABLE_PLUGINS = [
   {
     id: "third-party-faq",
@@ -13887,6 +13765,19 @@ var AVAILABLE_PLUGINS = [
     permissions: [],
     dependencies: [],
     is_core: false
+  },
+  {
+    id: "turnstile",
+    name: "turnstile-plugin",
+    display_name: "Cloudflare Turnstile",
+    description: "CAPTCHA-free bot protection for forms using Cloudflare Turnstile. Provides seamless spam prevention with configurable modes, themes, and pre-clearance options.",
+    version: "1.0.0",
+    author: "SonicJS Team",
+    category: "security",
+    icon: "\u{1F6E1}\uFE0F",
+    permissions: [],
+    dependencies: [],
+    is_core: true
   }
 ];
 adminPluginRoutes.get("/", async (c) => {
@@ -14281,6 +14172,33 @@ adminPluginRoutes.post("/install", async (c) => {
         }
       });
       return c.json({ success: true, plugin: easyMdxPlugin2 });
+    }
+    if (body.name === "turnstile-plugin") {
+      const turnstilePlugin = await pluginService.installPlugin({
+        id: "turnstile",
+        name: "turnstile-plugin",
+        display_name: "Cloudflare Turnstile",
+        description: "CAPTCHA-free bot protection for forms using Cloudflare Turnstile. Provides seamless spam prevention with configurable modes, themes, and pre-clearance options.",
+        version: "1.0.0",
+        author: "SonicJS Team",
+        category: "security",
+        icon: "\u{1F6E1}\uFE0F",
+        permissions: [],
+        dependencies: [],
+        is_core: true,
+        settings: {
+          siteKey: "",
+          secretKey: "",
+          theme: "auto",
+          size: "normal",
+          mode: "managed",
+          appearance: "always",
+          preClearanceEnabled: false,
+          preClearanceLevel: "managed",
+          enabled: false
+        }
+      });
+      return c.json({ success: true, plugin: turnstilePlugin });
     }
     return c.json({ error: "Plugin not found in registry" }, 404);
   } catch (error) {
@@ -15111,7 +15029,7 @@ function renderLogConfigPage(data) {
 
 // src/routes/admin-logs.ts
 var adminLogsRoutes = new hono.Hono();
-adminLogsRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
+adminLogsRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
 adminLogsRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -17441,7 +17359,7 @@ function renderStorageUsage(databaseSizeBytes, mediaSizeBytes) {
 // src/routes/admin-dashboard.ts
 var VERSION = chunkSZE3XVET_cjs.getCoreVersion();
 var router = new hono.Hono();
-router.use("*", chunkMMGAIKPS_cjs.requireAuth());
+router.use("*", chunk7KCNAJH7_cjs.requireAuth());
 router.get("/", async (c) => {
   const user = c.get("user");
   try {
@@ -19199,7 +19117,7 @@ function renderCollectionFormPage(data) {
 
 // src/routes/admin-collections.ts
 var adminCollectionsRoutes = new hono.Hono();
-adminCollectionsRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
+adminCollectionsRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
 adminCollectionsRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -21362,7 +21280,7 @@ function renderDatabaseToolsSettings(settings) {
 
 // src/routes/admin-settings.ts
 var adminSettingsRoutes = new hono.Hono();
-adminSettingsRoutes.use("*", chunkMMGAIKPS_cjs.requireAuth());
+adminSettingsRoutes.use("*", chunk7KCNAJH7_cjs.requireAuth());
 function getMockSettings(user) {
   return {
     general: {
@@ -21530,7 +21448,7 @@ adminSettingsRoutes.get("/database-tools", (c) => {
 adminSettingsRoutes.get("/api/migrations/status", async (c) => {
   try {
     const db = c.env.DB;
-    const migrationService = new chunkSONXVJQU_cjs.MigrationService(db);
+    const migrationService = new chunk25OAPYGE_cjs.MigrationService(db);
     const status = await migrationService.getMigrationStatus();
     return c.json({
       success: true,
@@ -21554,7 +21472,7 @@ adminSettingsRoutes.post("/api/migrations/run", async (c) => {
       }, 403);
     }
     const db = c.env.DB;
-    const migrationService = new chunkSONXVJQU_cjs.MigrationService(db);
+    const migrationService = new chunk25OAPYGE_cjs.MigrationService(db);
     const result = await migrationService.runPendingMigrations();
     return c.json({
       success: result.success,
@@ -21572,7 +21490,7 @@ adminSettingsRoutes.post("/api/migrations/run", async (c) => {
 adminSettingsRoutes.get("/api/migrations/validate", async (c) => {
   try {
     const db = c.env.DB;
-    const migrationService = new chunkSONXVJQU_cjs.MigrationService(db);
+    const migrationService = new chunk25OAPYGE_cjs.MigrationService(db);
     const validation = await migrationService.validateSchema();
     return c.json({
       success: true,
@@ -21796,7 +21714,6 @@ var ROUTES_INFO = {
   reference: "https://github.com/sonicjs/sonicjs"
 };
 
-exports.PluginBuilder = PluginBuilder;
 exports.ROUTES_INFO = ROUTES_INFO;
 exports.adminCheckboxRoutes = adminCheckboxRoutes;
 exports.adminCollectionsRoutes = adminCollectionsRoutes;
@@ -21817,5 +21734,5 @@ exports.auth_default = auth_default;
 exports.router = router;
 exports.test_cleanup_default = test_cleanup_default;
 exports.userRoutes = userRoutes;
-//# sourceMappingURL=chunk-WHZOUNG5.cjs.map
-//# sourceMappingURL=chunk-WHZOUNG5.cjs.map
+//# sourceMappingURL=chunk-3XR5CPTV.cjs.map
+//# sourceMappingURL=chunk-3XR5CPTV.cjs.map

@@ -1,8 +1,9 @@
 import { getCacheService, CACHE_CONFIGS, getLogger, SettingsService } from './chunk-3YNNVSMC.js';
-import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-XJ7XY6JM.js';
+import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-FPHKKRRE.js';
 import { PluginService } from './chunk-SGAG6FD3.js';
-import { MigrationService } from './chunk-DH77X56G.js';
+import { MigrationService } from './chunk-OYGGHQE6.js';
 import { init_admin_layout_catalyst_template, renderDesignPage, renderCheckboxPage, renderTestimonialsList, renderCodeExamplesList, renderAlert, renderTable, renderPagination, renderConfirmationDialog, getConfirmationDialogScript, renderAdminLayoutCatalyst, renderAdminLayout, adminLayoutV2, renderForm } from './chunk-V5LBQN3I.js';
+import { PluginBuilder } from './chunk-GRGGQZR2.js';
 import { QueryFilterBuilder, sanitizeInput, getCoreVersion, escapeHtml } from './chunk-SKPETEM5.js';
 import { metricsTracker } from './chunk-FICTAGD4.js';
 import { Hono } from 'hono';
@@ -1720,7 +1721,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-HBO36CZI.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-LFEOU3C5.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -1745,7 +1746,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-HBO36CZI.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-LFEOU3C5.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -1764,7 +1765,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-HBO36CZI.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-LFEOU3C5.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -3783,207 +3784,6 @@ function escapeHtml2(text) {
     "'": "&#39;"
   })[char] || char);
 }
-var PluginBuilder = class _PluginBuilder {
-  plugin;
-  constructor(options) {
-    this.plugin = {
-      name: options.name,
-      version: options.version,
-      description: options.description,
-      author: options.author,
-      dependencies: options.dependencies,
-      routes: [],
-      middleware: [],
-      models: [],
-      services: [],
-      adminPages: [],
-      adminComponents: [],
-      menuItems: [],
-      hooks: []
-    };
-  }
-  /**
-   * Create a new plugin builder
-   */
-  static create(options) {
-    return new _PluginBuilder(options);
-  }
-  /**
-   * Add metadata to the plugin
-   */
-  metadata(metadata) {
-    Object.assign(this.plugin, metadata);
-    return this;
-  }
-  /**
-   * Add routes to plugin
-   */
-  addRoutes(routes) {
-    this.plugin.routes = [...this.plugin.routes || [], ...routes];
-    return this;
-  }
-  /**
-   * Add a single route to plugin
-   */
-  addRoute(path, handler, options) {
-    const route = {
-      path,
-      handler,
-      ...options
-    };
-    this.plugin.routes = [...this.plugin.routes || [], route];
-    return this;
-  }
-  /**
-   * Add middleware to plugin
-   */
-  addMiddleware(middleware) {
-    this.plugin.middleware = [...this.plugin.middleware || [], ...middleware];
-    return this;
-  }
-  /**
-   * Add a single middleware to plugin
-   */
-  addSingleMiddleware(name, handler, options) {
-    const middleware = {
-      name,
-      handler,
-      ...options
-    };
-    this.plugin.middleware = [...this.plugin.middleware || [], middleware];
-    return this;
-  }
-  /**
-   * Add models to plugin
-   */
-  addModels(models) {
-    this.plugin.models = [...this.plugin.models || [], ...models];
-    return this;
-  }
-  /**
-   * Add a single model to plugin
-   */
-  addModel(name, options) {
-    const model = {
-      name,
-      ...options
-    };
-    this.plugin.models = [...this.plugin.models || [], model];
-    return this;
-  }
-  /**
-   * Add services to plugin
-   */
-  addServices(services) {
-    this.plugin.services = [...this.plugin.services || [], ...services];
-    return this;
-  }
-  /**
-   * Add a single service to plugin
-   */
-  addService(name, implementation, options) {
-    const service = {
-      name,
-      implementation,
-      ...options
-    };
-    this.plugin.services = [...this.plugin.services || [], service];
-    return this;
-  }
-  /**
-   * Add admin pages to plugin
-   */
-  addAdminPages(pages) {
-    this.plugin.adminPages = [...this.plugin.adminPages || [], ...pages];
-    return this;
-  }
-  /**
-   * Add a single admin page to plugin
-   */
-  addAdminPage(path, title, component, options) {
-    const page = {
-      path,
-      title,
-      component,
-      ...options
-    };
-    this.plugin.adminPages = [...this.plugin.adminPages || [], page];
-    return this;
-  }
-  /**
-   * Add admin components to plugin
-   */
-  addComponents(components) {
-    this.plugin.adminComponents = [...this.plugin.adminComponents || [], ...components];
-    return this;
-  }
-  /**
-   * Add a single admin component to plugin
-   */
-  addComponent(name, template, options) {
-    const component = {
-      name,
-      template,
-      ...options
-    };
-    this.plugin.adminComponents = [...this.plugin.adminComponents || [], component];
-    return this;
-  }
-  /**
-   * Add menu items to plugin
-   */
-  addMenuItems(items) {
-    this.plugin.menuItems = [...this.plugin.menuItems || [], ...items];
-    return this;
-  }
-  /**
-   * Add a single menu item to plugin
-   */
-  addMenuItem(label, path, options) {
-    const menuItem = {
-      label,
-      path,
-      ...options
-    };
-    this.plugin.menuItems = [...this.plugin.menuItems || [], menuItem];
-    return this;
-  }
-  /**
-   * Add hooks to plugin
-   */
-  addHooks(hooks) {
-    this.plugin.hooks = [...this.plugin.hooks || [], ...hooks];
-    return this;
-  }
-  /**
-   * Add a single hook to plugin
-   */
-  addHook(name, handler, options) {
-    const hook = {
-      name,
-      handler,
-      ...options
-    };
-    this.plugin.hooks = [...this.plugin.hooks || [], hook];
-    return this;
-  }
-  /**
-   * Add lifecycle hooks
-   */
-  lifecycle(hooks) {
-    Object.assign(this.plugin, hooks);
-    return this;
-  }
-  /**
-   * Build the plugin
-   */
-  build() {
-    if (!this.plugin.name || !this.plugin.version) {
-      throw new Error("Plugin name and version are required");
-    }
-    return this.plugin;
-  }
-};
 
 // src/plugins/available/tinymce-plugin/index.ts
 var builder = PluginBuilder.create({
@@ -13546,6 +13346,7 @@ function renderSettingsTab(plugin) {
   const settings = plugin.settings || {};
   const isSeedDataPlugin = plugin.id === "seed-data" || plugin.name === "seed-data";
   const isAuthPlugin = plugin.id === "core-auth" || plugin.name === "core-auth";
+  const isTurnstilePlugin = plugin.id === "turnstile" || plugin.name === "turnstile";
   return `
     ${isSeedDataPlugin ? `
       <div class="backdrop-blur-md bg-black/20 rounded-xl border border-white/10 shadow-xl p-6 mb-6">
@@ -13572,12 +13373,15 @@ function renderSettingsTab(plugin) {
       ${isAuthPlugin ? `
         <h2 class="text-xl font-semibold text-white mb-4">Authentication Settings</h2>
         <p class="text-gray-400 mb-6">Configure user registration fields and validation rules.</p>
+      ` : isTurnstilePlugin ? `
+        <h2 class="text-xl font-semibold text-white mb-4">Cloudflare Turnstile Settings</h2>
+        <p class="text-gray-400 mb-6">Configure CAPTCHA-free bot protection for your forms.</p>
       ` : `
         <h2 class="text-xl font-semibold text-white mb-4">Plugin Settings</h2>
       `}
 
       <form id="settings-form" class="space-y-6">
-        ${isAuthPlugin && Object.keys(settings).length > 0 ? renderAuthSettingsForm(settings) : Object.keys(settings).length > 0 ? renderSettingsFields(settings) : renderNoSettings(plugin)}
+        ${isAuthPlugin && Object.keys(settings).length > 0 ? renderAuthSettingsForm(settings) : isTurnstilePlugin && Object.keys(settings).length > 0 ? renderTurnstileSettingsForm(settings) : Object.keys(settings).length > 0 ? renderSettingsFields(settings) : renderNoSettings(plugin)}
 
         ${Object.keys(settings).length > 0 ? `
         <div class="flex items-center justify-end pt-6 border-t border-white/10">
@@ -13640,6 +13444,80 @@ function renderSettingsFields(settings) {
       `;
     }
   }).join("");
+}
+function renderTurnstileSettingsForm(settings) {
+  const inputClass = "backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-300 focus:border-blue-400 focus:outline-none transition-colors w-full";
+  const selectClass = "backdrop-blur-sm bg-zinc-800 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-blue-400 focus:outline-none transition-colors w-full [&>option]:bg-zinc-800 [&>option]:text-white";
+  return `
+    <!-- Enable Toggle -->
+    <div class="flex items-center justify-between">
+      <div>
+        <label for="setting_enabled" class="text-sm font-medium text-gray-300">Enable Turnstile</label>
+        <p class="text-xs text-gray-400">Enable or disable Turnstile verification globally</p>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" name="setting_enabled" id="setting_enabled" ${settings.enabled ? "checked" : ""} class="sr-only peer">
+        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+      </label>
+    </div>
+
+    <!-- Site Key -->
+    <div>
+      <label for="setting_siteKey" class="block text-sm font-medium text-gray-300 mb-2">Site Key</label>
+      <input type="text" name="setting_siteKey" id="setting_siteKey" value="${settings.siteKey || ""}" placeholder="0x4AAAAAAAA..." class="${inputClass}">
+      <p class="text-xs text-gray-400 mt-1">Your Cloudflare Turnstile site key (public)</p>
+    </div>
+
+    <!-- Secret Key -->
+    <div>
+      <label for="setting_secretKey" class="block text-sm font-medium text-gray-300 mb-2">Secret Key</label>
+      <input type="password" name="setting_secretKey" id="setting_secretKey" value="${settings.secretKey || ""}" placeholder="0x4AAAAAAAA..." class="${inputClass}">
+      <p class="text-xs text-gray-400 mt-1">Your Cloudflare Turnstile secret key (private)</p>
+    </div>
+
+    <!-- Theme -->
+    <div>
+      <label for="setting_theme" class="block text-sm font-medium text-gray-300 mb-2">Widget Theme</label>
+      <select name="setting_theme" id="setting_theme" class="${selectClass}" style="color: white; background-color: rgb(39, 39, 42);">
+        <option value="auto" ${settings.theme === "auto" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Auto (matches page theme)</option>
+        <option value="light" ${settings.theme === "light" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Light</option>
+        <option value="dark" ${settings.theme === "dark" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Dark</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-1">Visual appearance of the Turnstile widget</p>
+    </div>
+
+    <!-- Size -->
+    <div>
+      <label for="setting_size" class="block text-sm font-medium text-gray-300 mb-2">Widget Size</label>
+      <select name="setting_size" id="setting_size" class="${selectClass}" style="color: white; background-color: rgb(39, 39, 42);">
+        <option value="normal" ${settings.size === "normal" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Normal (300x65px)</option>
+        <option value="compact" ${settings.size === "compact" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Compact (130x120px)</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-1">Size of the Turnstile challenge widget</p>
+    </div>
+
+    <!-- Widget Mode -->
+    <div>
+      <label for="setting_mode" class="block text-sm font-medium text-gray-300 mb-2">Widget Mode</label>
+      <select name="setting_mode" id="setting_mode" class="${selectClass}" style="color: white; background-color: rgb(39, 39, 42);">
+        <option value="managed" ${!settings.mode || settings.mode === "managed" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Managed (Recommended) - Adaptive challenge</option>
+        <option value="non-interactive" ${settings.mode === "non-interactive" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Non-Interactive - Always visible, minimal friction</option>
+        <option value="invisible" ${settings.mode === "invisible" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Invisible - No visible widget</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-1"><strong>Managed:</strong> Shows challenge only when needed. <strong>Non-Interactive:</strong> Always shows but doesn't require interaction. <strong>Invisible:</strong> Runs in background without UI.</p>
+    </div>
+
+    <!-- Appearance (Pre-clearance) -->
+    <div>
+      <label for="setting_appearance" class="block text-sm font-medium text-gray-300 mb-2">Pre-clearance / Appearance</label>
+      <select name="setting_appearance" id="setting_appearance" class="${selectClass}" style="color: white; background-color: rgb(39, 39, 42);">
+        <option value="always" ${!settings.appearance || settings.appearance === "always" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Always - Pre-clearance enabled (verifies immediately)</option>
+        <option value="execute" ${settings.appearance === "execute" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Execute - Challenge on form submit</option>
+        <option value="interaction-only" ${settings.appearance === "interaction-only" ? "selected" : ""} style="background-color: rgb(39, 39, 42); color: white;">Interaction Only - Only after user interaction</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-1">Controls when Turnstile verification occurs. <strong>Always:</strong> Verifies immediately (pre-clearance). <strong>Execute:</strong> Verifies on form submit. <strong>Interaction Only:</strong> Only after user interaction.</p>
+    </div>
+  `;
 }
 function renderNoSettings(plugin) {
   if (plugin.id === "seed-data" || plugin.name === "seed-data") {
@@ -13885,6 +13763,19 @@ var AVAILABLE_PLUGINS = [
     permissions: [],
     dependencies: [],
     is_core: false
+  },
+  {
+    id: "turnstile",
+    name: "turnstile-plugin",
+    display_name: "Cloudflare Turnstile",
+    description: "CAPTCHA-free bot protection for forms using Cloudflare Turnstile. Provides seamless spam prevention with configurable modes, themes, and pre-clearance options.",
+    version: "1.0.0",
+    author: "SonicJS Team",
+    category: "security",
+    icon: "\u{1F6E1}\uFE0F",
+    permissions: [],
+    dependencies: [],
+    is_core: true
   }
 ];
 adminPluginRoutes.get("/", async (c) => {
@@ -14279,6 +14170,33 @@ adminPluginRoutes.post("/install", async (c) => {
         }
       });
       return c.json({ success: true, plugin: easyMdxPlugin2 });
+    }
+    if (body.name === "turnstile-plugin") {
+      const turnstilePlugin = await pluginService.installPlugin({
+        id: "turnstile",
+        name: "turnstile-plugin",
+        display_name: "Cloudflare Turnstile",
+        description: "CAPTCHA-free bot protection for forms using Cloudflare Turnstile. Provides seamless spam prevention with configurable modes, themes, and pre-clearance options.",
+        version: "1.0.0",
+        author: "SonicJS Team",
+        category: "security",
+        icon: "\u{1F6E1}\uFE0F",
+        permissions: [],
+        dependencies: [],
+        is_core: true,
+        settings: {
+          siteKey: "",
+          secretKey: "",
+          theme: "auto",
+          size: "normal",
+          mode: "managed",
+          appearance: "always",
+          preClearanceEnabled: false,
+          preClearanceLevel: "managed",
+          enabled: false
+        }
+      });
+      return c.json({ success: true, plugin: turnstilePlugin });
     }
     return c.json({ error: "Plugin not found in registry" }, 404);
   } catch (error) {
@@ -21794,6 +21712,6 @@ var ROUTES_INFO = {
   reference: "https://github.com/sonicjs/sonicjs"
 };
 
-export { PluginBuilder, ROUTES_INFO, adminCheckboxRoutes, adminCollectionsRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_api_default, admin_code_examples_default, admin_content_default, admin_testimonials_default, api_content_crud_default, api_default, api_media_default, api_system_default, auth_default, router, test_cleanup_default, userRoutes };
-//# sourceMappingURL=chunk-AKEOTWJC.js.map
-//# sourceMappingURL=chunk-AKEOTWJC.js.map
+export { ROUTES_INFO, adminCheckboxRoutes, adminCollectionsRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_api_default, admin_code_examples_default, admin_content_default, admin_testimonials_default, api_content_crud_default, api_default, api_media_default, api_system_default, auth_default, router, test_cleanup_default, userRoutes };
+//# sourceMappingURL=chunk-K3GOTTMZ.js.map
+//# sourceMappingURL=chunk-K3GOTTMZ.js.map
