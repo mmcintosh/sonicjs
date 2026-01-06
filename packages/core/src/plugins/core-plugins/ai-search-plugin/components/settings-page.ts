@@ -98,7 +98,13 @@ export function renderSettingsPage(data: SettingsPageData): string {
                     <input type="checkbox" id="ai_mode_enabled" name="ai_mode_enabled" ${aiModeEnabled ? 'checked' : ''} class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
                     <div class="flex-1">
                       <label for="ai_mode_enabled" class="text-base font-semibold text-zinc-900 dark:text-white select-none cursor-pointer block">🤖 AI/Semantic Search</label>
-                      <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">Enable natural language queries and semantic understanding</p>
+                      <p class="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+                        Enable natural language queries (requires Cloudflare Workers AI binding)
+                        <a href="https://developers.cloudflare.com/workers-ai/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline ml-1">→ Setup Guide</a>
+                      </p>
+                      <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                        ⚠️ If AI binding unavailable, will fallback to keyword search
+                      </p>
                     </div>
                   </div>
                 </div>

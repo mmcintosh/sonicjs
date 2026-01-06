@@ -28,10 +28,18 @@ binding = "CACHE_KV"
 id = "a16f8246fc294d809c90b0fb2df6d363"
 preview_id = "25360861fb2745fab3b1ef2f0f13ffc8"
 
-# Cloudflare AI Search
-# Note: AI Search binding is configured via Cloudflare Dashboard
-# The binding name will be available as env.AI_SEARCH in Workers
-# See: https://developers.cloudflare.com/ai-search/usage/workers-binding/
+# Cloudflare AI (Workers AI)
+# Enables built-in AI models for semantic search
+# See: https://developers.cloudflare.com/workers-ai/
+[ai]
+binding = "AI"
+
+# Cloudflare Vectorize (for AI Search indexes)
+# Uncomment and configure after creating a Vectorize index
+# See: https://developers.cloudflare.com/vectorize/
+# [[vectorize]]
+# binding = "VECTORIZE"
+# index_name = "sonicjs-search-index"
 
 # Environment variables
 [vars]

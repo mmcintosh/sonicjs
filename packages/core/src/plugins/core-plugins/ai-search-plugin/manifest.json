@@ -21,8 +21,15 @@
     "ai_mode_enabled": {
       "type": "boolean",
       "label": "Enable AI/Semantic Search",
-      "description": "Enable AI-powered semantic search (natural language queries)",
-      "default": true
+      "description": "Enable AI-powered semantic search (requires Cloudflare Workers AI binding)",
+      "default": false
+    },
+    "ai_provider": {
+      "type": "string",
+      "label": "AI Provider",
+      "description": "Which AI service to use for semantic search",
+      "default": "cloudflare",
+      "enum": ["cloudflare", "keyword-only"]
     },
     "autocomplete_enabled": {
       "type": "boolean",
