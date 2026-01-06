@@ -283,7 +283,7 @@ export class AISearchService {
     }
 
     // Use AI Search if enabled and mode is 'ai'
-    if (query.mode === 'ai' && settings.ai_mode_enabled && this.aiSearch) {
+    if (query.mode === 'ai' && settings.ai_mode_enabled && this.customRAG?.isAvailable()) {
       return this.searchAI(query, settings)
     }
 
@@ -618,7 +618,7 @@ export class AISearchService {
    * Verify Custom RAG is available
    */
   verifyBinding(): boolean {
-    return this.isCustomRAGAvailable()
+    return this.customRAG?.isAvailable() ?? false
   }
 
   /**
