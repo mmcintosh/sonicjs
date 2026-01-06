@@ -186,21 +186,28 @@ export class AISearchService {
         })
       }
       
-      // Filter out test collections (starts with test_, ends with _test, or is test_collection)
+      // Filter out test collections
       const collections = (allCollections || []).filter(
         (col) => {
           if (!col.id || !col.name) return false
           const name = col.name.toLowerCase()
-          return !name.startsWith('test_') && 
-                 !name.endsWith('_test') && 
-                 name !== 'test_collection' &&
-                 !name.includes('_test_') &&
-                 name !== 'large_payload_test' &&
-                 name !== 'concurrent_test'
+          const isTestCollection = name.startsWith('test_') || 
+                 name.endsWith('_test') || 
+                 name.includes('_test_') ||
+                 name === 'test_collection' ||
+                 name === 'large_payload_test' ||
+                 name === 'concurrent_test'
+          
+          if (isTestCollection) {
+            console.log('[AISearchService.getAllCollections] Filtering out test collection:', name)
+          }
+          
+          return !isTestCollection
         }
       )
       
       console.log('[AISearchService.getAllCollections] After filtering test collections:', collections.length)
+      console.log('[AISearchService.getAllCollections] Remaining collections:', collections.map(c => c.name).join(', '))
 
       // Get settings
       const settings = await this.getSettings()

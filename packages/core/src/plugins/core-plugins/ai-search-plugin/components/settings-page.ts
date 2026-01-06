@@ -266,39 +266,60 @@ export function renderSettingsPage(data: SettingsPageData): string {
           </div>
     </div>
     <script>
-      // Form submission
+      // Form submission with error handling
       document.getElementById('settingsForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = e.submitter;
-        btn.innerText = 'Saving...'; 
-        btn.disabled = true;
+        console.log('[AI Search Client] Form submitted');
         
-        const formData = new FormData(e.target);
-        const data = {
-          enabled: document.getElementById('enabled').checked,
-          ai_mode_enabled: document.getElementById('ai_mode_enabled').checked,
-            selected_collections: Array.from(formData.getAll('selected_collections')).map(String),
-          autocomplete_enabled: document.getElementById('autocomplete_enabled').checked,
-          cache_duration: Number(formData.get('cache_duration')),
-          results_limit: Number(formData.get('results_limit')),
-          index_media: document.getElementById('index_media').checked,
-        };
-        
-        const res = await fetch('/admin/plugins/ai-search', { 
-          method: 'POST', 
-          headers: {'Content-Type': 'application/json'}, 
-          body: JSON.stringify(data) 
-        });
-        
-        if (res.ok) { 
-          document.getElementById('msg').classList.remove('hidden'); 
-          setTimeout(() => {
-            document.getElementById('msg').classList.add('hidden');
-            location.reload(); // Reload to show updated status
-          }, 2000); 
+        try {
+          const btn = e.submitter;
+          btn.innerText = 'Saving...'; 
+          btn.disabled = true;
+          
+          const formData = new FormData(e.target);
+          const selectedCollections = Array.from(formData.getAll('selected_collections')).map(String);
+          
+          const data = {
+            enabled: document.getElementById('enabled').checked,
+            ai_mode_enabled: document.getElementById('ai_mode_enabled').checked,
+            selected_collections: selectedCollections,
+            autocomplete_enabled: document.getElementById('autocomplete_enabled').checked,
+            cache_duration: Number(formData.get('cache_duration')),
+            results_limit: Number(formData.get('results_limit')),
+            index_media: document.getElementById('index_media').checked,
+          };
+          
+          console.log('[AI Search Client] Sending data:', data);
+          console.log('[AI Search Client] Selected collections:', selectedCollections);
+          
+          const res = await fetch('/admin/plugins/ai-search', { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify(data) 
+          });
+          
+          console.log('[AI Search Client] Response status:', res.status);
+          
+          if (res.ok) {
+            const result = await res.json();
+            console.log('[AI Search Client] Save successful:', result);
+            document.getElementById('msg').classList.remove('hidden'); 
+            setTimeout(() => {
+              document.getElementById('msg').classList.add('hidden');
+              location.reload();
+            }, 2000); 
+          } else {
+            const error = await res.text();
+            console.error('[AI Search Client] Save failed:', error);
+            alert('Failed to save settings: ' + error);
+          }
+          
+          btn.innerText = 'Save Settings'; 
+          btn.disabled = false;
+        } catch (error) {
+          console.error('[AI Search Client] Error:', error);
+          alert('Error saving settings: ' + error.message);
         }
-        btn.innerText = 'Save Settings'; 
-        btn.disabled = false;
       });
 
       // Add collection to index
