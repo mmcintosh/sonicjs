@@ -2890,7 +2890,7 @@ function renderSettingsPage(data) {
           const { data } = await res.json();
           // Update status indicators if needed
           // For now, just reload every 30 seconds if indexing is in progress
-          const hasIndexing = Object.values(data).some((s: any) => s.status === 'indexing');
+          const hasIndexing = Object.values(data).some((s) => s.status === 'indexing');
           if (hasIndexing) {
             location.reload();
           }
