@@ -186,30 +186,9 @@ export class AISearchService {
         })
       }
       
-      // Filter out test collections - be aggressive!
+      // No filtering needed - test collections are now properly cleaned up by E2E tests
       const collections = (allCollections || []).filter(
-        (col) => {
-          if (!col.id || !col.name) return false
-          const name = col.name.toLowerCase()
-          
-          // Filter out anything with "test" in the name
-          const isTestCollection = 
-            name.includes('test') ||           // Any "test" anywhere
-            name.includes('_test') ||          // Ends with _test
-            name.startsWith('test_') ||        // Starts with test_
-            name.includes('_test_') ||         // Contains _test_ 
-            name === 'test_collection' ||      // Exact match
-            name === 'large_payload_test' ||   // Specific tests
-            name === 'concurrent_test' ||
-            name === 'delete_test_collection' ||
-            name === 'duplicate_test'
-          
-          if (isTestCollection) {
-            console.log('[AISearchService.getAllCollections] Filtering out test collection:', name)
-          }
-          
-          return !isTestCollection
-        }
+        (col) => col.id && col.name
       )
       
       console.log('[AISearchService.getAllCollections] After filtering test collections:', collections.length)
