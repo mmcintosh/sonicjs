@@ -1,11 +1,11 @@
-import { api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminSettingsRoutes, admin_content_default, adminMediaRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-WPQGVZ4E.js';
-export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-WPQGVZ4E.js';
+import { api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminSettingsRoutes, admin_content_default, adminMediaRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-F2YCLBW6.js';
+export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-F2YCLBW6.js';
 import { schema_exports } from './chunk-3YNNVSMC.js';
 export { Logger, apiTokens, collections, content, contentVersions, getLogger, initLogger, insertCollectionSchema, insertContentSchema, insertLogConfigSchema, insertMediaSchema, insertPluginActivityLogSchema, insertPluginAssetSchema, insertPluginHookSchema, insertPluginRouteSchema, insertPluginSchema, insertSystemLogSchema, insertUserSchema, insertWorkflowHistorySchema, logConfig, media, pluginActivityLog, pluginAssets, pluginHooks, pluginRoutes, plugins, selectCollectionSchema, selectContentSchema, selectLogConfigSchema, selectMediaSchema, selectPluginActivityLogSchema, selectPluginAssetSchema, selectPluginHookSchema, selectPluginRouteSchema, selectPluginSchema, selectSystemLogSchema, selectUserSchema, selectWorkflowHistorySchema, systemLogs, users, workflowHistory } from './chunk-3YNNVSMC.js';
-import { requireAuth, AuthManager, metricsMiddleware, bootstrapMiddleware } from './chunk-EDHXRIU4.js';
-export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware } from './chunk-EDHXRIU4.js';
+import { requireAuth, AuthManager, metricsMiddleware, bootstrapMiddleware } from './chunk-KNKPM4EG.js';
+export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware } from './chunk-KNKPM4EG.js';
 export { PluginBootstrapService, PluginService as PluginServiceClass, cleanupRemovedCollections, fullCollectionSync, getAvailableCollectionNames, getManagedCollections, isCollectionManaged, loadCollectionConfig, loadCollectionConfigs, registerCollections, syncCollection, syncCollections, validateCollectionConfig } from './chunk-YFJJU26H.js';
-export { MigrationService } from './chunk-WNOKFYEO.js';
+export { MigrationService } from './chunk-XROI5DNT.js';
 export { renderFilterBar } from './chunk-AVPUX57O.js';
 import { init_admin_layout_catalyst_template, renderAdminLayout, adminLayoutV2, renderAdminLayoutCatalyst } from './chunk-V5LBQN3I.js';
 export { getConfirmationDialogScript, renderAlert, renderConfirmationDialog, renderForm, renderFormField, renderPagination, renderTable } from './chunk-V5LBQN3I.js';
@@ -2939,17 +2939,20 @@ adminRoutes.post("/", async (c) => {
     const service = new AISearchService(db, aiSearch);
     const indexer = new IndexManager(db, aiSearch);
     const body = await c.req.json();
+    console.log("[AI Search POST] Received body:", JSON.stringify(body, null, 2));
     const currentSettings = await service.getSettings();
+    console.log("[AI Search POST] Current settings selected_collections:", currentSettings?.selected_collections);
     const updatedSettings = {
       enabled: body.enabled !== void 0 ? Boolean(body.enabled) : currentSettings?.enabled,
       ai_mode_enabled: body.ai_mode_enabled !== void 0 ? Boolean(body.ai_mode_enabled) : currentSettings?.ai_mode_enabled,
-      selected_collections: body.selected_collections ? Array.isArray(body.selected_collections) ? body.selected_collections.map(String) : [String(body.selected_collections)] : currentSettings?.selected_collections || [],
-      dismissed_collections: body.dismissed_collections ? Array.isArray(body.dismissed_collections) ? body.dismissed_collections.map(String) : [String(body.dismissed_collections)] : currentSettings?.dismissed_collections || [],
+      selected_collections: Array.isArray(body.selected_collections) ? body.selected_collections.map(String) : currentSettings?.selected_collections || [],
+      dismissed_collections: Array.isArray(body.dismissed_collections) ? body.dismissed_collections.map(String) : currentSettings?.dismissed_collections || [],
       autocomplete_enabled: body.autocomplete_enabled !== void 0 ? Boolean(body.autocomplete_enabled) : currentSettings?.autocomplete_enabled,
       cache_duration: body.cache_duration ? Number(body.cache_duration) : currentSettings?.cache_duration,
       results_limit: body.results_limit ? Number(body.results_limit) : currentSettings?.results_limit,
       index_media: body.index_media !== void 0 ? Boolean(body.index_media) : currentSettings?.index_media
     };
+    console.log("[AI Search POST] Updated settings selected_collections:", updatedSettings.selected_collections);
     const collectionsChanged = JSON.stringify(updatedSettings.selected_collections) !== JSON.stringify(currentSettings?.selected_collections || []);
     await service.updateSettings(updatedSettings);
     if (collectionsChanged && updatedSettings.selected_collections) {

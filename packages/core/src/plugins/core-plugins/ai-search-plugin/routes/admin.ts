@@ -98,38 +98,44 @@ adminRoutes.post('/', async (c) => {
     const indexer = new IndexManager(db, aiSearch)
 
     const body = await c.req.json()
+    console.log('[AI Search POST] Received body:', JSON.stringify(body, null, 2))
 
     // Get current settings
     const currentSettings = await service.getSettings()
+    console.log('[AI Search POST] Current settings selected_collections:', currentSettings?.selected_collections)
 
     // Update settings
     const updatedSettings: Partial<AISearchSettings> = {
       enabled: body.enabled !== undefined ? Boolean(body.enabled) : currentSettings?.enabled,
       ai_mode_enabled: body.ai_mode_enabled !== undefined ? Boolean(body.ai_mode_enabled) : currentSettings?.ai_mode_enabled,
-          selected_collections: body.selected_collections ? (Array.isArray(body.selected_collections) ? body.selected_collections.map(String) : [String(body.selected_collections)]) : currentSettings?.selected_collections || [],
-          dismissed_collections: body.dismissed_collections ? (Array.isArray(body.dismissed_collections) ? body.dismissed_collections.map(String) : [String(body.dismissed_collections)]) : currentSettings?.dismissed_collections || [],
+      selected_collections: Array.isArray(body.selected_collections) ? body.selected_collections.map(String) : (currentSettings?.selected_collections || []),
+      dismissed_collections: Array.isArray(body.dismissed_collections) ? body.dismissed_collections.map(String) : (currentSettings?.dismissed_collections || []),
       autocomplete_enabled: body.autocomplete_enabled !== undefined ? Boolean(body.autocomplete_enabled) : currentSettings?.autocomplete_enabled,
       cache_duration: body.cache_duration ? Number(body.cache_duration) : currentSettings?.cache_duration,
       results_limit: body.results_limit ? Number(body.results_limit) : currentSettings?.results_limit,
       index_media: body.index_media !== undefined ? Boolean(body.index_media) : currentSettings?.index_media,
     }
 
+    console.log('[AI Search POST] Updated settings selected_collections:', updatedSettings.selected_collections)
+
     // If collections changed, trigger indexing
     const collectionsChanged =
       JSON.stringify(updatedSettings.selected_collections) !==
       JSON.stringify(currentSettings?.selected_collections || [])
 
-    await service.updateSettings(updatedSettings)
+    const saved = await service.updateSettings(updatedSettings)
+    console.log('[AI Search POST] Settings saved, selected_collections:', saved.selected_collections)
 
     // Start indexing if collections were added
     if (collectionsChanged && updatedSettings.selected_collections) {
+      console.log('[AI Search POST] Collections changed, starting background indexing')
       // Start indexing in background (non-blocking)
       indexer
         .syncAll(updatedSettings.selected_collections)
         .catch((error) => console.error('Background indexing error:', error))
     }
 
-    return c.json({ success: true, settings: updatedSettings })
+    return c.json({ success: true, settings: saved })
   } catch (error) {
     console.error('Error updating AI Search settings:', error)
     return c.json({ error: 'Failed to update settings' }, 500)
