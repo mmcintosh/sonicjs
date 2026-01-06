@@ -30,6 +30,7 @@ import { createDatabaseToolsAdminRoutes } from './plugins/core-plugins/database-
 import { emailPlugin } from './plugins/core-plugins/email-plugin'
 import { otpLoginPlugin } from './plugins/core-plugins/otp-login-plugin'
 import { createMagicLinkAuthPlugin } from './plugins/available/magic-link-auth'
+import { seedDataPlugin } from './plugins/core-plugins/seed-data-plugin'
 
 // ============================================================================
 // Type Definitions
@@ -207,6 +208,13 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
   const magicLinkPlugin = createMagicLinkAuthPlugin()
   if (magicLinkPlugin.routes && magicLinkPlugin.routes.length > 0) {
     for (const route of magicLinkPlugin.routes) {
+      app.route(route.path, route.handler)
+    }
+  }
+
+  // Plugin routes - Seed Data (generate test data for development)
+  if (seedDataPlugin.routes && seedDataPlugin.routes.length > 0) {
+    for (const route of seedDataPlugin.routes) {
       app.route(route.path, route.handler)
     }
   }
