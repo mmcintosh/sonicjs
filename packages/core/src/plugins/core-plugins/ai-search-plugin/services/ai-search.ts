@@ -186,17 +186,23 @@ export class AISearchService {
         })
       }
       
-      // Filter out test collections
+      // Filter out test collections - be aggressive!
       const collections = (allCollections || []).filter(
         (col) => {
           if (!col.id || !col.name) return false
           const name = col.name.toLowerCase()
-          const isTestCollection = name.startsWith('test_') || 
-                 name.endsWith('_test') || 
-                 name.includes('_test_') ||
-                 name === 'test_collection' ||
-                 name === 'large_payload_test' ||
-                 name === 'concurrent_test'
+          
+          // Filter out anything with "test" in the name
+          const isTestCollection = 
+            name.includes('test') ||           // Any "test" anywhere
+            name.includes('_test') ||          // Ends with _test
+            name.startsWith('test_') ||        // Starts with test_
+            name.includes('_test_') ||         // Contains _test_ 
+            name === 'test_collection' ||      // Exact match
+            name === 'large_payload_test' ||   // Specific tests
+            name === 'concurrent_test' ||
+            name === 'delete_test_collection' ||
+            name === 'duplicate_test'
           
           if (isTestCollection) {
             console.log('[AISearchService.getAllCollections] Filtering out test collection:', name)

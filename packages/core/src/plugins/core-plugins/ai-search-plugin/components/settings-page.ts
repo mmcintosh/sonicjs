@@ -2,8 +2,8 @@ import { renderAdminLayout } from '../../../../templates/layouts/admin-layout-v2
 import type {
   AISearchSettings,
   CollectionInfo,
-  NewCollectionNotification,
   IndexStatus,
+  NewCollectionNotification,
 } from '../types'
 
 interface SettingsPageData {
@@ -48,10 +48,10 @@ export function renderSettingsPage(data: SettingsPageData): string {
 
   const selectedCollectionIds = new Set(selectedCollections.map(id => String(id)))
   const dismissedCollectionIds = new Set(dismissedCollections.map(id => String(id)))
-  
+
   // Ensure collections array exists
   const collections = Array.isArray(data.collections) ? data.collections : []
-  
+
   // Debug: Log collections in template
   console.log('[SettingsPage Template] Collections received:', collections.length)
   if (collections.length > 0) {
@@ -124,27 +124,26 @@ export function renderSettingsPage(data: SettingsPageData): string {
                 </div>
             <div class="space-y-3 max-h-96 overflow-y-auto border-2 border-zinc-300 dark:border-zinc-700 rounded-lg p-4 bg-white dark:bg-zinc-800" id="collections-list">
               ${collections.length === 0
-                ? '<p class="text-sm text-zinc-500 dark:text-zinc-400 p-4">No collections available. Create collections first.</p>'
-                : collections.map((collection) => {
-                    const collectionId = String(collection.id)
-                    const isChecked = selectedCollectionIds.has(collectionId)
-                    const isDismissed = dismissedCollectionIds.has(collectionId)
-                    const isNew = collection.is_new === true && !isDismissed
-                    const indexStatusMap: Record<string, any> = data.indexStatus || {}
-                    const status = indexStatusMap[collectionId]
-                    const statusBadge = status
-                      ? `<span class="ml-2 px-2 py-1 text-xs rounded-full ${
-                          status.status === 'completed'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                            : status.status === 'indexing'
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                            : status.status === 'error'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                        }">${status.status}</span>`
-                      : ''
+      ? '<p class="text-sm text-zinc-500 dark:text-zinc-400 p-4">No collections available. Create collections first.</p>'
+      : collections.map((collection) => {
+        const collectionId = String(collection.id)
+        const isChecked = selectedCollectionIds.has(collectionId)
+        const isDismissed = dismissedCollectionIds.has(collectionId)
+        const isNew = collection.is_new === true && !isDismissed
+        const indexStatusMap: Record<string, any> = data.indexStatus || {}
+        const status = indexStatusMap[collectionId]
+        const statusBadge = status
+          ? `<span class="ml-2 px-2 py-1 text-xs rounded-full ${status.status === 'completed'
+            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+            : status.status === 'indexing'
+              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+              : status.status === 'error'
+                ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+          }">${status.status}</span>`
+          : ''
 
-                    return `<div class="flex items-start gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 ${isNew ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'}">
+        return `<div class="flex items-start gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 ${isNew ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'}">
                       <input
                         type="checkbox"
                         id="collection_${collectionId}"
@@ -165,13 +164,13 @@ export function renderSettingsPage(data: SettingsPageData): string {
                           ${status ? ` • ${status.indexed_items}/${status.total_items} indexed` : ''}
                         </p>
                         ${status && status.status === 'indexing'
-                          ? `<div class="mt-2 w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+            ? `<div class="mt-2 w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
                               <div class="bg-blue-600 h-2 rounded-full" style="width: ${(status.indexed_items / status.total_items) * 100}%"></div>
                             </div>`
-                          : ''}
+            : ''}
                       </div>
                     </div>`
-                  }).join('')}
+      }).join('')}
             </div>
           </div>
 
@@ -239,22 +238,22 @@ export function renderSettingsPage(data: SettingsPageData): string {
           </div>
         </div>
         ${data.analytics.popular_queries.length > 0
-          ? `
+      ? `
               <div>
                 <h3 class="text-sm font-semibold text-zinc-950 dark:text-white mb-2">Popular Searches</h3>
                 <div class="space-y-1">
                   ${data.analytics.popular_queries.map(
-                    (item) => `
+        (item) => `
                       <div class="flex items-center justify-between text-sm">
                         <span class="text-zinc-700 dark:text-zinc-300">"${item.query}"</span>
                         <span class="text-zinc-500 dark:text-zinc-400">${item.count} times</span>
                       </div>
                     `
-                  ).join('')}
+      ).join('')}
                 </div>
               </div>
             `
-          : '<p class="text-sm text-zinc-500 dark:text-zinc-400">No search history yet.</p>'}
+      : '<p class="text-sm text-zinc-500 dark:text-zinc-400">No search history yet.</p>'}
       </div>
 
           <!-- Success Message -->
@@ -374,7 +373,7 @@ export function renderSettingsPage(data: SettingsPageData): string {
       }, 30000);
     </script>
   `
-  
+
   return renderAdminLayout({
     title: 'AI Search Settings',
     pageTitle: 'AI Search Settings',
