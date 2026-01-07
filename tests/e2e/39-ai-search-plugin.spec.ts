@@ -5,9 +5,6 @@ import {
   ensureWorkflowTablesExist
 } from './utils/test-helpers'
 
-// Use environment variable for port or default to 8787
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8787'
-
 test.describe('AI Search Plugin', () => {
   test.beforeEach(async ({ page }) => {
     await ensureAdminUserExists(page)
@@ -16,7 +13,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should display AI Search plugin in plugins list', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/plugins`)
+    await page.goto('/admin/plugins')
     
     // Wait for plugins to load
     await page.waitForSelector('h1:has-text("Plugins")')
@@ -27,10 +24,10 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should access AI Search settings page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/plugins/ai-search`)
+    await page.goto('/admin/plugins/ai-search')
     
-    // Check page loaded
-    await expect(page.locator('h1, h2')).toContainText(/AI Search|Search/i, { timeout: 10000 })
+    // Check page loaded - use h1 only to avoid strict mode violation
+    await expect(page.locator('h1')).toContainText(/AI Search/i, { timeout: 10000 })
     
     // Should see collections available for indexing
     const pageContent = await page.content()
@@ -38,7 +35,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should show available collections for indexing', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/plugins/ai-search`)
+    await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
     
     // Look for collection checkboxes or list
@@ -50,7 +47,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should be able to select collections for indexing', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/plugins/ai-search`)
+    await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
     
     // Find first checkbox
@@ -84,7 +81,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should show index status for collections', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/plugins/ai-search`)
+    await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
     
     // Look for status indicators (indexed, not indexed, indexing)
@@ -101,7 +98,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should have re-index functionality', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/plugins/ai-search`)
+    await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
     
     // Look for re-index button
@@ -124,7 +121,7 @@ test.describe('AI Search Plugin', () => {
 
   test('should fetch index status via API', async ({ page }) => {
     // Make API request to get index status
-    const response = await page.request.get(`${BASE_URL}/admin/plugins/ai-search/api/status`)
+    const response = await page.request.get('/admin/plugins/ai-search/api/status')
     
     expect(response.status()).toBe(200)
     
@@ -137,7 +134,7 @@ test.describe('AI Search Plugin', () => {
 
   test('should support search via API', async ({ page }) => {
     // Create some test content first
-    await page.goto(`${BASE_URL}/admin/content/new?collection=col-blog_posts-b5408030`)
+    await page.goto('/admin/content/new?collection=col-blog_posts-b5408030')
     await page.waitForTimeout(1000)
     
     // Check if we're on content creation page
@@ -164,7 +161,7 @@ test.describe('AI Search Plugin', () => {
     await page.waitForTimeout(3000)
     
     // Try search API
-    const searchResponse = await page.request.post(`${BASE_URL}/api/search`, {
+    const searchResponse = await page.request.post('/api/search', {
       data: {
         query: 'test',
         mode: 'keyword',
@@ -181,7 +178,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should have Custom RAG initialized', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/plugins/ai-search`)
+    await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
     
     // Check browser console for Custom RAG logs
@@ -201,7 +198,7 @@ test.describe('AI Search Plugin', () => {
 
   test('should show Vectorize binding status', async ({ page }) => {
     // Check if Vectorize is configured by looking at server logs or settings
-    await page.goto(`${BASE_URL}/admin/plugins/ai-search`)
+    await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
     
     // Look for any Vectorize-related messaging in the UI
@@ -213,7 +210,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should handle plugin settings save', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/plugins/ai-search`)
+    await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
     
     // Try to update a setting
@@ -246,7 +243,7 @@ test.describe('AI Search Plugin', () => {
     await loginAsAdmin(page)
     
     // Navigate to content and clean up test content
-    await page.goto(`${BASE_URL}/admin/content`)
+    await page.goto('/admin/content')
     await page.waitForTimeout(2000)
     
     // Look for "AI Search Test Content" and delete if found
