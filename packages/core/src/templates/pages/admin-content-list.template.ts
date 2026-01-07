@@ -241,12 +241,57 @@ export function renderContentListPage(data: ContentListPageData): string {
         <div class="relative bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 rounded-xl">
           <div class="px-6 py-5">
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-4">
-                <!-- Search Input -->
+              <div class="flex items-center space-x-4 flex-1">
+                <!-- Model Filter -->
                 <div>
+                  <label class="block text-sm font-medium text-zinc-950 dark:text-white mb-2">Model</label>
+                  <div class="grid grid-cols-1">
+                    <select
+                      name="model"
+                      onchange="updateContentFilters('model', this.value)"
+                      class="col-start-1 row-start-1 w-full appearance-none rounded-lg bg-white/5 dark:bg-white/5 py-2 pl-3 pr-8 text-sm text-zinc-950 dark:text-white outline outline-1 -outline-offset-1 outline-cyan-500/30 dark:outline-cyan-400/30 *:bg-white dark:*:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-cyan-500 dark:focus-visible:outline-cyan-400 min-w-40"
+                    >
+                      <option value="all" ${data.modelName === 'all' ? 'selected' : ''}>All Models</option>
+                      ${data.models.map(model => `
+                        <option value="${model.name}" ${data.modelName === model.name ? 'selected' : ''}>
+                          ${model.displayName}
+                        </option>
+                      `).join('')}
+                    </select>
+                    <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-cyan-600 dark:text-cyan-400 sm:size-4">
+                      <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                  <label class="block text-sm font-medium text-zinc-950 dark:text-white mb-2">Status</label>
+                  <div class="grid grid-cols-1">
+                    <select
+                      name="status"
+                      onchange="updateContentFilters('status', this.value)"
+                      class="col-start-1 row-start-1 w-full appearance-none rounded-lg bg-white/5 dark:bg-white/5 py-2 pl-3 pr-8 text-sm text-zinc-950 dark:text-white outline outline-1 -outline-offset-1 outline-cyan-500/30 dark:outline-cyan-400/30 *:bg-white dark:*:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-cyan-500 dark:focus-visible:outline-cyan-400 min-w-40"
+                    >
+                      <option value="all" ${data.status === 'all' ? 'selected' : ''}>All Status</option>
+                      <option value="draft" ${data.status === 'draft' ? 'selected' : ''}>Draft</option>
+                      <option value="review" ${data.status === 'review' ? 'selected' : ''}>Under Review</option>
+                      <option value="scheduled" ${data.status === 'scheduled' ? 'selected' : ''}>Scheduled</option>
+                      <option value="published" ${data.status === 'published' ? 'selected' : ''}>Published</option>
+                      <option value="archived" ${data.status === 'archived' ? 'selected' : ''}>Archived</option>
+                      <option value="deleted" ${data.status === 'deleted' ? 'selected' : ''}>Deleted</option>
+                    </select>
+                    <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-cyan-600 dark:text-cyan-400 sm:size-4">
+                      <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Search Input -->
+                <div class="flex-1 max-w-md">
                   <label class="block text-sm font-medium text-zinc-950 dark:text-white mb-2">Search</label>
                   <form onsubmit="performContentSearch(event)" class="flex items-center space-x-2">
-                    <div class="relative group">
+                    <div class="relative group flex-1">
                       <input
                         type="text"
                         name="search"
@@ -254,7 +299,7 @@ export function renderContentListPage(data: ContentListPageData): string {
                         value="${data.search || ''}"
                         oninput="toggleContentClearButton()"
                         placeholder="Search content..."
-                        class="rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm px-4 py-2.5 pl-11 pr-10 text-sm w-72 text-zinc-950 dark:text-white border-2 border-cyan-200/50 dark:border-cyan-700/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-800 focus:shadow-lg focus:shadow-cyan-500/20 dark:focus:shadow-cyan-400/20 transition-all duration-300"
+                        class="w-full rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm px-4 py-2.5 pl-11 pr-10 text-sm text-zinc-950 dark:text-white border-2 border-cyan-200/50 dark:border-cyan-700/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-800 focus:shadow-lg focus:shadow-cyan-500/20 dark:focus:shadow-cyan-400/20 transition-all duration-300"
                       >
                       <div class="absolute left-3.5 top-2.5 flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 dark:from-cyan-300 dark:to-blue-400 opacity-90 group-focus-within:opacity-100 transition-opacity">
                         <svg class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
@@ -725,27 +770,6 @@ export function renderContentListPage(data: ContentListPageData): string {
                       <option value="scheduled">Scheduled</option>
                       <option value="archived">Archived</option>
                     </select>
-                  </div>
-
-                  <!-- Date Range -->
-                  <div>
-                    <label class="block text-sm font-medium text-zinc-950 dark:text-white mb-2">Created After</label>
-                    <input
-                      type="date"
-                      id="filterDateStart"
-                      name="date_start"
-                      class="w-full rounded-lg bg-white dark:bg-white/5 px-3 py-2 text-sm text-zinc-950 dark:text-white ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10"
-                    />
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-zinc-950 dark:text-white mb-2">Created Before</label>
-                    <input
-                      type="date"
-                      id="filterDateEnd"
-                      name="date_end"
-                      class="w-full rounded-lg bg-white dark:bg-white/5 px-3 py-2 text-sm text-zinc-950 dark:text-white ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10"
-                    />
                   </div>
                 </div>
               </div>

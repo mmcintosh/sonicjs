@@ -129,10 +129,12 @@ export function renderSettingsPage(data: SettingsPageData): string {
         const collectionId = String(collection.id)
         const isChecked = selectedCollectionIds.has(collectionId)
         const isDismissed = dismissedCollectionIds.has(collectionId)
-        const isNew = collection.is_new === true && !isDismissed
         const indexStatusMap: Record<string, any> = data.indexStatus || {}
         const status = indexStatusMap[collectionId]
-        const statusBadge = status
+        // Only show NEW badge if collection is new, not dismissed, and has never been indexed
+        const isNew = collection.is_new === true && !isDismissed && !status
+        // Only show status badge if collection is CHECKED and has status
+        const statusBadge = (status && isChecked)
           ? `<span class="ml-2 px-2 py-1 text-xs rounded-full ${status.status === 'completed'
             ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
             : status.status === 'indexing'

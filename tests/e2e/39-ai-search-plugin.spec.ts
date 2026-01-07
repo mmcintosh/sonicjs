@@ -132,48 +132,50 @@ test.describe('AI Search Plugin', () => {
     console.log('Index status response:', JSON.stringify(data, null, 2))
   })
 
-  test('should support search via API', async ({ page }) => {
-    // Create some test content first
-    await page.goto('/admin/content/new?collection=col-blog_posts-b5408030')
-    await page.waitForTimeout(1000)
-    
-    // Check if we're on content creation page
-    const titleInput = page.locator('input[name="title"]').or(page.locator('#title'))
-    
-    if (await titleInput.count() > 0) {
-      await titleInput.fill('AI Search Test Content')
-      
-      // Fill body if available
-      const bodyInput = page.locator('textarea[name="body"]').or(page.locator('#body'))
-      if (await bodyInput.count() > 0) {
-        await bodyInput.fill('This is test content for AI search functionality with semantic search capabilities.')
-      }
-      
-      // Save
-      const saveButton = page.locator('button:has-text("Save")').or(page.locator('button[type="submit"]'))
-      if (await saveButton.count() > 0) {
-        await saveButton.first().click()
-        await page.waitForTimeout(2000)
-      }
-    }
-    
-    // Wait a bit for indexing
-    await page.waitForTimeout(3000)
-    
-    // Try search API
+  test('should support keyword search via API', async ({ page }) => {
+    // Try keyword search API
     const searchResponse = await page.request.post('/api/search', {
       data: {
-        query: 'test',
+        query: 'web',
         mode: 'keyword',
         limit: 10
       }
     })
     
-    expect([200, 404, 500]).toContain(searchResponse.status())
+    expect(searchResponse.status()).toBe(200)
     
-    if (searchResponse.status() === 200) {
-      const searchData = await searchResponse.json()
-      console.log('Search results:', JSON.stringify(searchData, null, 2))
+    const searchData = await searchResponse.json()
+    expect(searchData).toHaveProperty('success')
+    console.log('Keyword search results count:', searchData?.data?.total || 0)
+  })
+
+  test('should support AI semantic search via API', async ({ page }) => {
+    // Try AI search API with semantic query
+    const searchResponse = await page.request.post('/api/search', {
+      data: {
+        query: 'JavaScript programming',
+        mode: 'ai',
+        limit: 10
+      }
+    })
+    
+    expect(searchResponse.status()).toBe(200)
+    
+    const searchData = await searchResponse.json()
+    expect(searchData).toHaveProperty('success')
+    expect(searchData).toHaveProperty('data')
+    expect(searchData.data).toHaveProperty('mode', 'ai')
+    
+    console.log('AI search results:', JSON.stringify({
+      total: searchData.data?.total || 0,
+      query_time_ms: searchData.data?.query_time_ms,
+      mode: searchData.data?.mode,
+      sample_titles: searchData.data?.results?.slice(0, 3).map((r: any) => r.title) || []
+    }, null, 2))
+    
+    // Should return results with relevance scores
+    if (searchData.data?.results?.length > 0) {
+      expect(searchData.data.results[0]).toHaveProperty('relevance_score')
     }
   })
 

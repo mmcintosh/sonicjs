@@ -1,11 +1,11 @@
-import { api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminSettingsRoutes, admin_content_default, adminMediaRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-TLR5PFQX.js';
-export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-TLR5PFQX.js';
+import { api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminSettingsRoutes, admin_content_default, adminMediaRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-HSWMVGUE.js';
+export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-HSWMVGUE.js';
 import { schema_exports } from './chunk-3YNNVSMC.js';
 export { Logger, apiTokens, collections, content, contentVersions, getLogger, initLogger, insertCollectionSchema, insertContentSchema, insertLogConfigSchema, insertMediaSchema, insertPluginActivityLogSchema, insertPluginAssetSchema, insertPluginHookSchema, insertPluginRouteSchema, insertPluginSchema, insertSystemLogSchema, insertUserSchema, insertWorkflowHistorySchema, logConfig, media, pluginActivityLog, pluginAssets, pluginHooks, pluginRoutes, plugins, selectCollectionSchema, selectContentSchema, selectLogConfigSchema, selectMediaSchema, selectPluginActivityLogSchema, selectPluginAssetSchema, selectPluginHookSchema, selectPluginRouteSchema, selectPluginSchema, selectSystemLogSchema, selectUserSchema, selectWorkflowHistorySchema, systemLogs, users, workflowHistory } from './chunk-3YNNVSMC.js';
-import { requireAuth, AuthManager, metricsMiddleware, bootstrapMiddleware } from './chunk-EQTAQJS3.js';
-export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware } from './chunk-EQTAQJS3.js';
+import { requireAuth, AuthManager, metricsMiddleware, bootstrapMiddleware } from './chunk-763AB47P.js';
+export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware } from './chunk-763AB47P.js';
 export { PluginBootstrapService, PluginService as PluginServiceClass, cleanupRemovedCollections, fullCollectionSync, getAvailableCollectionNames, getManagedCollections, isCollectionManaged, loadCollectionConfig, loadCollectionConfigs, registerCollections, syncCollection, syncCollections, validateCollectionConfig } from './chunk-YFJJU26H.js';
-export { MigrationService } from './chunk-X3TR4X66.js';
+export { MigrationService } from './chunk-365FTBHX.js';
 export { renderFilterBar } from './chunk-AVPUX57O.js';
 import { init_admin_layout_catalyst_template, renderAdminLayout, adminLayoutV2, renderAdminLayoutCatalyst } from './chunk-V5LBQN3I.js';
 export { getConfirmationDialogScript, renderAlert, renderConfirmationDialog, renderForm, renderFormField, renderPagination, renderTable } from './chunk-V5LBQN3I.js';
@@ -2721,11 +2721,26 @@ ${c.text}`)
         filter.status = { $in: query.filters.status };
       }
       const vectorResults = await this.vectorize.query(queryEmbedding, {
-        topK: query.limit || settings.results_limit || 20,
-        filter: Object.keys(filter).length > 0 ? filter : void 0,
+        topK: 50,
+        // Max allowed with returnMetadata: true
         returnMetadata: true
       });
-      console.log(`[CustomRAG] Found ${vectorResults.matches?.length || 0} vector matches`);
+      let filteredMatches = vectorResults.matches || [];
+      if (filter.collection_id?.$in && Array.isArray(filter.collection_id.$in)) {
+        const allowedCollections = filter.collection_id.$in;
+        filteredMatches = filteredMatches.filter(
+          (match) => allowedCollections.includes(match.metadata?.collection_id)
+        );
+      }
+      if (filter.status?.$in && Array.isArray(filter.status.$in)) {
+        const allowedStatuses = filter.status.$in;
+        filteredMatches = filteredMatches.filter(
+          (match) => allowedStatuses.includes(match.metadata?.status)
+        );
+      }
+      const topK = query.limit || settings.results_limit || 20;
+      filteredMatches = filteredMatches.slice(0, topK);
+      vectorResults.matches = filteredMatches;
       if (!vectorResults.matches || vectorResults.matches.length === 0) {
         return {
           results: [],
@@ -3086,23 +3101,18 @@ var AISearchService = class {
     return this.searchKeyword(query, settings);
   }
   /**
-   * AI-powered semantic search
+   * AI-powered semantic search using Custom RAG
    */
   async searchAI(query, settings) {
     try {
-      const filters = {};
-      if (query.filters?.collections && query.filters.collections.length > 0) {
-        filters.collection_id = query.filters.collections;
+      if (!this.customRAG) {
+        console.warn("[AISearchService] CustomRAG not available, falling back to keyword search");
+        return this.searchKeyword(query, settings);
       }
-      const searchParams = {
-        query: query.query,
-        filters,
-        limit: query.limit || settings.results_limit,
-        offset: query.offset || 0
-      };
-      return this.searchKeyword(query, settings);
+      const result = await this.customRAG.search(query, settings);
+      return result;
     } catch (error) {
-      console.error("AI Search error:", error);
+      console.error("[AISearchService] AI search error, falling back to keyword:", error);
       return this.searchKeyword(query, settings);
     }
   }
@@ -3721,10 +3731,10 @@ function renderSettingsPage(data) {
     const collectionId = String(collection.id);
     const isChecked = selectedCollectionIds.has(collectionId);
     const isDismissed = dismissedCollectionIds.has(collectionId);
-    const isNew = collection.is_new === true && !isDismissed;
     const indexStatusMap = data.indexStatus || {};
     const status = indexStatusMap[collectionId];
-    const statusBadge = status ? `<span class="ml-2 px-2 py-1 text-xs rounded-full ${status.status === "completed" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : status.status === "indexing" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : status.status === "error" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"}">${status.status}</span>` : "";
+    const isNew = collection.is_new === true && !isDismissed && !status;
+    const statusBadge = status && isChecked ? `<span class="ml-2 px-2 py-1 text-xs rounded-full ${status.status === "completed" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : status.status === "indexing" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : status.status === "error" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"}">${status.status}</span>` : "";
     return `<div class="flex items-start gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 ${isNew ? "bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800" : "hover:bg-zinc-50 dark:hover:bg-zinc-800"}">
                       <input
                         type="checkbox"
@@ -3983,7 +3993,7 @@ adminRoutes.get("/", async (c) => {
     const user = c.get("user");
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const service = new AISearchService(db, ai, vectorize);
     const indexer = new IndexManager(db, ai, vectorize);
     const settings = await service.getSettings();
@@ -4031,7 +4041,7 @@ adminRoutes.post("/", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const service = new AISearchService(db, ai, vectorize);
     const indexer = new IndexManager(db, ai, vectorize);
     const body = await c.req.json();
@@ -4054,7 +4064,9 @@ adminRoutes.post("/", async (c) => {
     console.log("[AI Search POST] Settings saved, selected_collections:", saved.selected_collections);
     if (collectionsChanged && updatedSettings.selected_collections) {
       console.log("[AI Search POST] Collections changed, starting background indexing");
-      indexer.syncAll(updatedSettings.selected_collections).catch((error) => console.error("Background indexing error:", error));
+      c.executionCtx.waitUntil(
+        indexer.syncAll(updatedSettings.selected_collections).then(() => console.log("[AI Search POST] Background indexing completed")).catch((error) => console.error("[AI Search POST] Background indexing error:", error))
+      );
     }
     return c.json({ success: true, settings: saved });
   } catch (error) {
@@ -4066,7 +4078,7 @@ adminRoutes.get("/api/settings", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const service = new AISearchService(db, ai, vectorize);
     const settings = await service.getSettings();
     return c.json({ success: true, data: settings });
@@ -4079,7 +4091,7 @@ adminRoutes.get("/api/new-collections", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const service = new AISearchService(db, ai, vectorize);
     const notifications = await service.detectNewCollections();
     return c.json({ success: true, data: notifications });
@@ -4092,7 +4104,7 @@ adminRoutes.get("/api/status", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const indexer = new IndexManager(db, ai, vectorize);
     const status = await indexer.getAllIndexStatus();
     return c.json({ success: true, data: status });
@@ -4105,7 +4117,7 @@ adminRoutes.post("/api/reindex", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const indexer = new IndexManager(db, ai, vectorize);
     const body = await c.req.json();
     const collectionIdRaw = body.collection_id;
@@ -4113,7 +4125,9 @@ adminRoutes.post("/api/reindex", async (c) => {
     if (!collectionId || collectionId === "undefined" || collectionId === "null") {
       return c.json({ error: "collection_id is required" }, 400);
     }
-    indexer.indexCollection(collectionId).then(() => console.log(`Re-indexing completed for collection ${collectionId}`)).catch((error) => console.error(`Re-indexing error for collection ${collectionId}:`, error));
+    c.executionCtx.waitUntil(
+      indexer.indexCollection(collectionId).then(() => console.log(`[AI Search Reindex] Completed for collection ${collectionId}`)).catch((error) => console.error(`[AI Search Reindex] Error for collection ${collectionId}:`, error))
+    );
     return c.json({ success: true, message: "Re-indexing started" });
   } catch (error) {
     console.error("Error starting re-index:", error);
@@ -4126,7 +4140,7 @@ apiRoutes.post("/", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const service = new AISearchService(db, ai, vectorize);
     const body = await c.req.json();
     const query = {
@@ -4165,7 +4179,7 @@ apiRoutes.get("/suggest", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const service = new AISearchService(db, ai, vectorize);
     const query = c.req.query("q") || "";
     if (!query || query.length < 2) {
@@ -4191,7 +4205,7 @@ apiRoutes.get("/analytics", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
-    const vectorize = c.env.VECTORIZE;
+    const vectorize = c.env.VECTORIZE_INDEX;
     const service = new AISearchService(db, ai, vectorize);
     const analytics = await service.getSearchAnalytics();
     return c.json({

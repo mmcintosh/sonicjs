@@ -21,7 +21,7 @@ apiRoutes.post('/', async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
-    const vectorize = (c.env as any).VECTORIZE
+    const vectorize = (c.env as any).VECTORIZE_INDEX
     const service = new AISearchService(db, ai, vectorize)
 
     const body = await c.req.json()
@@ -71,7 +71,7 @@ apiRoutes.get('/suggest', async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
-    const vectorize = (c.env as any).VECTORIZE
+    const vectorize = (c.env as any).VECTORIZE_INDEX
     const service = new AISearchService(db, ai, vectorize)
 
     const query = c.req.query('q') || ''
@@ -106,7 +106,7 @@ apiRoutes.get('/analytics', async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
-    const vectorize = (c.env as any).VECTORIZE
+    const vectorize = (c.env as any).VECTORIZE_INDEX
     const service = new AISearchService(db, ai, vectorize)
 
     const analytics = await service.getSearchAnalytics()

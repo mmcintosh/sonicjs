@@ -166,14 +166,35 @@ export class CustomRAGService {
         filter.status = { $in: query.filters.status }
       }
 
-      // Search Vectorize
+      // Vectorize filters have issues, so we query without filter and manually filter results
       const vectorResults = await this.vectorize.query(queryEmbedding, {
-        topK: query.limit || settings.results_limit || 20,
-        filter: Object.keys(filter).length > 0 ? filter : undefined,
+        topK: 50, // Max allowed with returnMetadata: true
         returnMetadata: true
       })
 
-      console.log(`[CustomRAG] Found ${vectorResults.matches?.length || 0} vector matches`)
+      // Manually filter results by collection_id if filter exists
+      let filteredMatches = vectorResults.matches || []
+      if (filter.collection_id?.$in && Array.isArray(filter.collection_id.$in)) {
+        const allowedCollections = filter.collection_id.$in
+        filteredMatches = filteredMatches.filter((match: any) => 
+          allowedCollections.includes(match.metadata?.collection_id)
+        )
+      }
+
+      // Apply status filter if exists
+      if (filter.status?.$in && Array.isArray(filter.status.$in)) {
+        const allowedStatuses = filter.status.$in
+        filteredMatches = filteredMatches.filter((match: any) => 
+          allowedStatuses.includes(match.metadata?.status)
+        )
+      }
+
+      // Limit to requested topK
+      const topK = query.limit || settings.results_limit || 20
+      filteredMatches = filteredMatches.slice(0, topK)
+
+      // Replace matches with filtered results
+      vectorResults.matches = filteredMatches
 
       if (!vectorResults.matches || vectorResults.matches.length === 0) {
         return {

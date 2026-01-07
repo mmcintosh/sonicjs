@@ -292,33 +292,23 @@ export class AISearchService {
   }
 
   /**
-   * AI-powered semantic search
+   * AI-powered semantic search using Custom RAG
    */
   private async searchAI(query: SearchQuery, settings: AISearchSettings): Promise<SearchResponse> {
+    const startTime = Date.now()
+    
     try {
-      // Build filters
-      const filters: any = {}
-
-      if (query.filters?.collections && query.filters.collections.length > 0) {
-        filters.collection_id = query.filters.collections
+      if (!this.customRAG) {
+        console.warn('[AISearchService] CustomRAG not available, falling back to keyword search')
+        return this.searchKeyword(query, settings)
       }
 
-      // Call Cloudflare AI Search
-      // Note: Actual implementation depends on AI Search API
-      const searchParams = {
-        query: query.query,
-        filters,
-        limit: query.limit || settings.results_limit,
-        offset: query.offset || 0,
-      }
+      // Use Custom RAG for semantic search - pass the full query object and settings
+      const result = await this.customRAG.search(query, settings)
 
-      // TODO: Implement actual AI Search API call
-      // const results = await this.aiSearch.search(searchParams)
-
-      // For now, fallback to keyword search
-      return this.searchKeyword(query, settings)
+      return result
     } catch (error) {
-      console.error('AI Search error:', error)
+      console.error('[AISearchService] AI search error, falling back to keyword:', error)
       // Fallback to keyword search
       return this.searchKeyword(query, settings)
     }

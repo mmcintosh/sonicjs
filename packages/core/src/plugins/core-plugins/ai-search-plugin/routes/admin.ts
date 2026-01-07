@@ -28,7 +28,7 @@ adminRoutes.get('/', async (c) => {
     const user = c.get('user')
     const db = c.env.DB
     const ai = (c.env as any).AI // Workers AI for embeddings
-    const vectorize = (c.env as any).VECTORIZE // Vectorize for vector search
+    const vectorize = (c.env as any).VECTORIZE_INDEX // Vectorize for vector search
 
     const service = new AISearchService(db, ai, vectorize)
     const indexer = new IndexManager(db, ai, vectorize)
@@ -95,7 +95,7 @@ adminRoutes.post('/', async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
-    const vectorize = (c.env as any).VECTORIZE
+    const vectorize = (c.env as any).VECTORIZE_INDEX
     const service = new AISearchService(db, ai, vectorize)
     const indexer = new IndexManager(db, ai, vectorize)
 
@@ -131,10 +131,13 @@ adminRoutes.post('/', async (c) => {
     // Start indexing if collections were added
     if (collectionsChanged && updatedSettings.selected_collections) {
       console.log('[AI Search POST] Collections changed, starting background indexing')
-      // Start indexing in background (non-blocking)
-      indexer
-        .syncAll(updatedSettings.selected_collections)
-        .catch((error) => console.error('Background indexing error:', error))
+      // Start indexing in background (non-blocking) - must use waitUntil to ensure it completes
+      c.executionCtx.waitUntil(
+        indexer
+          .syncAll(updatedSettings.selected_collections)
+          .then(() => console.log('[AI Search POST] Background indexing completed'))
+          .catch((error) => console.error('[AI Search POST] Background indexing error:', error))
+      )
     }
 
     return c.json({ success: true, settings: saved })
@@ -152,7 +155,7 @@ adminRoutes.get('/api/settings', async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
-    const vectorize = (c.env as any).VECTORIZE
+    const vectorize = (c.env as any).VECTORIZE_INDEX
     const service = new AISearchService(db, ai, vectorize)
 
     const settings = await service.getSettings()
@@ -171,7 +174,7 @@ adminRoutes.get('/api/new-collections', async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
-    const vectorize = (c.env as any).VECTORIZE
+    const vectorize = (c.env as any).VECTORIZE_INDEX
     const service = new AISearchService(db, ai, vectorize)
 
     const notifications = await service.detectNewCollections()
@@ -190,7 +193,7 @@ adminRoutes.get('/api/status', async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
-    const vectorize = (c.env as any).VECTORIZE
+    const vectorize = (c.env as any).VECTORIZE_INDEX
     const indexer = new IndexManager(db, ai, vectorize)
 
     const status = await indexer.getAllIndexStatus()
@@ -209,7 +212,7 @@ adminRoutes.post('/api/reindex', async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
-    const vectorize = (c.env as any).VECTORIZE
+    const vectorize = (c.env as any).VECTORIZE_INDEX
     const indexer = new IndexManager(db, ai, vectorize)
 
       const body = await c.req.json()
@@ -220,11 +223,13 @@ adminRoutes.post('/api/reindex', async (c) => {
         return c.json({ error: 'collection_id is required' }, 400)
       }
 
-      // Start indexing in background
-      indexer
-        .indexCollection(collectionId)
-      .then(() => console.log(`Re-indexing completed for collection ${collectionId}`))
-      .catch((error) => console.error(`Re-indexing error for collection ${collectionId}:`, error))
+      // Start indexing in background - must use waitUntil to ensure it completes
+      c.executionCtx.waitUntil(
+        indexer
+          .indexCollection(collectionId)
+          .then(() => console.log(`[AI Search Reindex] Completed for collection ${collectionId}`))
+          .catch((error) => console.error(`[AI Search Reindex] Error for collection ${collectionId}:`, error))
+      )
 
     return c.json({ success: true, message: 'Re-indexing started' })
   } catch (error) {

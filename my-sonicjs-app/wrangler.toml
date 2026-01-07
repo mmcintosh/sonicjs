@@ -16,8 +16,8 @@ workers_dev = true
 # Run `npm run setup:db` to create a fresh database for your branch
 [[d1_databases]]
 binding = "DB"
-database_name = "sonicjs-worktree-fix-admin-content-form"
-database_id = "f2c8a7cb-fb84-4c88-92cc-12bfe9548b74"
+database_name = "sonicjs-worktree-feature-ai-search-plugin"
+database_id = "6f8d5de1-4df4-44ac-99d4-8654e7c6b891"
 migrations_dir = "../packages/core/migrations"
 
 # R2 Bucket for media storage
@@ -36,13 +36,14 @@ preview_id = "25360861fb2745fab3b1ef2f0f13ffc8"
 # See: https://developers.cloudflare.com/workers-ai/
 [ai]
 binding = "AI"
+remote = true
 
 # Cloudflare Vectorize (for AI Search indexes)
-# Uncomment and configure after creating a Vectorize index
 # See: https://developers.cloudflare.com/vectorize/
-# [[vectorize]]
-# binding = "VECTORIZE"
-# index_name = "sonicjs-search-index"
+[[vectorize]]
+binding = "VECTORIZE_INDEX"
+index_name = "sonicjs-search"
+remote = true
 
 # Environment variables
 [vars]
