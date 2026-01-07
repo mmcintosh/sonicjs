@@ -169,6 +169,19 @@ export function renderSettingsPage(data: SettingsPageData): string {
                             </div>`
             : ''}
                       </div>
+                      ${isChecked ? `
+                        <button
+                          type="button"
+                          onclick="reindexCollection('${collectionId}')"
+                          class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                          ${status && status.status === 'indexing' ? 'disabled' : ''}
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          Re-index
+                        </button>
+                      ` : ''}
                     </div>`
       }).join('')}
             </div>
@@ -347,7 +360,7 @@ export function renderSettingsPage(data: SettingsPageData): string {
 
       // Re-index collection
       async function reindexCollection(collectionId) {
-        const res = await fetch('/admin/api/ai-search/reindex', {
+        const res = await fetch('/admin/plugins/ai-search/api/reindex', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ collection_id: collectionId })
@@ -355,12 +368,14 @@ export function renderSettingsPage(data: SettingsPageData): string {
         if (res.ok) {
           alert('Re-indexing started. Page will refresh in a moment.');
           setTimeout(() => location.reload(), 2000);
+        } else {
+          alert('Failed to start re-indexing. Please try again.');
         }
       }
 
       // Poll for index status updates
       setInterval(async () => {
-        const res = await fetch('/admin/api/ai-search/status');
+        const res = await fetch('/admin/plugins/ai-search/api/status');
         if (res.ok) {
           const { data } = await res.json();
           // Update status indicators if needed
