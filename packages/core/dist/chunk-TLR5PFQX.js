@@ -1,7 +1,7 @@
 import { getCacheService, CACHE_CONFIGS, getLogger, SettingsService } from './chunk-3YNNVSMC.js';
-import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-DRV3X2IB.js';
+import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-EQTAQJS3.js';
 import { PluginService } from './chunk-YFJJU26H.js';
-import { MigrationService } from './chunk-MCJU5ZRM.js';
+import { MigrationService } from './chunk-X3TR4X66.js';
 import { init_admin_layout_catalyst_template, renderDesignPage, renderCheckboxPage, renderTestimonialsList, renderCodeExamplesList, renderAlert, renderTable, renderPagination, renderConfirmationDialog, getConfirmationDialogScript, renderAdminLayoutCatalyst, renderAdminLayout, adminLayoutV2, renderForm } from './chunk-V5LBQN3I.js';
 import { PluginBuilder } from './chunk-GRGGQZR2.js';
 import { QueryFilterBuilder, sanitizeInput, getCoreVersion, escapeHtml } from './chunk-TMQOLXLY.js';
@@ -1721,7 +1721,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-SZCBSQBU.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-BYXK27MA.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -1746,7 +1746,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-SZCBSQBU.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-BYXK27MA.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -1765,7 +1765,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-SZCBSQBU.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-BYXK27MA.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -21979,5 +21979,5 @@ var ROUTES_INFO = {
 };
 
 export { ROUTES_INFO, adminCheckboxRoutes, adminCollectionsRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_api_default, admin_code_examples_default, admin_content_default, admin_testimonials_default, api_content_crud_default, api_default, api_media_default, api_system_default, auth_default, router, test_cleanup_default, userRoutes };
-//# sourceMappingURL=chunk-GCUQ7DD6.js.map
-//# sourceMappingURL=chunk-GCUQ7DD6.js.map
+//# sourceMappingURL=chunk-TLR5PFQX.js.map
+//# sourceMappingURL=chunk-TLR5PFQX.js.map
