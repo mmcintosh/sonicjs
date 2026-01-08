@@ -98,38 +98,52 @@ git branch --show-current
 **Run these in EXACT order. Stop if any fail.**
 
 ```bash
-# Step 1: Type Check
+# Step 1: Verify package-lock.json sync (catches CI failures early!)
+cd /path/to/sonicjs
+npm ci
+# ✅ MUST PASS - if fails, package-lock.json is out of sync
+# Fix: Run `npm install` to regenerate package-lock.json
+# Then commit the updated package-lock.json
+
+# Step 2: Type Check
 cd packages/core
 npm run type-check
 # ✅ MUST PASS before continuing
 
-# Step 2: Lint Check  
+# Step 3: Lint Check  
 npm run lint
-# ✅ MUST PASS before continuing
+# ✅ MUST PASS before continuing (warnings OK, errors NOT OK)
 
-# Step 3: Build
+# Step 4: Build
 npm run build
 # ✅ MUST PASS before continuing
 
-# Step 4: Unit Tests (if we had them)
+# Step 5: Unit Tests (if we had them)
 # npm test
 # (Skip for now - we don't have unit tests yet)
 
-# Step 5: Return to root
+# Step 6: Return to root
 cd ../..
 ```
 
 **✅ Checklist:**
+- [ ] `npm ci` ✅ PASSED (package-lock in sync)
 - [ ] `npm run type-check` ✅ PASSED
-- [ ] `npm run lint` ✅ PASSED  
+- [ ] `npm run lint` ✅ PASSED (no errors)
 - [ ] `npm run build` ✅ PASSED
 - [ ] No TypeScript errors
-- [ ] No ESLint warnings
+- [ ] No ESLint errors (warnings OK)
 
 **❌ If ANY step fails:**
 1. Fix the issue
 2. Start Phase 3 over from Step 1
 3. Do NOT proceed until all pass
+
+**Common Fixes:**
+- `npm ci` fails → Run `npm install` to fix package-lock.json, commit it
+- Type errors → Fix type issues in source code
+- Lint errors → Fix code style issues
+- Build fails → Check for syntax errors or import issues
 
 ---
 
