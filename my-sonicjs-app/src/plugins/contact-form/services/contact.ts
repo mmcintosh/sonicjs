@@ -66,14 +66,14 @@ export class ContactService {
       if (existing) {
         // Update existing row
         await this.db
-          .prepare(`UPDATE plugins SET settings = ?, updated_at = ?, status = 'active' WHERE id = ?`)
+          .prepare(`UPDATE plugins SET settings = ?, last_updated = ?, status = 'active' WHERE id = ?`)
           .bind(JSON.stringify(settings), Date.now(), manifest.id)
           .run()
       } else {
         // Insert new row
         await this.db
           .prepare(`
-            INSERT INTO plugins (id, name, display_name, description, version, status, settings, created_at, updated_at)
+            INSERT INTO plugins (id, name, display_name, description, version, status, settings, installed_at, last_updated)
             VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?)
           `)
           .bind(
@@ -224,7 +224,7 @@ export class ContactService {
       await this.db
         .prepare(`
           UPDATE plugins 
-          SET status = 'active', updated_at = ? 
+          SET status = 'active', last_updated = ? 
           WHERE id = ?
         `)
         .bind(Date.now(), manifest.id)
@@ -244,7 +244,7 @@ export class ContactService {
       await this.db
         .prepare(`
           UPDATE plugins 
-          SET status = 'inactive', updated_at = ? 
+          SET status = 'inactive', last_updated = ? 
           WHERE id = ?
         `)
         .bind(Date.now(), manifest.id)
