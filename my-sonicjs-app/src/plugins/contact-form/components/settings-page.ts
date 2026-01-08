@@ -107,8 +107,36 @@ export function renderSettingsPage(settings: ContactSettings, turnstileAvailable
         if (turnstileCheckbox) {
           data.useTurnstile = turnstileCheckbox.checked;
         }
-        const res = await fetch('/admin/plugins/contact-form', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
-        if (res.ok) { document.getElementById('msg').classList.remove('hidden'); setTimeout(() => document.getElementById('msg').classList.add('hidden'), 3000); }
+        try {
+          console.log('[Contact Form] Saving settings to /admin/plugins/contact-form');
+          
+          // Get the auth token from cookie to send in header (SameSite=Strict prevents automatic sending)
+          const authToken = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+          
+          const headers = {'Content-Type': 'application/json'};
+          if (authToken) {
+            headers['Authorization'] = 'Bearer ' + authToken;
+            console.log('[Contact Form] Including auth token in Authorization header');
+          }
+          
+          const res = await fetch('/admin/plugins/contact-form', { 
+            method: 'POST', 
+            headers: headers,
+            body: JSON.stringify(data),
+            credentials: 'same-origin' // Include cookies for authentication
+          });
+          console.log('[Contact Form] Response status:', res.status, res.ok);
+          if (res.ok) { 
+            console.log('[Contact Form] Settings saved successfully, showing message');
+            document.getElementById('msg').classList.remove('hidden'); 
+            setTimeout(() => document.getElementById('msg').classList.add('hidden'), 3000); 
+          } else {
+            const errorText = await res.text();
+            console.error('[Contact Form] Save failed:', res.status, errorText);
+          }
+        } catch (error) {
+          console.error('[Contact Form] Fetch error:', error);
+        }
         btn.innerText = 'Save Settings'; btn.disabled = false;
       });
     </script>
