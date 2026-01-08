@@ -20,12 +20,6 @@ publicRoutes.get('/contact', async (c: any) => {
     const service = new ContactService(db)
     const { status, data: settings } = await service.getSettings()
 
-    // DEBUG: Log what settings we got
-    console.log('[Contact Form Public] Plugin status:', status)
-    console.log('[Contact Form Public] Settings:', JSON.stringify(settings))
-    console.log('[Contact Form Public] showMap:', settings.showMap)
-    console.log('[Contact Form Public] mapApiKey:', settings.mapApiKey)
-
     // For testing: Allow form to work even if not activated
     // TODO: Remove this after proper plugin activation
     // if (status !== 'active') {
@@ -44,6 +38,13 @@ publicRoutes.get('/contact', async (c: any) => {
   const isEnabled = settings.showMap === 1 || settings.showMap === true || settings.showMap === 'true' || settings.showMap === 'on'
   const hasKey = apiKey && apiKey.length > 5
   const showMap = isEnabled && hasKey
+  
+  console.log('[Contact Form Public] settings.showMap:', settings.showMap, 'type:', typeof settings.showMap)
+  console.log('[Contact Form Public] isEnabled:', isEnabled, 'hasKey:', hasKey, 'showMap:', showMap)
+  console.log('[Contact Form Public] apiKey length:', apiKey.length, 'city:', city)
+  
+  console.log('[Contact Form Public] settings.showMap:', settings.showMap, 'type:', typeof settings.showMap)
+  console.log('[Contact Form Public] isEnabled:', isEnabled, 'hasKey:', hasKey, 'showMap:', showMap)
   const mapQuery = `${street} ${city} ${state}`
   const mapSrc = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(mapQuery)}`
 
