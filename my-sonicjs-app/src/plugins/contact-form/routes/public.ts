@@ -95,11 +95,6 @@ publicRoutes.get('/contact', async (c: any) => {
                <strong>📍 Address:</strong> ${fullAddressDisplay} <br>
                <strong>📞 Phone:</strong> ${phone}
             </p>
-            <!-- DEBUG INFO (remove after testing) -->
-            <div class="alert alert-info" style="font-family: monospace; font-size: 12px;">
-              <strong>DEBUG:</strong> showMap=${String(showMap)} | isEnabled=${String(isEnabled)} | hasKey=${String(hasKey)} | 
-              settings.showMap=${JSON.stringify(settings.showMap)} | apiKey.length=${apiKey.length} | city=${city}
-            </div>
             ${showMap ? html`<div class="ratio ratio-16x9 mb-4 border rounded shadow-sm"><iframe src="${mapSrc}" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>` : ''}
             ${isEnabled && !hasKey ? html`<div class="alert alert-warning">⚠️ Map is enabled but API Key is missing.</div>` : ''}
             <div id="success-alert" class="alert alert-success d-none">Message sent!</div>

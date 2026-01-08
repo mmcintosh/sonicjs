@@ -3,6 +3,40 @@ import { loginAsAdmin } from './utils/test-helpers';
 
 test.describe('Contact Form Plugin', () => {
 
+  // Ensure plugin is activated before running tests
+  test.beforeAll(async ({ browser }) => {
+    const page = await browser.newPage();
+    await loginAsAdmin(page);
+    
+    // Navigate to plugins page
+    await page.goto('/admin/plugins');
+    await page.waitForLoadState('networkidle');
+    
+    // Find Contact Form plugin row and check if it needs activation
+    const pluginRow = page.locator('tr:has-text("Contact Form")');
+    const activateButton = pluginRow.locator('button:has-text("Activate")');
+    
+    if (await activateButton.isVisible()) {
+      console.log('[Test Setup] Activating Contact Form plugin...');
+      await activateButton.click();
+      
+      // Wait for activation to complete
+      await page.waitForResponse(resp => 
+        resp.url().includes('/activate') && resp.status() === 200,
+        { timeout: 10000 }
+      ).catch(() => {
+        console.log('[Test Setup] Activation response timeout, continuing anyway...');
+      });
+      
+      await page.waitForTimeout(500); // Small buffer
+      console.log('[Test Setup] Contact Form plugin activated');
+    } else {
+      console.log('[Test Setup] Contact Form plugin already active');
+    }
+    
+    await page.close();
+  });
+
   // TEST 1: Public Form Submission
   test('should allow a guest to send a message', async ({ page }) => {
     // 1. Go to the contact page
