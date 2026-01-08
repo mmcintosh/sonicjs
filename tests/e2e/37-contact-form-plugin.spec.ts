@@ -75,6 +75,11 @@ test.describe('Contact Form Plugin', () => {
     // Debug: Check page content
     const pageContent = await page.content();
     console.log('[Test] Page title:', await page.title());
+    
+    // Extract and log the DEBUG div content
+    const debugDiv = await page.locator('.alert-info:has-text("DEBUG:")').textContent().catch(() => 'DEBUG div not found');
+    console.log('[Test] DEBUG DIV:', debugDiv);
+    
     console.log('[Test] Has ratio-16x9:', pageContent.includes('ratio-16x9'));
     console.log('[Test] Has Google Maps iframe:', pageContent.includes('google.com/maps'));
     console.log('[Test] Has Baltimore:', pageContent.includes('Baltimore'));
