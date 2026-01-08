@@ -57,24 +57,37 @@ export class ContactService {
    */
   async saveSettings(settings: ContactSettings): Promise<void> {
     try {
-      // Use INSERT OR REPLACE to handle both new and existing plugin rows
-      await this.db
-        .prepare(`
-          INSERT INTO plugins (id, name, display_name, settings, updated_at, status)
-          VALUES (?, ?, ?, ?, ?, 'active')
-          ON CONFLICT(id) DO UPDATE SET
-            settings = excluded.settings,
-            updated_at = excluded.updated_at,
-            status = 'active'
-        `)
-        .bind(
-          manifest.id,
-          manifest.name,
-          manifest.displayName,
-          JSON.stringify(settings),
-          Date.now()
-        )
-        .run()
+      // Check if plugin row exists
+      const existing = await this.db
+        .prepare(`SELECT id FROM plugins WHERE id = ?`)
+        .bind(manifest.id)
+        .first()
+
+      if (existing) {
+        // Update existing row
+        await this.db
+          .prepare(`UPDATE plugins SET settings = ?, updated_at = ?, status = 'active' WHERE id = ?`)
+          .bind(JSON.stringify(settings), Date.now(), manifest.id)
+          .run()
+      } else {
+        // Insert new row
+        await this.db
+          .prepare(`
+            INSERT INTO plugins (id, name, display_name, description, version, status, settings, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?)
+          `)
+          .bind(
+            manifest.id,
+            manifest.name,
+            manifest.displayName,
+            manifest.description || '',
+            manifest.version || '1.0.0',
+            JSON.stringify(settings),
+            Date.now(),
+            Date.now()
+          )
+          .run()
+      }
       console.log('Contact form settings saved successfully')
     } catch (error) {
       console.error('Error saving contact form settings:', error)
