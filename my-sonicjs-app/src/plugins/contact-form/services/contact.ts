@@ -88,7 +88,7 @@ export class ContactService {
           .bind(
             manifest.id,
             manifest.name,
-            manifest.displayName,
+            manifest.name, // Use name for display_name since displayName doesn't exist in manifest
             manifest.description || '',
             manifest.version || '1.0.0',
             JSON.stringify(settings),
