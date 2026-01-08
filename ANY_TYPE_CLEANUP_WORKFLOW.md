@@ -27,16 +27,23 @@ git checkout main
 git status
 # MUST show: "working tree clean" - if not, commit or stash
 
-# 2. Sync fork's main with upstream (lead's main)
+# 2. Clean up any leftover build artifacts from other branches
+cd packages/core
+npm run build
+cd ../..
+git checkout -- packages/core/dist/ packages/core/src/db/migrations-bundle.ts
+# This ensures dist/ matches main before branching
+
+# 3. Sync fork's main with upstream (lead's main)
 git fetch upstream main
 git merge upstream/main --no-edit
 git push origin main
 
-# 3. Verify main is clean and synced
+# 4. Verify main is clean and synced
 git status
 # Should show: "Your branch is up to date with 'origin/main'"
 
-# 4. Verify no test files that shouldn't be there
+# 5. Verify no test files that shouldn't be there
 git diff upstream/main --name-only | grep "test"
 # Should show: nothing or only expected differences
 ```
@@ -44,6 +51,7 @@ git diff upstream/main --name-only | grep "test"
 **✅ Checklist:**
 - [ ] On main branch (`git branch --show-current` shows "main")
 - [ ] Working tree clean
+- [ ] Build artifacts cleaned (no leftover from other branches)
 - [ ] Fork synced with upstream ✅
 - [ ] No unexpected test files on main
 - [ ] No merge conflicts pending
@@ -149,28 +157,51 @@ cd ../..
 
 ### Phase 4: Commit (2 minutes)
 
+**Important:** Build artifacts MUST be committed because the package is published with them.
+
 ```bash
-# 1. Stage changes (dist files will be regenerated)
+# 1. Stage ONLY the source file you changed
 git add packages/core/src/PATH/TO/FILE.ts
+
+# 2. Build generates artifacts - stage them too
 git add packages/core/dist/
 git add packages/core/src/db/migrations-bundle.ts
 
-# 2. Commit with template
+# 3. Review what's being committed
+git status
+git diff --cached --stat
+# Should see: source file + dist files + migrations-bundle
+
+# 4. Commit with descriptive message
 git commit -m "refactor(types): replace 'any' with proper types in FILENAME
 
-Addresses lane711/sonicjs#435
+- Changed X from 'any' to 'ProperType'
+- Added import for 'ProperType'
 
-Changes:
-- Line X: Changed type from 'any' to 'ProperType'
-- Added import for 'ProperType' from '../path'
+✅ Type-check passed
+✅ Lint passed
+✅ Build successful"
+```
 
-Testing:
-- npm run type-check ✅
-- npm run lint ✅
-- npm run build ✅
+**✅ Checklist:**
+- [ ] Only source file + build artifacts staged
+- [ ] No unrelated files in commit
+- [ ] Commit message is descriptive
+- [ ] Includes test results in commit message
 
-Impact:
-- Before: N instances of 'any' in FILENAME
+**📝 Handling Build Artifacts:**
+- **DO commit** `dist/` files - they're needed for published package
+- **DO commit** `migrations-bundle.ts` - bundled migrations
+- **DON'T worry** about large diffs - build artifacts are expected
+- **TIP:** Use `git diff --cached --stat` to verify staged files
+
+**🔧 Avoiding Conflicts:**
+If you see conflicts in `dist/` files:
+1. Don't manually edit them
+2. Checkout the incoming version: `git checkout --theirs packages/core/dist/`
+3. Rebuild: `cd packages/core && npm run build`
+4. Stage: `git add packages/core/dist/`
+5. Continue merge/rebase
 - After: 0 instances of 'any' in FILENAME"
 
 # 3. Verify commit
@@ -517,3 +548,59 @@ Create file: `ANY_TYPE_PROGRESS.md`
 ---
 
 Generated: 2026-01-08
+
+---
+
+## 🏗️ Build Artifacts - What You Need to Know
+
+### Why We Commit Build Artifacts
+
+SonicJS publishes `packages/core/dist/` to npm. Users install the built files, not source.
+- **DO commit:** All files in `packages/core/dist/`
+- **DO commit:** `packages/core/src/db/migrations-bundle.ts`
+- **Reason:** Published package needs these files to work
+
+### Build Artifacts Behavior
+
+**What gets regenerated:**
+- `packages/core/dist/` - All compiled JavaScript, types, and source maps
+- `packages/core/src/db/migrations-bundle.ts` - Bundled SQL migrations
+- Chunk names change between builds (e.g., `chunk-ABC123.js` → `chunk-XYZ789.js`)
+- **Large diffs are NORMAL and EXPECTED**
+
+### Handling in Workflow
+
+**Before branching (Phase 1):**
+```bash
+cd packages/core && npm run build && cd ../..
+git checkout -- packages/core/dist/ packages/core/src/db/migrations-bundle.ts
+```
+This ensures dist/ matches main before you start.
+
+**After changes (Phase 4):**
+```bash
+git add packages/core/src/PATH/TO/FILE.ts
+git add packages/core/dist/
+git add packages/core/src/db/migrations-bundle.ts
+```
+Always commit source + artifacts together.
+
+**During conflicts:**
+```bash
+git checkout --theirs packages/core/dist/
+cd packages/core && npm run build && cd ../..
+git add packages/core/dist/
+```
+Never manually resolve dist/ conflicts - rebuild instead.
+
+### What NOT to Do
+
+❌ **DON'T** add `dist/` to `.gitignore`
+❌ **DON'T** manually edit files in `dist/`
+❌ **DON'T** worry about large diffs in `dist/`
+❌ **DON'T** commit without rebuilding
+❌ **DON'T** push without committing dist/
+
+---
+
+Last Updated: 2026-01-08 19:30 UTC
