@@ -70,6 +70,14 @@ test.describe('Contact Form Plugin', () => {
 
     // 4. Verify on Public Page (the real test - did settings actually persist?)
     await page.goto('/contact');
+    await page.waitForLoadState('networkidle');
+    
+    // Debug: Check page content
+    const pageContent = await page.content();
+    console.log('[Test] Page title:', await page.title());
+    console.log('[Test] Has ratio-16x9:', pageContent.includes('ratio-16x9'));
+    console.log('[Test] Has Google Maps iframe:', pageContent.includes('google.com/maps'));
+    console.log('[Test] Has Baltimore:', pageContent.includes('Baltimore'));
     
     // 5. Check if Map Iframe exists
     await expect(page.locator('.ratio-16x9')).toBeVisible();
