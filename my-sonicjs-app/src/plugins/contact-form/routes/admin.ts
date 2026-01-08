@@ -63,10 +63,12 @@ admin.post('/', async (c: any) => {
     
     return c.json({ success: true, message: 'Settings saved successfully' })
   } catch (error) {
-    console.error('Error saving settings:', error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('[ContactForm Admin] Error saving settings:', errorMessage)
+    console.error('[ContactForm Admin] Full error:', error)
     return c.json({ 
       success: false, 
-      error: 'Failed to save settings' 
+      error: `Failed to save settings: ${errorMessage}`
     }, 500)
   }
 })
