@@ -57,21 +57,30 @@ export class ContactService {
    */
   async saveSettings(settings: ContactSettings): Promise<void> {
     try {
+      console.log('[ContactService.saveSettings] Starting save for plugin:', manifest.id)
+      console.log('[ContactService.saveSettings] Settings:', JSON.stringify(settings))
+      
       // Check if plugin row exists
       const existing = await this.db
-        .prepare(`SELECT id FROM plugins WHERE id = ?`)
+        .prepare(`SELECT id, status FROM plugins WHERE id = ?`)
         .bind(manifest.id)
         .first()
 
+      console.log('[ContactService.saveSettings] Existing row:', JSON.stringify(existing))
+
       if (existing) {
         // Update existing row
-        await this.db
+        console.log('[ContactService.saveSettings] Updating existing row...')
+        const result = await this.db
           .prepare(`UPDATE plugins SET settings = ?, last_updated = ? WHERE id = ?`)
           .bind(JSON.stringify(settings), Date.now(), manifest.id)
           .run()
+        console.log('[ContactService.saveSettings] UPDATE result:', JSON.stringify(result))
+        console.log('[ContactService.saveSettings] Successfully updated')
       } else {
         // Insert new row
-        await this.db
+        console.log('[ContactService.saveSettings] No existing row, inserting new...')
+        const result = await this.db
           .prepare(`
             INSERT INTO plugins (id, name, display_name, description, version, status, settings, installed_at, last_updated)
             VALUES (?, ?, ?, ?, ?, 'inactive', ?, ?, ?)
@@ -87,11 +96,15 @@ export class ContactService {
             Date.now()
           )
           .run()
+        console.log('[ContactService.saveSettings] INSERT result:', JSON.stringify(result))
+        console.log('[ContactService.saveSettings] Successfully inserted')
       }
-      console.log('Contact form settings saved successfully')
+      console.log('[ContactService.saveSettings] Settings saved successfully')
     } catch (error) {
-      console.error('Error saving contact form settings:', error)
-      throw new Error('Failed to save contact form settings')
+      console.error('[ContactService.saveSettings] ERROR:', error)
+      console.error('[ContactService.saveSettings] Error message:', error instanceof Error ? error.message : String(error))
+      console.error('[ContactService.saveSettings] Error stack:', error instanceof Error ? error.stack : 'No stack')
+      throw new Error(`Failed to save contact form settings: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
