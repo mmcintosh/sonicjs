@@ -82,8 +82,8 @@ export class ContactService {
         console.log('[ContactService.saveSettings] No existing row, inserting new...')
         const result = await this.db
           .prepare(`
-            INSERT INTO plugins (id, name, display_name, description, version, status, settings, installed_at, last_updated)
-            VALUES (?, ?, ?, ?, ?, 'inactive', ?, ?, ?)
+            INSERT INTO plugins (id, name, display_name, description, version, author, category, status, settings, installed_at, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'inactive', ?, ?, ?)
           `)
           .bind(
             manifest.id,
@@ -91,6 +91,8 @@ export class ContactService {
             manifest.name, // Use name for display_name since displayName doesn't exist in manifest
             manifest.description || '',
             manifest.version || '1.0.0',
+            manifest.author || 'Unknown',
+            manifest.category || 'other',
             JSON.stringify(settings),
             Date.now(),
             Date.now()
