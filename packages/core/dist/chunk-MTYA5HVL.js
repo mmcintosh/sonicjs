@@ -1,10 +1,10 @@
 import { getCacheService, CACHE_CONFIGS, getLogger, SettingsService } from './chunk-3YNNVSMC.js';
-import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-XRT3YP2H.js';
+import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-XBK7AGQM.js';
 import { PluginService } from './chunk-SGAG6FD3.js';
-import { MigrationService } from './chunk-CZI27OXC.js';
+import { MigrationService } from './chunk-VIWFPWZT.js';
 import { init_admin_layout_catalyst_template, renderDesignPage, renderCheckboxPage, renderTestimonialsList, renderCodeExamplesList, renderAlert, renderTable, renderPagination, renderConfirmationDialog, getConfirmationDialogScript, renderAdminLayoutCatalyst, renderAdminLayout, adminLayoutV2, renderForm } from './chunk-V5LBQN3I.js';
 import { PluginBuilder } from './chunk-GRGGQZR2.js';
-import { QueryFilterBuilder, sanitizeInput, getCoreVersion, escapeHtml } from './chunk-VNCYCH3H.js';
+import { QueryFilterBuilder, sanitizeInput, getCoreVersion, escapeHtml } from './chunk-337VL5AP.js';
 import { metricsTracker } from './chunk-FICTAGD4.js';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -15,6 +15,37 @@ import { html, raw } from 'hono/html';
 // src/schemas/index.ts
 var schemaDefinitions = [];
 var apiContentCrudRoutes = new Hono();
+apiContentCrudRoutes.get("/check-slug", async (c) => {
+  try {
+    const db = c.env.DB;
+    const collectionId = c.req.query("collectionId");
+    const slug = c.req.query("slug");
+    const excludeId = c.req.query("excludeId");
+    if (!collectionId || !slug) {
+      return c.json({ error: "collectionId and slug are required" }, 400);
+    }
+    let query = "SELECT id FROM content WHERE collection_id = ? AND slug = ?";
+    const params = [collectionId, slug];
+    if (excludeId) {
+      query += " AND id != ?";
+      params.push(excludeId);
+    }
+    const existing = await db.prepare(query).bind(...params).first();
+    if (existing) {
+      return c.json({
+        available: false,
+        message: "This URL slug is already in use in this collection"
+      });
+    }
+    return c.json({ available: true });
+  } catch (error) {
+    console.error("Error checking slug:", error);
+    return c.json({
+      error: "Failed to check slug availability",
+      details: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+});
 apiContentCrudRoutes.get("/:id", async (c) => {
   try {
     const id = c.req.param("id");
@@ -1721,7 +1752,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-PLKUNG73.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-YMUP3K4Z.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -1746,7 +1777,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-PLKUNG73.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-YMUP3K4Z.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -1765,7 +1796,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-PLKUNG73.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-YMUP3K4Z.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -3384,7 +3415,7 @@ init_admin_layout_catalyst_template();
 
 // src/templates/components/dynamic-field.template.ts
 function renderDynamicField(field, options = {}) {
-  const { value = "", errors = [], disabled = false, className = "", pluginStatuses = {} } = options;
+  const { value = "", errors = [], disabled = false, className = "", pluginStatuses = {}, collectionId = "", contentId = "" } = options;
   const opts = field.field_options || {};
   const required = field.is_required ? "required" : "";
   const baseClasses = `w-full rounded-lg px-3 py-2 text-sm text-zinc-950 dark:text-white bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow ${className}`;
@@ -3637,67 +3668,167 @@ function renderDynamicField(field, options = {}) {
       `;
       break;
     case "slug":
-      let slugPattern = opts.pattern || "^[a-z0-9-]+$";
-      let slugHelp = '<p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Use lowercase letters, numbers, and hyphens only</p>';
-      slugHelp += `<button type="button" class="mt-1 text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300" onclick="generateSlugFromTitle('\${fieldId}')">Generate from title</button>`;
+      const slugPattern = opts.pattern || "^[a-z0-9-]+$";
+      const collectionId2 = opts.collectionId || "";
+      const contentId2 = opts.contentId || "";
+      const isEditMode = !!value;
       fieldHTML = `
-        <input
-          type="text"
-          id="${fieldId}"
-          name="${fieldName}"
-          value="${escapeHtml2(value)}"
-          placeholder="${opts.placeholder || "url-friendly-slug"}"
-          maxlength="${opts.maxLength || ""}"
-          data-pattern="${slugPattern}"
-          class="${baseClasses} ${errorClasses}"
-          ${required}
-          ${disabled ? "disabled" : ""}
-        >
-        ${slugHelp}
+        <div class="slug-field-container">
+          <input
+            type="text"
+            id="${fieldId}"
+            name="${fieldName}"
+            value="${escapeHtml2(value)}"
+            placeholder="${opts.placeholder || "url-friendly-slug"}"
+            maxlength="${opts.maxLength || 100}"
+            data-pattern="${slugPattern}"
+            data-collection-id="${collectionId2}"
+            data-content-id="${contentId2}"
+            data-is-edit-mode="${isEditMode}"
+            class="${baseClasses} ${errorClasses}"
+            ${required}
+            ${disabled ? "disabled" : ""}
+          >
+          <div id="${fieldId}-status" class="slug-status mt-1 text-sm min-h-[20px]"></div>
+          <button 
+            type="button" 
+            class="regenerate-slug-btn mt-2 text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 flex items-center gap-1 transition-colors"
+            onclick="window.regenerateSlugFromTitle_${fieldId.replace(/-/g, "_")}()"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Regenerate from title
+          </button>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Use lowercase letters, numbers, and hyphens only</p>
+        </div>
+        
         <script>
           (function() {
-            const field = document.getElementById('${fieldId}');
+            const slugField = document.getElementById('${fieldId}');
+            const statusDiv = document.getElementById('${fieldId}-status');
+            const isEditMode = slugField.dataset.isEditMode === 'true';
             const pattern = new RegExp('${slugPattern}');
-
-            field.addEventListener('input', function() {
-              if (this.value && !pattern.test(this.value)) {
-                this.setCustomValidity('Please use only lowercase letters, numbers, and hyphens.');
-              } else {
-                this.setCustomValidity('');
-              }
-            });
-
-            field.addEventListener('blur', function() {
-              this.reportValidity();
-            });
-          })();
-
-          function generateSlugFromTitle(slugFieldId) {
-            const titleField = document.querySelector('input[name="title"]');
-            const slugField = document.getElementById(slugFieldId);
-            if (titleField && slugField) {
-              const slug = titleField.value
+            const collectionId = slugField.dataset.collectionId;
+            const contentId = slugField.dataset.contentId;
+            
+            let checkTimeout;
+            let lastCheckedSlug = '';
+            let manuallyEdited = false;
+            
+            // Shared slug generation function
+            function generateSlug(text) {
+              if (!text) return '';
+              
+              return text
                 .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\\u0300-\\u036f]/g, '')
                 .replace(/[^a-z0-9\\s_-]/g, '')
                 .replace(/\\s+/g, '-')
                 .replace(/[-_]+/g, '-')
-                .replace(/^[-_]|[-_]$/g, '');
-              slugField.value = slug;
+                .replace(/^[-_]+|[-_]+$/g, '')
+                .substring(0, 100);
             }
-          }
-
-          // Auto-generate slug when title changes
-          document.addEventListener('DOMContentLoaded', function() {
-            const titleField = document.querySelector('input[name="title"]');
-            const slugField = document.getElementById('${fieldId}');
-            if (titleField && slugField && !slugField.value) {
-              titleField.addEventListener('input', function() {
-                if (!slugField.value) {
-                  generateSlugFromTitle('${fieldId}');
+            
+            // Check if slug is available
+            async function checkSlugAvailability(slug) {
+              if (!slug || !collectionId) return;
+              
+              // Don't check if it's the same as last time
+              if (slug === lastCheckedSlug) return;
+              lastCheckedSlug = slug;
+              
+              try {
+                // Show checking status
+                statusDiv.innerHTML = '<span class="text-gray-400">\u23F3 Checking availability...</span>';
+                
+                // Build URL
+                let url = \`/api/content/check-slug?collectionId=\${encodeURIComponent(collectionId)}&slug=\${encodeURIComponent(slug)}\`;
+                if (contentId) {
+                  url += \`&excludeId=\${encodeURIComponent(contentId)}\`;
                 }
-              });
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.available) {
+                  statusDiv.innerHTML = '<span class="text-green-500 dark:text-green-400">\u2713 Available</span>';
+                  slugField.setCustomValidity('');
+                } else {
+                  statusDiv.innerHTML = \`<span class="text-red-500 dark:text-red-400">\u2717 \${data.message || 'Already in use'}</span>\`;
+                  slugField.setCustomValidity(data.message || 'This slug is already in use');
+                }
+              } catch (error) {
+                console.error('Error checking slug:', error);
+                statusDiv.innerHTML = '<span class="text-yellow-500 dark:text-yellow-400">\u26A0 Could not verify</span>';
+              }
             }
-          });
+            
+            // Format validation and duplicate checking
+            slugField.addEventListener('input', function() {
+              const value = this.value;
+              
+              // Mark as manually edited if user types directly
+              if (document.activeElement === this) {
+                manuallyEdited = true;
+              }
+              
+              // Clear status if empty
+              if (!value) {
+                statusDiv.innerHTML = '';
+                this.setCustomValidity('');
+                return;
+              }
+              
+              // Pattern validation
+              if (!pattern.test(value)) {
+                this.setCustomValidity('Please use only lowercase letters, numbers, and hyphens.');
+                statusDiv.innerHTML = '<span class="text-red-500 dark:text-red-400">\u2717 Invalid format</span>';
+                return;
+              }
+              
+              // Debounce the availability check
+              clearTimeout(checkTimeout);
+              checkTimeout = setTimeout(() => {
+                checkSlugAvailability(value);
+              }, 500); // Wait 500ms after user stops typing
+            });
+            
+            // Initial check if field has value
+            if (slugField.value) {
+              checkSlugAvailability(slugField.value);
+            }
+            
+            // Auto-generate only in create mode
+            if (!isEditMode) {
+              const titleField = document.querySelector('input[name="title"]');
+              if (titleField) {
+                titleField.addEventListener('input', function() {
+                  if (!manuallyEdited) {
+                    const slug = generateSlug(this.value);
+                    slugField.value = slug;
+                    
+                    // Trigger validation and duplicate check
+                    slugField.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+                });
+              }
+            }
+            
+            // Global function for regenerate button
+            window.regenerateSlugFromTitle_${fieldId.replace(/-/g, "_")} = function() {
+              const titleField = document.querySelector('input[name="title"]');
+              if (titleField && slugField) {
+                const slug = generateSlug(titleField.value);
+                slugField.value = slug;
+                manuallyEdited = false;
+                
+                // Trigger validation and duplicate check
+                slugField.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+            };
+          })();
         </script>
       `;
       break;
@@ -4373,17 +4504,24 @@ function renderContentFormPage(data) {
   const coreFieldsHTML = coreFields.sort((a, b) => a.field_order - b.field_order).map((field) => renderDynamicField(field, {
     value: getFieldValue(field.field_name),
     errors: data.validationErrors?.[field.field_name] || [],
-    pluginStatuses
+    pluginStatuses,
+    collectionId: data.collection.id,
+    contentId: data.id
+    // Pass content ID when editing
   }));
   const contentFieldsHTML = contentFields.sort((a, b) => a.field_order - b.field_order).map((field) => renderDynamicField(field, {
     value: getFieldValue(field.field_name),
     errors: data.validationErrors?.[field.field_name] || [],
-    pluginStatuses
+    pluginStatuses,
+    collectionId: data.collection.id,
+    contentId: data.id
   }));
   const metaFieldsHTML = metaFields.sort((a, b) => a.field_order - b.field_order).map((field) => renderDynamicField(field, {
     value: getFieldValue(field.field_name),
     errors: data.validationErrors?.[field.field_name] || [],
-    pluginStatuses
+    pluginStatuses,
+    collectionId: data.collection.id,
+    contentId: data.id
   }));
   const pageContent = `
     <div class="space-y-6">
@@ -21721,5 +21859,5 @@ var ROUTES_INFO = {
 };
 
 export { ROUTES_INFO, adminCheckboxRoutes, adminCollectionsRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_api_default, admin_code_examples_default, admin_content_default, admin_testimonials_default, api_content_crud_default, api_default, api_media_default, api_system_default, auth_default, checkAdminUserExists, router, test_cleanup_default, userRoutes };
-//# sourceMappingURL=chunk-DO362EEQ.js.map
-//# sourceMappingURL=chunk-DO362EEQ.js.map
+//# sourceMappingURL=chunk-MTYA5HVL.js.map
+//# sourceMappingURL=chunk-MTYA5HVL.js.map

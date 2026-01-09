@@ -1,12 +1,12 @@
 'use strict';
 
 var chunk7FOAMNTI_cjs = require('./chunk-7FOAMNTI.cjs');
-var chunkMC2HO526_cjs = require('./chunk-MC2HO526.cjs');
+var chunkZQAQJNIN_cjs = require('./chunk-ZQAQJNIN.cjs');
 var chunkILZ3DP4I_cjs = require('./chunk-ILZ3DP4I.cjs');
-var chunk4SZJQD43_cjs = require('./chunk-4SZJQD43.cjs');
+var chunkE3B4X74R_cjs = require('./chunk-E3B4X74R.cjs');
 var chunkAZLU3ROK_cjs = require('./chunk-AZLU3ROK.cjs');
 var chunkQBKCBF7C_cjs = require('./chunk-QBKCBF7C.cjs');
-var chunkFYEDK7K7_cjs = require('./chunk-FYEDK7K7.cjs');
+var chunkS6B6PRD7_cjs = require('./chunk-S6B6PRD7.cjs');
 var chunkRCQ2HIQD_cjs = require('./chunk-RCQ2HIQD.cjs');
 var hono = require('hono');
 var cors = require('hono/cors');
@@ -17,6 +17,37 @@ var html = require('hono/html');
 // src/schemas/index.ts
 var schemaDefinitions = [];
 var apiContentCrudRoutes = new hono.Hono();
+apiContentCrudRoutes.get("/check-slug", async (c) => {
+  try {
+    const db = c.env.DB;
+    const collectionId = c.req.query("collectionId");
+    const slug = c.req.query("slug");
+    const excludeId = c.req.query("excludeId");
+    if (!collectionId || !slug) {
+      return c.json({ error: "collectionId and slug are required" }, 400);
+    }
+    let query = "SELECT id FROM content WHERE collection_id = ? AND slug = ?";
+    const params = [collectionId, slug];
+    if (excludeId) {
+      query += " AND id != ?";
+      params.push(excludeId);
+    }
+    const existing = await db.prepare(query).bind(...params).first();
+    if (existing) {
+      return c.json({
+        available: false,
+        message: "This URL slug is already in use in this collection"
+      });
+    }
+    return c.json({ available: true });
+  } catch (error) {
+    console.error("Error checking slug:", error);
+    return c.json({
+      error: "Failed to check slug availability",
+      details: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+});
 apiContentCrudRoutes.get("/:id", async (c) => {
   try {
     const id = c.req.param("id");
@@ -45,7 +76,7 @@ apiContentCrudRoutes.get("/:id", async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.post("/", chunkMC2HO526_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.post("/", chunkZQAQJNIN_cjs.requireAuth(), async (c) => {
   try {
     const db = c.env.DB;
     const user = c.get("user");
@@ -111,7 +142,7 @@ apiContentCrudRoutes.post("/", chunkMC2HO526_cjs.requireAuth(), async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.put("/:id", chunkMC2HO526_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.put("/:id", chunkZQAQJNIN_cjs.requireAuth(), async (c) => {
   try {
     const id = c.req.param("id");
     const db = c.env.DB;
@@ -175,7 +206,7 @@ apiContentCrudRoutes.put("/:id", chunkMC2HO526_cjs.requireAuth(), async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.delete("/:id", chunkMC2HO526_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.delete("/:id", chunkZQAQJNIN_cjs.requireAuth(), async (c) => {
   try {
     const id = c.req.param("id");
     const db = c.env.DB;
@@ -211,7 +242,7 @@ apiRoutes.use("*", async (c, next) => {
   c.header("X-Response-Time", `${totalTime}ms`);
 });
 apiRoutes.use("*", async (c, next) => {
-  const cacheEnabled = await chunkMC2HO526_cjs.isPluginActive(c.env.DB, "core-cache");
+  const cacheEnabled = await chunkZQAQJNIN_cjs.isPluginActive(c.env.DB, "core-cache");
   c.set("cacheEnabled", cacheEnabled);
   await next();
 });
@@ -336,12 +367,12 @@ apiRoutes.get("/content", async (c) => {
         });
       }
     }
-    const filter = chunkFYEDK7K7_cjs.QueryFilterBuilder.parseFromQuery(queryParams);
+    const filter = chunkS6B6PRD7_cjs.QueryFilterBuilder.parseFromQuery(queryParams);
     if (!filter.limit) {
       filter.limit = 50;
     }
     filter.limit = Math.min(filter.limit, 1e3);
-    const builder3 = new chunkFYEDK7K7_cjs.QueryFilterBuilder();
+    const builder3 = new chunkS6B6PRD7_cjs.QueryFilterBuilder();
     const queryResult = builder3.build("content", filter);
     if (queryResult.errors.length > 0) {
       return c.json({
@@ -428,7 +459,7 @@ apiRoutes.get("/collections/:collection/content", async (c) => {
     if (!collectionResult) {
       return c.json({ error: "Collection not found" }, 404);
     }
-    const filter = chunkFYEDK7K7_cjs.QueryFilterBuilder.parseFromQuery(queryParams);
+    const filter = chunkS6B6PRD7_cjs.QueryFilterBuilder.parseFromQuery(queryParams);
     if (!filter.where) {
       filter.where = { and: [] };
     }
@@ -444,7 +475,7 @@ apiRoutes.get("/collections/:collection/content", async (c) => {
       filter.limit = 50;
     }
     filter.limit = Math.min(filter.limit, 1e3);
-    const builder3 = new chunkFYEDK7K7_cjs.QueryFilterBuilder();
+    const builder3 = new chunkS6B6PRD7_cjs.QueryFilterBuilder();
     const queryResult = builder3.build("content", filter);
     if (queryResult.errors.length > 0) {
       return c.json({
@@ -569,7 +600,7 @@ var fileValidationSchema = zod.z.object({
   // 50MB max
 });
 var apiMediaRoutes = new hono.Hono();
-apiMediaRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
+apiMediaRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
 apiMediaRoutes.post("/upload", async (c) => {
   try {
     const user = c.get("user");
@@ -1313,8 +1344,8 @@ apiSystemRoutes.get("/env", (c) => {
 });
 var api_system_default = apiSystemRoutes;
 var adminApiRoutes = new hono.Hono();
-adminApiRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
-adminApiRoutes.use("*", chunkMC2HO526_cjs.requireRole(["admin", "editor"]));
+adminApiRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
+adminApiRoutes.use("*", chunkZQAQJNIN_cjs.requireRole(["admin", "editor"]));
 adminApiRoutes.get("/stats", async (c) => {
   try {
     const db = c.env.DB;
@@ -1723,7 +1754,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-YS4DXK7D.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-CBNILRKP.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -1748,7 +1779,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-YS4DXK7D.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-CBNILRKP.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -1767,7 +1798,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-YS4DXK7D.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-CBNILRKP.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -2290,7 +2321,7 @@ authRoutes.post(
       if (existingUser) {
         return c.json({ error: "User with this email or username already exists" }, 400);
       }
-      const passwordHash = await chunkMC2HO526_cjs.AuthManager.hashPassword(password);
+      const passwordHash = await chunkZQAQJNIN_cjs.AuthManager.hashPassword(password);
       const userId = crypto.randomUUID();
       const now = /* @__PURE__ */ new Date();
       await db.prepare(`
@@ -2310,7 +2341,7 @@ authRoutes.post(
         now.getTime(),
         now.getTime()
       ).run();
-      const token = await chunkMC2HO526_cjs.AuthManager.generateToken(userId, normalizedEmail, "viewer");
+      const token = await chunkZQAQJNIN_cjs.AuthManager.generateToken(userId, normalizedEmail, "viewer");
       cookie.setCookie(c, "auth_token", token, {
         httpOnly: true,
         secure: true,
@@ -2363,11 +2394,11 @@ authRoutes.post("/login", async (c) => {
     if (!user) {
       return c.json({ error: "Invalid email or password" }, 401);
     }
-    const isValidPassword = await chunkMC2HO526_cjs.AuthManager.verifyPassword(password, user.password_hash);
+    const isValidPassword = await chunkZQAQJNIN_cjs.AuthManager.verifyPassword(password, user.password_hash);
     if (!isValidPassword) {
       return c.json({ error: "Invalid email or password" }, 401);
     }
-    const token = await chunkMC2HO526_cjs.AuthManager.generateToken(user.id, user.email, user.role);
+    const token = await chunkZQAQJNIN_cjs.AuthManager.generateToken(user.id, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: true,
@@ -2416,7 +2447,7 @@ authRoutes.get("/logout", (c) => {
   });
   return c.redirect("/auth/login?message=You have been logged out successfully");
 });
-authRoutes.get("/me", chunkMC2HO526_cjs.requireAuth(), async (c) => {
+authRoutes.get("/me", chunkZQAQJNIN_cjs.requireAuth(), async (c) => {
   try {
     const user = c.get("user");
     if (!user) {
@@ -2433,13 +2464,13 @@ authRoutes.get("/me", chunkMC2HO526_cjs.requireAuth(), async (c) => {
     return c.json({ error: "Failed to get user" }, 500);
   }
 });
-authRoutes.post("/refresh", chunkMC2HO526_cjs.requireAuth(), async (c) => {
+authRoutes.post("/refresh", chunkZQAQJNIN_cjs.requireAuth(), async (c) => {
   try {
     const user = c.get("user");
     if (!user) {
       return c.json({ error: "Not authenticated" }, 401);
     }
-    const token = await chunkMC2HO526_cjs.AuthManager.generateToken(user.userId, user.email, user.role);
+    const token = await chunkZQAQJNIN_cjs.AuthManager.generateToken(user.userId, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: true,
@@ -2499,7 +2530,7 @@ authRoutes.post("/register/form", async (c) => {
         </div>
       `);
     }
-    const passwordHash = await chunkMC2HO526_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunkZQAQJNIN_cjs.AuthManager.hashPassword(password);
     const role = isFirstUser ? "admin" : "viewer";
     const userId = crypto.randomUUID();
     const now = /* @__PURE__ */ new Date();
@@ -2522,7 +2553,7 @@ authRoutes.post("/register/form", async (c) => {
     if (isFirstUser) {
       setAdminExists();
     }
-    const token = await chunkMC2HO526_cjs.AuthManager.generateToken(userId, normalizedEmail, role);
+    const token = await chunkZQAQJNIN_cjs.AuthManager.generateToken(userId, normalizedEmail, role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: false,
@@ -2574,7 +2605,7 @@ authRoutes.post("/login/form", async (c) => {
         </div>
       `);
     }
-    const isValidPassword = await chunkMC2HO526_cjs.AuthManager.verifyPassword(password, user.password_hash);
+    const isValidPassword = await chunkZQAQJNIN_cjs.AuthManager.verifyPassword(password, user.password_hash);
     if (!isValidPassword) {
       return c.html(html.html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -2582,7 +2613,7 @@ authRoutes.post("/login/form", async (c) => {
         </div>
       `);
     }
-    const token = await chunkMC2HO526_cjs.AuthManager.generateToken(user.id, user.email, user.role);
+    const token = await chunkZQAQJNIN_cjs.AuthManager.generateToken(user.id, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: false,
@@ -2641,7 +2672,7 @@ authRoutes.post("/seed-admin", async (c) => {
     `).run();
     const existingAdmin = await db.prepare("SELECT id FROM users WHERE email = ? OR username = ?").bind("admin@sonicjs.com", "admin").first();
     if (existingAdmin) {
-      const passwordHash2 = await chunkMC2HO526_cjs.AuthManager.hashPassword("sonicjs!");
+      const passwordHash2 = await chunkZQAQJNIN_cjs.AuthManager.hashPassword("sonicjs!");
       await db.prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?").bind(passwordHash2, Date.now(), existingAdmin.id).run();
       setAdminExists();
       return c.json({
@@ -2654,7 +2685,7 @@ authRoutes.post("/seed-admin", async (c) => {
         }
       });
     }
-    const passwordHash = await chunkMC2HO526_cjs.AuthManager.hashPassword("sonicjs!");
+    const passwordHash = await chunkZQAQJNIN_cjs.AuthManager.hashPassword("sonicjs!");
     const userId = "admin-user-id";
     const now = Date.now();
     const adminEmail = "admin@sonicjs.com".toLowerCase();
@@ -2875,7 +2906,7 @@ authRoutes.post("/accept-invitation", async (c) => {
     if (existingUsername) {
       return c.json({ error: "Username is already taken" }, 400);
     }
-    const passwordHash = await chunkMC2HO526_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunkZQAQJNIN_cjs.AuthManager.hashPassword(password);
     const updateStmt = db.prepare(`
       UPDATE users SET 
         username = ?,
@@ -2894,7 +2925,7 @@ authRoutes.post("/accept-invitation", async (c) => {
       Date.now(),
       invitedUser.id
     ).run();
-    const authToken = await chunkMC2HO526_cjs.AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role);
+    const authToken = await chunkZQAQJNIN_cjs.AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role);
     cookie.setCookie(c, "auth_token", authToken, {
       httpOnly: true,
       secure: true,
@@ -3124,7 +3155,7 @@ authRoutes.post("/reset-password", async (c) => {
     if (Date.now() > user.password_reset_expires) {
       return c.json({ error: "Reset token has expired" }, 400);
     }
-    const newPasswordHash = await chunkMC2HO526_cjs.AuthManager.hashPassword(password);
+    const newPasswordHash = await chunkZQAQJNIN_cjs.AuthManager.hashPassword(password);
     try {
       const historyStmt = db.prepare(`
         INSERT INTO password_history (id, user_id, password_hash, created_at)
@@ -3386,7 +3417,7 @@ chunkAZLU3ROK_cjs.init_admin_layout_catalyst_template();
 
 // src/templates/components/dynamic-field.template.ts
 function renderDynamicField(field, options = {}) {
-  const { value = "", errors = [], disabled = false, className = "", pluginStatuses = {} } = options;
+  const { value = "", errors = [], disabled = false, className = "", pluginStatuses = {}, collectionId = "", contentId = "" } = options;
   const opts = field.field_options || {};
   const required = field.is_required ? "required" : "";
   const baseClasses = `w-full rounded-lg px-3 py-2 text-sm text-zinc-950 dark:text-white bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow ${className}`;
@@ -3639,67 +3670,167 @@ function renderDynamicField(field, options = {}) {
       `;
       break;
     case "slug":
-      let slugPattern = opts.pattern || "^[a-z0-9-]+$";
-      let slugHelp = '<p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Use lowercase letters, numbers, and hyphens only</p>';
-      slugHelp += `<button type="button" class="mt-1 text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300" onclick="generateSlugFromTitle('\${fieldId}')">Generate from title</button>`;
+      const slugPattern = opts.pattern || "^[a-z0-9-]+$";
+      const collectionId2 = opts.collectionId || "";
+      const contentId2 = opts.contentId || "";
+      const isEditMode = !!value;
       fieldHTML = `
-        <input
-          type="text"
-          id="${fieldId}"
-          name="${fieldName}"
-          value="${escapeHtml2(value)}"
-          placeholder="${opts.placeholder || "url-friendly-slug"}"
-          maxlength="${opts.maxLength || ""}"
-          data-pattern="${slugPattern}"
-          class="${baseClasses} ${errorClasses}"
-          ${required}
-          ${disabled ? "disabled" : ""}
-        >
-        ${slugHelp}
+        <div class="slug-field-container">
+          <input
+            type="text"
+            id="${fieldId}"
+            name="${fieldName}"
+            value="${escapeHtml2(value)}"
+            placeholder="${opts.placeholder || "url-friendly-slug"}"
+            maxlength="${opts.maxLength || 100}"
+            data-pattern="${slugPattern}"
+            data-collection-id="${collectionId2}"
+            data-content-id="${contentId2}"
+            data-is-edit-mode="${isEditMode}"
+            class="${baseClasses} ${errorClasses}"
+            ${required}
+            ${disabled ? "disabled" : ""}
+          >
+          <div id="${fieldId}-status" class="slug-status mt-1 text-sm min-h-[20px]"></div>
+          <button 
+            type="button" 
+            class="regenerate-slug-btn mt-2 text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 flex items-center gap-1 transition-colors"
+            onclick="window.regenerateSlugFromTitle_${fieldId.replace(/-/g, "_")}()"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Regenerate from title
+          </button>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Use lowercase letters, numbers, and hyphens only</p>
+        </div>
+        
         <script>
           (function() {
-            const field = document.getElementById('${fieldId}');
+            const slugField = document.getElementById('${fieldId}');
+            const statusDiv = document.getElementById('${fieldId}-status');
+            const isEditMode = slugField.dataset.isEditMode === 'true';
             const pattern = new RegExp('${slugPattern}');
-
-            field.addEventListener('input', function() {
-              if (this.value && !pattern.test(this.value)) {
-                this.setCustomValidity('Please use only lowercase letters, numbers, and hyphens.');
-              } else {
-                this.setCustomValidity('');
-              }
-            });
-
-            field.addEventListener('blur', function() {
-              this.reportValidity();
-            });
-          })();
-
-          function generateSlugFromTitle(slugFieldId) {
-            const titleField = document.querySelector('input[name="title"]');
-            const slugField = document.getElementById(slugFieldId);
-            if (titleField && slugField) {
-              const slug = titleField.value
+            const collectionId = slugField.dataset.collectionId;
+            const contentId = slugField.dataset.contentId;
+            
+            let checkTimeout;
+            let lastCheckedSlug = '';
+            let manuallyEdited = false;
+            
+            // Shared slug generation function
+            function generateSlug(text) {
+              if (!text) return '';
+              
+              return text
                 .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\\u0300-\\u036f]/g, '')
                 .replace(/[^a-z0-9\\s_-]/g, '')
                 .replace(/\\s+/g, '-')
                 .replace(/[-_]+/g, '-')
-                .replace(/^[-_]|[-_]$/g, '');
-              slugField.value = slug;
+                .replace(/^[-_]+|[-_]+$/g, '')
+                .substring(0, 100);
             }
-          }
-
-          // Auto-generate slug when title changes
-          document.addEventListener('DOMContentLoaded', function() {
-            const titleField = document.querySelector('input[name="title"]');
-            const slugField = document.getElementById('${fieldId}');
-            if (titleField && slugField && !slugField.value) {
-              titleField.addEventListener('input', function() {
-                if (!slugField.value) {
-                  generateSlugFromTitle('${fieldId}');
+            
+            // Check if slug is available
+            async function checkSlugAvailability(slug) {
+              if (!slug || !collectionId) return;
+              
+              // Don't check if it's the same as last time
+              if (slug === lastCheckedSlug) return;
+              lastCheckedSlug = slug;
+              
+              try {
+                // Show checking status
+                statusDiv.innerHTML = '<span class="text-gray-400">\u23F3 Checking availability...</span>';
+                
+                // Build URL
+                let url = \`/api/content/check-slug?collectionId=\${encodeURIComponent(collectionId)}&slug=\${encodeURIComponent(slug)}\`;
+                if (contentId) {
+                  url += \`&excludeId=\${encodeURIComponent(contentId)}\`;
                 }
-              });
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.available) {
+                  statusDiv.innerHTML = '<span class="text-green-500 dark:text-green-400">\u2713 Available</span>';
+                  slugField.setCustomValidity('');
+                } else {
+                  statusDiv.innerHTML = \`<span class="text-red-500 dark:text-red-400">\u2717 \${data.message || 'Already in use'}</span>\`;
+                  slugField.setCustomValidity(data.message || 'This slug is already in use');
+                }
+              } catch (error) {
+                console.error('Error checking slug:', error);
+                statusDiv.innerHTML = '<span class="text-yellow-500 dark:text-yellow-400">\u26A0 Could not verify</span>';
+              }
             }
-          });
+            
+            // Format validation and duplicate checking
+            slugField.addEventListener('input', function() {
+              const value = this.value;
+              
+              // Mark as manually edited if user types directly
+              if (document.activeElement === this) {
+                manuallyEdited = true;
+              }
+              
+              // Clear status if empty
+              if (!value) {
+                statusDiv.innerHTML = '';
+                this.setCustomValidity('');
+                return;
+              }
+              
+              // Pattern validation
+              if (!pattern.test(value)) {
+                this.setCustomValidity('Please use only lowercase letters, numbers, and hyphens.');
+                statusDiv.innerHTML = '<span class="text-red-500 dark:text-red-400">\u2717 Invalid format</span>';
+                return;
+              }
+              
+              // Debounce the availability check
+              clearTimeout(checkTimeout);
+              checkTimeout = setTimeout(() => {
+                checkSlugAvailability(value);
+              }, 500); // Wait 500ms after user stops typing
+            });
+            
+            // Initial check if field has value
+            if (slugField.value) {
+              checkSlugAvailability(slugField.value);
+            }
+            
+            // Auto-generate only in create mode
+            if (!isEditMode) {
+              const titleField = document.querySelector('input[name="title"]');
+              if (titleField) {
+                titleField.addEventListener('input', function() {
+                  if (!manuallyEdited) {
+                    const slug = generateSlug(this.value);
+                    slugField.value = slug;
+                    
+                    // Trigger validation and duplicate check
+                    slugField.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+                });
+              }
+            }
+            
+            // Global function for regenerate button
+            window.regenerateSlugFromTitle_${fieldId.replace(/-/g, "_")} = function() {
+              const titleField = document.querySelector('input[name="title"]');
+              if (titleField && slugField) {
+                const slug = generateSlug(titleField.value);
+                slugField.value = slug;
+                manuallyEdited = false;
+                
+                // Trigger validation and duplicate check
+                slugField.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+            };
+          })();
         </script>
       `;
       break;
@@ -4375,17 +4506,24 @@ function renderContentFormPage(data) {
   const coreFieldsHTML = coreFields.sort((a, b) => a.field_order - b.field_order).map((field) => renderDynamicField(field, {
     value: getFieldValue(field.field_name),
     errors: data.validationErrors?.[field.field_name] || [],
-    pluginStatuses
+    pluginStatuses,
+    collectionId: data.collection.id,
+    contentId: data.id
+    // Pass content ID when editing
   }));
   const contentFieldsHTML = contentFields.sort((a, b) => a.field_order - b.field_order).map((field) => renderDynamicField(field, {
     value: getFieldValue(field.field_name),
     errors: data.validationErrors?.[field.field_name] || [],
-    pluginStatuses
+    pluginStatuses,
+    collectionId: data.collection.id,
+    contentId: data.id
   }));
   const metaFieldsHTML = metaFields.sort((a, b) => a.field_order - b.field_order).map((field) => renderDynamicField(field, {
     value: getFieldValue(field.field_name),
     errors: data.validationErrors?.[field.field_name] || [],
-    pluginStatuses
+    pluginStatuses,
+    collectionId: data.collection.id,
+    contentId: data.id
   }));
   const pageContent = `
     <div class="space-y-6">
@@ -5825,7 +5963,7 @@ async function isPluginActive2(db, pluginId) {
 
 // src/routes/admin-content.ts
 var adminContentRoutes = new hono.Hono();
-adminContentRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
+adminContentRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
 async function getCollectionFields(db, collectionId) {
   const cache = chunk7FOAMNTI_cjs.getCacheService(chunk7FOAMNTI_cjs.CACHE_CONFIGS.collection);
   return cache.getOrSet(
@@ -7886,7 +8024,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="first_name"
-                      value="${chunkFYEDK7K7_cjs.escapeHtml(data.userToEdit.firstName || "")}"
+                      value="${chunkS6B6PRD7_cjs.escapeHtml(data.userToEdit.firstName || "")}"
                       required
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -7897,7 +8035,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="last_name"
-                      value="${chunkFYEDK7K7_cjs.escapeHtml(data.userToEdit.lastName || "")}"
+                      value="${chunkS6B6PRD7_cjs.escapeHtml(data.userToEdit.lastName || "")}"
                       required
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -7908,7 +8046,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="username"
-                      value="${chunkFYEDK7K7_cjs.escapeHtml(data.userToEdit.username || "")}"
+                      value="${chunkS6B6PRD7_cjs.escapeHtml(data.userToEdit.username || "")}"
                       required
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -7919,7 +8057,7 @@ function renderUserEditPage(data) {
                     <input
                       type="email"
                       name="email"
-                      value="${chunkFYEDK7K7_cjs.escapeHtml(data.userToEdit.email || "")}"
+                      value="${chunkS6B6PRD7_cjs.escapeHtml(data.userToEdit.email || "")}"
                       required
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -7930,7 +8068,7 @@ function renderUserEditPage(data) {
                     <input
                       type="tel"
                       name="phone"
-                      value="${chunkFYEDK7K7_cjs.escapeHtml(data.userToEdit.phone || "")}"
+                      value="${chunkS6B6PRD7_cjs.escapeHtml(data.userToEdit.phone || "")}"
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
                   </div>
@@ -7944,7 +8082,7 @@ function renderUserEditPage(data) {
                         class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 dark:bg-white/5 py-1.5 pl-3 pr-8 text-base text-zinc-950 dark:text-white outline outline-1 -outline-offset-1 outline-zinc-500/30 dark:outline-zinc-400/30 *:bg-white dark:*:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-zinc-500 dark:focus-visible:outline-zinc-400 sm:text-sm/6"
                       >
                         ${data.roles.map((role) => `
-                          <option value="${chunkFYEDK7K7_cjs.escapeHtml(role.value)}" ${data.userToEdit.role === role.value ? "selected" : ""}>${chunkFYEDK7K7_cjs.escapeHtml(role.label)}</option>
+                          <option value="${chunkS6B6PRD7_cjs.escapeHtml(role.value)}" ${data.userToEdit.role === role.value ? "selected" : ""}>${chunkS6B6PRD7_cjs.escapeHtml(role.label)}</option>
                         `).join("")}
                       </select>
                       <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-zinc-600 dark:text-zinc-400 sm:size-4">
@@ -7960,7 +8098,7 @@ function renderUserEditPage(data) {
                     name="bio"
                     rows="3"
                     class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
-                  >${chunkFYEDK7K7_cjs.escapeHtml(data.userToEdit.bio || "")}</textarea>
+                  >${chunkS6B6PRD7_cjs.escapeHtml(data.userToEdit.bio || "")}</textarea>
                 </div>
               </div>
 
@@ -8860,7 +8998,7 @@ function renderUsersListPage(data) {
 
 // src/routes/admin-users.ts
 var userRoutes = new hono.Hono();
-userRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
+userRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
 userRoutes.get("/", (c) => {
   return c.redirect("/admin/dashboard");
 });
@@ -8959,12 +9097,12 @@ userRoutes.put("/profile", async (c) => {
   const db = c.env.DB;
   try {
     const formData = await c.req.formData();
-    const firstName = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("first_name")?.toString());
-    const lastName = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("last_name")?.toString());
-    const username = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("username")?.toString());
+    const firstName = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("first_name")?.toString());
+    const lastName = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("last_name")?.toString());
+    const username = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("username")?.toString());
     const email = formData.get("email")?.toString()?.trim().toLowerCase() || "";
-    const phone = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
-    const bio = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
+    const phone = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
+    const bio = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
     const timezone = formData.get("timezone")?.toString() || "UTC";
     const language = formData.get("language")?.toString() || "en";
     const emailNotifications = formData.get("email_notifications") === "1";
@@ -9015,7 +9153,7 @@ userRoutes.put("/profile", async (c) => {
       Date.now(),
       user.userId
     ).run();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "profile.update",
@@ -9078,7 +9216,7 @@ userRoutes.post("/profile/avatar", async (c) => {
       SELECT first_name, last_name FROM users WHERE id = ?
     `);
     const userData = await userStmt.bind(user.userId).first();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "profile.avatar_update",
@@ -9149,7 +9287,7 @@ userRoutes.post("/profile/password", async (c) => {
         dismissible: true
       }));
     }
-    const validPassword = await chunkMC2HO526_cjs.AuthManager.verifyPassword(currentPassword, userData.password_hash);
+    const validPassword = await chunkZQAQJNIN_cjs.AuthManager.verifyPassword(currentPassword, userData.password_hash);
     if (!validPassword) {
       return c.html(renderAlert2({
         type: "error",
@@ -9157,7 +9295,7 @@ userRoutes.post("/profile/password", async (c) => {
         dismissible: true
       }));
     }
-    const newPasswordHash = await chunkMC2HO526_cjs.AuthManager.hashPassword(newPassword);
+    const newPasswordHash = await chunkZQAQJNIN_cjs.AuthManager.hashPassword(newPassword);
     const historyStmt = db.prepare(`
       INSERT INTO password_history (id, user_id, password_hash, created_at)
       VALUES (?, ?, ?, ?)
@@ -9173,7 +9311,7 @@ userRoutes.post("/profile/password", async (c) => {
       WHERE id = ?
     `);
     await updateStmt.bind(newPasswordHash, Date.now(), user.userId).run();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "profile.password_change",
@@ -9240,7 +9378,7 @@ userRoutes.get("/users", async (c) => {
     `);
     const countResult = await countStmt.bind(...params).first();
     const totalUsers = countResult?.total || 0;
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "users.list_view",
@@ -9342,12 +9480,12 @@ userRoutes.post("/users/new", async (c) => {
   const user = c.get("user");
   try {
     const formData = await c.req.formData();
-    const firstName = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("first_name")?.toString());
-    const lastName = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("last_name")?.toString());
-    const username = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("username")?.toString());
+    const firstName = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("first_name")?.toString());
+    const lastName = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("last_name")?.toString());
+    const username = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("username")?.toString());
     const email = formData.get("email")?.toString()?.trim().toLowerCase() || "";
-    const phone = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
-    const bio = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
+    const phone = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
+    const bio = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
     const role = formData.get("role")?.toString() || "viewer";
     const password = formData.get("password")?.toString() || "";
     const confirmPassword = formData.get("confirm_password")?.toString() || "";
@@ -9394,7 +9532,7 @@ userRoutes.post("/users/new", async (c) => {
         dismissible: true
       }));
     }
-    const passwordHash = await chunkMC2HO526_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunkZQAQJNIN_cjs.AuthManager.hashPassword(password);
     const userId = crypto.randomUUID();
     const createStmt = db.prepare(`
       INSERT INTO users (
@@ -9417,7 +9555,7 @@ userRoutes.post("/users/new", async (c) => {
       Date.now(),
       Date.now()
     ).run();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "user!.create",
@@ -9455,7 +9593,7 @@ userRoutes.get("/users/:id", async (c) => {
     if (!userRecord) {
       return c.json({ error: "User not found" }, 404);
     }
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "user!.view",
@@ -9548,12 +9686,12 @@ userRoutes.put("/users/:id", async (c) => {
   const userId = c.req.param("id");
   try {
     const formData = await c.req.formData();
-    const firstName = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("first_name")?.toString());
-    const lastName = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("last_name")?.toString());
-    const username = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("username")?.toString());
+    const firstName = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("first_name")?.toString());
+    const lastName = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("last_name")?.toString());
+    const username = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("username")?.toString());
     const email = formData.get("email")?.toString()?.trim().toLowerCase() || "";
-    const phone = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
-    const bio = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
+    const phone = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
+    const bio = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
     const role = formData.get("role")?.toString() || "viewer";
     const isActive = formData.get("is_active") === "1";
     const emailVerified = formData.get("email_verified") === "1";
@@ -9604,7 +9742,7 @@ userRoutes.put("/users/:id", async (c) => {
       Date.now(),
       userId
     ).run();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "user!.update",
@@ -9649,7 +9787,7 @@ userRoutes.post("/users/:id/toggle", async (c) => {
       UPDATE users SET is_active = ?, updated_at = ? WHERE id = ?
     `);
     await toggleStmt.bind(active ? 1 : 0, Date.now(), userId).run();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       active ? "user.activate" : "user.deactivate",
@@ -9690,7 +9828,7 @@ userRoutes.delete("/users/:id", async (c) => {
         DELETE FROM users WHERE id = ?
       `);
       await deleteStmt.bind(userId).run();
-      await chunkMC2HO526_cjs.logActivity(
+      await chunkZQAQJNIN_cjs.logActivity(
         db,
         user.userId,
         "user!.hard_delete",
@@ -9709,7 +9847,7 @@ userRoutes.delete("/users/:id", async (c) => {
         UPDATE users SET is_active = 0, updated_at = ? WHERE id = ?
       `);
       await deleteStmt.bind(Date.now(), userId).run();
-      await chunkMC2HO526_cjs.logActivity(
+      await chunkZQAQJNIN_cjs.logActivity(
         db,
         user.userId,
         "user!.soft_delete",
@@ -9736,8 +9874,8 @@ userRoutes.post("/invite-user", async (c) => {
     const formData = await c.req.formData();
     const email = formData.get("email")?.toString()?.trim().toLowerCase() || "";
     const role = formData.get("role")?.toString()?.trim() || "viewer";
-    const firstName = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("first_name")?.toString());
-    const lastName = chunkFYEDK7K7_cjs.sanitizeInput(formData.get("last_name")?.toString());
+    const firstName = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("first_name")?.toString());
+    const lastName = chunkS6B6PRD7_cjs.sanitizeInput(formData.get("last_name")?.toString());
     if (!email || !firstName || !lastName) {
       return c.json({ error: "Email, first name, and last name are required" }, 400);
     }
@@ -9775,7 +9913,7 @@ userRoutes.post("/invite-user", async (c) => {
       Date.now(),
       Date.now()
     ).run();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "user!.invite_sent",
@@ -9832,7 +9970,7 @@ userRoutes.post("/resend-invitation/:id", async (c) => {
       Date.now(),
       userId
     ).run();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "user!.invitation_resent",
@@ -9868,7 +10006,7 @@ userRoutes.delete("/cancel-invitation/:id", async (c) => {
     }
     const deleteStmt = db.prepare(`DELETE FROM users WHERE id = ?`);
     await deleteStmt.bind(userId).run();
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "user!.invitation_cancelled",
@@ -9951,7 +10089,7 @@ userRoutes.get("/activity-logs", async (c) => {
       ...log,
       details: log.details ? JSON.parse(log.details) : null
     }));
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "activity.logs_viewed",
@@ -10058,7 +10196,7 @@ userRoutes.get("/activity-logs/export", async (c) => {
       csvRows.push(row.join(","));
     }
     const csvContent = csvRows.join("\n");
-    await chunkMC2HO526_cjs.logActivity(
+    await chunkZQAQJNIN_cjs.logActivity(
       db,
       user.userId,
       "activity.logs_exported",
@@ -11397,7 +11535,7 @@ var fileValidationSchema2 = zod.z.object({
   // 50MB max
 });
 var adminMediaRoutes = new hono.Hono();
-adminMediaRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
+adminMediaRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
 adminMediaRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -11983,7 +12121,7 @@ adminMediaRoutes.put("/:id", async (c) => {
     `);
   }
 });
-adminMediaRoutes.delete("/cleanup", chunkMC2HO526_cjs.requireRole("admin"), async (c) => {
+adminMediaRoutes.delete("/cleanup", chunkZQAQJNIN_cjs.requireRole("admin"), async (c) => {
   try {
     const db = c.env.DB;
     const allMediaStmt = db.prepare("SELECT id, r2_key, filename FROM media WHERE deleted_at IS NULL");
@@ -13706,7 +13844,7 @@ function formatTimestamp(timestamp) {
 
 // src/routes/admin-plugins.ts
 var adminPluginRoutes = new hono.Hono();
-adminPluginRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
+adminPluginRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
 var AVAILABLE_PLUGINS = [
   {
     id: "third-party-faq",
@@ -15037,7 +15175,7 @@ function renderLogConfigPage(data) {
 
 // src/routes/admin-logs.ts
 var adminLogsRoutes = new hono.Hono();
-adminLogsRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
+adminLogsRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
 adminLogsRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -17365,9 +17503,9 @@ function renderStorageUsage(databaseSizeBytes, mediaSizeBytes) {
 }
 
 // src/routes/admin-dashboard.ts
-var VERSION = chunkFYEDK7K7_cjs.getCoreVersion();
+var VERSION = chunkS6B6PRD7_cjs.getCoreVersion();
 var router = new hono.Hono();
-router.use("*", chunkMC2HO526_cjs.requireAuth());
+router.use("*", chunkZQAQJNIN_cjs.requireAuth());
 router.get("/", async (c) => {
   const user = c.get("user");
   try {
@@ -19125,7 +19263,7 @@ function renderCollectionFormPage(data) {
 
 // src/routes/admin-collections.ts
 var adminCollectionsRoutes = new hono.Hono();
-adminCollectionsRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
+adminCollectionsRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
 adminCollectionsRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -21288,7 +21426,7 @@ function renderDatabaseToolsSettings(settings) {
 
 // src/routes/admin-settings.ts
 var adminSettingsRoutes = new hono.Hono();
-adminSettingsRoutes.use("*", chunkMC2HO526_cjs.requireAuth());
+adminSettingsRoutes.use("*", chunkZQAQJNIN_cjs.requireAuth());
 function getMockSettings(user) {
   return {
     general: {
@@ -21456,7 +21594,7 @@ adminSettingsRoutes.get("/database-tools", (c) => {
 adminSettingsRoutes.get("/api/migrations/status", async (c) => {
   try {
     const db = c.env.DB;
-    const migrationService = new chunk4SZJQD43_cjs.MigrationService(db);
+    const migrationService = new chunkE3B4X74R_cjs.MigrationService(db);
     const status = await migrationService.getMigrationStatus();
     return c.json({
       success: true,
@@ -21480,7 +21618,7 @@ adminSettingsRoutes.post("/api/migrations/run", async (c) => {
       }, 403);
     }
     const db = c.env.DB;
-    const migrationService = new chunk4SZJQD43_cjs.MigrationService(db);
+    const migrationService = new chunkE3B4X74R_cjs.MigrationService(db);
     const result = await migrationService.runPendingMigrations();
     return c.json({
       success: result.success,
@@ -21498,7 +21636,7 @@ adminSettingsRoutes.post("/api/migrations/run", async (c) => {
 adminSettingsRoutes.get("/api/migrations/validate", async (c) => {
   try {
     const db = c.env.DB;
-    const migrationService = new chunk4SZJQD43_cjs.MigrationService(db);
+    const migrationService = new chunkE3B4X74R_cjs.MigrationService(db);
     const validation = await migrationService.validateSchema();
     return c.json({
       success: true,
@@ -21743,5 +21881,5 @@ exports.checkAdminUserExists = checkAdminUserExists;
 exports.router = router;
 exports.test_cleanup_default = test_cleanup_default;
 exports.userRoutes = userRoutes;
-//# sourceMappingURL=chunk-MQM554ZP.cjs.map
-//# sourceMappingURL=chunk-MQM554ZP.cjs.map
+//# sourceMappingURL=chunk-QNWAMU63.cjs.map
+//# sourceMappingURL=chunk-QNWAMU63.cjs.map
