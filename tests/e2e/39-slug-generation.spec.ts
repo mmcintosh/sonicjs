@@ -9,6 +9,8 @@ test.describe('Slug Generation', () => {
 
   test('should auto-generate slug from title when creating new content', async ({ page }) => {
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
@@ -29,6 +31,8 @@ test.describe('Slug Generation', () => {
 
   test('should handle special characters in slug generation', async ({ page }) => {
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
@@ -45,6 +49,8 @@ test.describe('Slug Generation', () => {
 
   test('should stop auto-generating after manual edit', async ({ page }) => {
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
@@ -68,6 +74,8 @@ test.describe('Slug Generation', () => {
 
   test('should regenerate slug when button clicked', async ({ page }) => {
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
@@ -96,6 +104,8 @@ test.describe('Slug Generation', () => {
   test('should detect duplicate slugs within same collection', async ({ page }) => {
     // First, create content with a specific slug
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     await page.fill('input[name="title"]', 'Test Duplicate Page')
     await page.waitForTimeout(1000)
@@ -109,6 +119,8 @@ test.describe('Slug Generation', () => {
     
     // Now try to create another with same slug
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     await page.fill('input[name="title"]', 'Different Title')
     await page.waitForTimeout(500)
@@ -129,6 +141,9 @@ test.describe('Slug Generation', () => {
   test('should allow same slug in different collections', async ({ page }) => {
     // Create in pages collection
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
+    
     await page.fill('input[name="title"]', 'Test Cross Collection')
     await page.waitForTimeout(1000)
     
@@ -162,6 +177,9 @@ test.describe('Slug Generation', () => {
   test('should not auto-change slug when editing existing content', async ({ page }) => {
     // Create content first
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
+    
     await page.fill('input[name="title"]', 'Edit Mode Test Page')
     await page.waitForTimeout(1000)
     
@@ -197,6 +215,9 @@ test.describe('Slug Generation', () => {
   test('should allow manual regeneration in edit mode', async ({ page }) => {
     // Create content first
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
+    
     await page.fill('input[name="title"]', 'Regen Test Page')
     await page.waitForTimeout(1000)
     
@@ -232,6 +253,8 @@ test.describe('Slug Generation', () => {
 
   test('should show checking status during duplicate validation', async ({ page }) => {
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
@@ -257,6 +280,9 @@ test.describe('Slug Generation', () => {
   test('should prevent form submission with duplicate slug', async ({ page }) => {
     // Create first content
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
+    
     await page.fill('input[name="title"]', 'Submission Test Original')
     await page.waitForTimeout(1000)
     await page.click('button[name="status"][value="published"]')
@@ -264,6 +290,9 @@ test.describe('Slug Generation', () => {
     
     // Try to create duplicate
     await page.goto('/admin/content/new?collectionId=pages-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
+    
     await page.fill('input[name="title"]', 'Different Title')
     await page.waitForTimeout(500)
     
