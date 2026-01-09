@@ -34,18 +34,25 @@ publicRoutes.get('/contact', async (c: any) => {
   const phone = settings.phoneNumber || '555-0199'
   const apiKey = settings.mapApiKey || ''
   
+  // Defensive: Ensure values are strings, not undefined
+  const safeStreet = String(street || '123 Web Dev Lane')
+  const safeCity = String(city || 'Baltimore')
+  const safeState = String(state || 'MD')
+  
   const fullAddressDisplay = city ? `${street}, ${city}, ${state}` : street
   const isEnabled = settings.showMap === 1 || settings.showMap === true || settings.showMap === 'true' || settings.showMap === 'on'
   const hasKey = apiKey && apiKey.length > 5
-  const showMap = isEnabled && hasKey
+  
+  // Only show map if we have valid address data (prevent "undefined undefined" in URL)
+  const hasValidAddress = city && city !== 'undefined' && city.length > 0
+  const showMap = isEnabled && hasKey && hasValidAddress
   
   console.log('[Contact Form Public] settings.showMap:', settings.showMap, 'type:', typeof settings.showMap)
   console.log('[Contact Form Public] isEnabled:', isEnabled, 'hasKey:', hasKey, 'showMap:', showMap)
   console.log('[Contact Form Public] apiKey length:', apiKey.length, 'city:', city)
   
-  console.log('[Contact Form Public] settings.showMap:', settings.showMap, 'type:', typeof settings.showMap)
-  console.log('[Contact Form Public] isEnabled:', isEnabled, 'hasKey:', hasKey, 'showMap:', showMap)
-  const mapQuery = `${street} ${city} ${state}`
+  // Use safe values for map query to prevent "undefined undefined" in URL
+  const mapQuery = `${safeStreet} ${safeCity} ${safeState}`.trim()
   const mapSrc = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(mapQuery)}`
 
   // Check if Turnstile is enabled and available
