@@ -1,5 +1,5 @@
 import { syncCollections, PluginBootstrapService } from './chunk-SGAG6FD3.js';
-import { MigrationService } from './chunk-7KJRRFEA.js';
+import { MigrationService } from './chunk-EYFPQNUW.js';
 import { metricsTracker } from './chunk-FICTAGD4.js';
 import { sign, verify } from 'hono/jwt';
 import { setCookie, getCookie } from 'hono/cookie';
@@ -45,6 +45,19 @@ function bootstrapMiddleware(config = {}) {
   };
 }
 var JWT_SECRET = "your-super-secret-jwt-key-change-in-production";
+var tokenCache = /* @__PURE__ */ new Map();
+var CACHE_CLEANUP_INTERVAL = 5 * 60 * 1e3;
+var CACHE_TTL = 5 * 60 * 1e3;
+if (typeof setInterval !== "undefined") {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of tokenCache.entries()) {
+      if (entry.expires < now) {
+        tokenCache.delete(key);
+      }
+    }
+  }, CACHE_CLEANUP_INTERVAL);
+}
 var AuthManager = class {
   static async generateToken(userId, email, role) {
     const payload = {
@@ -110,20 +123,50 @@ var requireAuth = () => {
         }
         return c.json({ error: "Authentication required" }, 401);
       }
-      const kv = c.env?.KV;
+      const cacheKey = `auth:${token.substring(0, 20)}`;
       let payload = null;
-      if (kv) {
-        const cacheKey = `auth:${token.substring(0, 20)}`;
-        const cached = await kv.get(cacheKey, "json");
-        if (cached) {
-          payload = cached;
+      const memCached = tokenCache.get(cacheKey);
+      if (memCached && memCached.expires > Date.now()) {
+        payload = memCached.payload;
+      }
+      if (!payload) {
+        const kv = c.env?.KV;
+        const isCI = c.env?.ENVIRONMENT === "test" || c.env?.CI === "true";
+        if (kv && !isCI) {
+          try {
+            const kvCached = await Promise.race([
+              kv.get(cacheKey, "json"),
+              new Promise(
+                (_, reject) => setTimeout(() => reject(new Error("KV timeout")), 500)
+              )
+            ]);
+            if (kvCached) {
+              payload = kvCached;
+              tokenCache.set(cacheKey, {
+                payload,
+                expires: Date.now() + CACHE_TTL
+              });
+            }
+          } catch (error) {
+            if (error instanceof Error && error.message !== "KV timeout") {
+              console.debug("KV cache unavailable:", error.message);
+            }
+          }
         }
       }
       if (!payload) {
         payload = await AuthManager.verifyToken(token);
-        if (payload && kv) {
-          const cacheKey = `auth:${token.substring(0, 20)}`;
-          await kv.put(cacheKey, JSON.stringify(payload), { expirationTtl: 300 });
+        if (payload) {
+          tokenCache.set(cacheKey, {
+            payload,
+            expires: Date.now() + CACHE_TTL
+          });
+          const kv = c.env?.KV;
+          const isCI = c.env?.ENVIRONMENT === "test" || c.env?.CI === "true";
+          if (kv && !isCI) {
+            kv.put(cacheKey, JSON.stringify(payload), { expirationTtl: 300 }).catch(() => {
+            });
+          }
         }
       }
       if (!payload) {
@@ -198,6 +241,45 @@ var metricsMiddleware = () => {
   };
 };
 
+// src/middleware/timeout.ts
+var requestTimeout = (timeoutMs = 1e4) => {
+  return async (c, next) => {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`Request timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+    try {
+      await Promise.race([
+        next(),
+        timeoutPromise
+      ]);
+      return;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("timeout")) {
+        console.error(`Request timeout: ${c.req.method} ${c.req.path}`);
+        const acceptHeader = c.req.header("Accept") || "";
+        if (acceptHeader.includes("text/html")) {
+          return c.html("<h1>Request Timeout</h1><p>The server took too long to respond. Please try again.</p>", 408);
+        }
+        return c.json({
+          error: "Request timeout",
+          message: `Request took longer than ${timeoutMs}ms`
+        }, 408);
+      }
+      throw error;
+    }
+  };
+};
+async function withTimeout(promise, timeoutMs, errorMessage = "Operation timeout") {
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(errorMessage));
+    }, timeoutMs);
+  });
+  return Promise.race([promise, timeoutPromise]);
+}
+
 // src/middleware/index.ts
 var loggingMiddleware = () => async (_c, next) => await next();
 var detailedLoggingMiddleware = () => async (_c, next) => await next();
@@ -216,6 +298,6 @@ var requireActivePlugins = () => async (_c, next) => await next();
 var getActivePlugins = () => [];
 var isPluginActive = () => false;
 
-export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware };
-//# sourceMappingURL=chunk-OLIUF3SP.js.map
-//# sourceMappingURL=chunk-OLIUF3SP.js.map
+export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalAuth, performanceLoggingMiddleware, requestTimeout, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware, withTimeout };
+//# sourceMappingURL=chunk-IHRAULJU.js.map
+//# sourceMappingURL=chunk-IHRAULJU.js.map

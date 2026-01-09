@@ -133,12 +133,22 @@ export const requireAuth = () => {
         payload = memCached.payload
       }
 
-      // 2. If not in memory, try KV cache (slower but shared across requests)
+      // 2. If not in memory, try KV cache (only in production, not CI)
+      // KV operations count against the 6-connection limit and are slow in CI
       if (!payload) {
         const kv = c.env?.KV
-        if (kv) {
+        const isCI = c.env?.ENVIRONMENT === 'test' || c.env?.CI === 'true'
+        
+        if (kv && !isCI) {
           try {
-            const kvCached = await kv.get(cacheKey, 'json')
+            // Race with timeout - KV should be fast (<500ms)
+            const kvCached = await Promise.race([
+              kv.get(cacheKey, 'json'),
+              new Promise<null>((_, reject) => 
+                setTimeout(() => reject(new Error('KV timeout')), 500)
+              )
+            ])
+            
             if (kvCached) {
               payload = kvCached as JWTPayload
               // Also store in memory cache for next time
@@ -148,8 +158,10 @@ export const requireAuth = () => {
               })
             }
           } catch (error) {
-            // KV might be slow or unavailable in CI, continue without it
-            console.warn('KV cache unavailable, using memory cache only')
+            // KV timeout or unavailable - continue with memory cache only
+            if (error instanceof Error && error.message !== 'KV timeout') {
+              console.debug('KV cache unavailable:', error.message)
+            }
           }
         }
       }
@@ -158,17 +170,21 @@ export const requireAuth = () => {
       if (!payload) {
         payload = await AuthManager.verifyToken(token)
 
-        // Cache the verified payload in both stores
+        // Cache the verified payload
         if (payload) {
-          // Memory cache (instant)
+          // Memory cache (instant, always)
           tokenCache.set(cacheKey, {
             payload,
             expires: Date.now() + CACHE_TTL
           })
 
-          // KV cache (async, don't wait for it)
+          // KV cache (async, fire-and-forget, only in production)
           const kv = c.env?.KV
-          if (kv) {
+          const isCI = c.env?.ENVIRONMENT === 'test' || c.env?.CI === 'true'
+          
+          if (kv && !isCI) {
+            // Fire and forget - don't await, don't care about errors
+            // This doesn't block the request but still uses a connection
             kv.put(cacheKey, JSON.stringify(payload), { expirationTtl: 300 }).catch(() => {
               // Ignore KV errors, memory cache is sufficient
             })
