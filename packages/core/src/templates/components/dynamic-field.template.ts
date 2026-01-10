@@ -438,35 +438,22 @@ export function renderDynamicField(field: FieldDefinition, options: FieldRenderO
             
             // Auto-generate only in create mode
             // Wait for all fields to be rendered before attaching listeners
-            console.log('[Slug Debug] isEditMode:', isEditMode);
             if (!isEditMode) {
               // Use setTimeout to ensure all fields in the form are rendered
               setTimeout(() => {
-                console.log('[Slug Debug] setTimeout fired, looking for title field...');
                 const titleField = document.querySelector('input[name="title"]');
-                console.log('[Slug Debug] titleField found:', !!titleField, titleField);
                 if (titleField) {
-                  console.log('[Slug Debug] Adding input event listener to title field');
                   titleField.addEventListener('input', function() {
-                    console.log('[Slug Debug] Title input event! value:', this.value, 'manuallyEdited:', manuallyEdited);
                     if (!manuallyEdited) {
                       const slug = generateSlug(this.value);
-                      console.log('[Slug Debug] Generated slug:', slug);
                       slugField.value = slug;
                       
                       // Trigger validation and duplicate check
                       slugField.dispatchEvent(new Event('input', { bubbles: true }));
-                    } else {
-                      console.log('[Slug Debug] Skipping - manually edited');
                     }
                   });
-                  console.log('[Slug Debug] Event listener attached successfully');
-                } else {
-                  console.error('[Slug Debug] ERROR: Title field NOT found after setTimeout!');
                 }
               }, 0);
-            } else {
-              console.log('[Slug Debug] In edit mode - skipping auto-generation');
             }
             
             // Global function for regenerate button
