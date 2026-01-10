@@ -15,10 +15,3 @@ export { PluginManager } from './plugin-manager'
 
 // Plugin Validator
 export { PluginValidator } from './plugin-validator'
-
-// Core Plugins
-export { 
-  verifyTurnstile, 
-  createTurnstileMiddleware, 
-  TurnstileService 
-} from './core-plugins/turnstile-plugin'

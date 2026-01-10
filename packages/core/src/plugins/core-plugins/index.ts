@@ -20,8 +20,6 @@ export { helloWorldPlugin, createHelloWorldPlugin } from './hello-world-plugin'
 export { quillEditorPlugin, createQuillEditorPlugin } from './quill-editor'
 export { emailPlugin, createEmailPlugin } from './email-plugin'
 export { otpLoginPlugin, createOTPLoginPlugin } from './otp-login-plugin'
-export { turnstilePlugin } from './turnstile-plugin'
-export { TurnstileService, verifyTurnstile, createTurnstileMiddleware } from './turnstile-plugin'
 
 // Core plugins list - now imported from auto-generated registry
 export const CORE_PLUGIN_IDS = [
@@ -37,8 +35,7 @@ export const CORE_PLUGIN_IDS = [
   'hello-world',
   'quill-editor',
   'email',
-  'otp-login',
-  'turnstile'
+  'otp-login'
 ] as const
 
 export type CorePluginNames = (typeof CORE_PLUGIN_IDS)[number]
