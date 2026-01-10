@@ -15,11 +15,11 @@ test.describe('Slug Generation', () => {
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
     
-    // Type in title
-    await titleField.fill('My Awesome New Page 2024')
+    // Type in title - use type() instead of fill() to trigger input events
+    await titleField.type('My Awesome New Page 2024')
     
     // Wait for auto-generation and debounce
-    await page.waitForTimeout(1000)
+    await page.waitForTimeout(2000)
     
     // Slug should auto-generate
     await expect(slugField).toHaveValue('my-awesome-new-page-2024')
