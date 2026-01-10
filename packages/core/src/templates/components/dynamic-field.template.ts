@@ -304,8 +304,8 @@ export function renderDynamicField(field: FieldDefinition, options: FieldRenderO
     case 'slug':
       // Slug fields with auto-generation and duplicate detection
       const slugPattern = opts.pattern || '^[a-z0-9-]+$'
-      const collectionId = opts.collectionId || ''
-      const contentId = opts.contentId || ''
+      const collectionIdValue = collectionId || opts.collectionId || ''
+      const contentIdValue = contentId || opts.contentId || ''
       const isEditMode = !!value
       
       fieldHTML = `
@@ -318,8 +318,8 @@ export function renderDynamicField(field: FieldDefinition, options: FieldRenderO
             placeholder="${opts.placeholder || 'url-friendly-slug'}"
             maxlength="${opts.maxLength || 100}"
             data-pattern="${slugPattern}"
-            data-collection-id="${collectionId}"
-            data-content-id="${contentId}"
+            data-collection-id="${collectionIdValue}"
+            data-content-id="${contentIdValue}"
             data-is-edit-mode="${isEditMode}"
             class="${baseClasses} ${errorClasses}"
             ${required}

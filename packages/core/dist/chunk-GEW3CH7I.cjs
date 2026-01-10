@@ -1,3 +1,5 @@
+'use strict';
+
 // src/db/migrations-bundle.ts
 var bundledMigrations = [
   {
@@ -1442,6 +1444,50 @@ INSERT OR IGNORE INTO plugins (
     unixepoch()
 );
 `
+  },
+  {
+    id: "027",
+    name: "Fix Slug Field Type",
+    filename: "027_fix_slug_field_type.sql",
+    description: "Migration 027: Fix Slug Field Type",
+    sql: "-- Migration: Fix slug field type\n-- Description: Update slug fields to use 'slug' field type instead of 'text' for proper auto-generation\n-- Created: 2026-01-10\n\n-- Update pages collection slug field to use 'slug' field type\nUPDATE content_fields \nSET field_type = 'slug'\nWHERE field_name = 'slug' AND collection_id = 'pages-collection';\n\n-- Update blog posts slug field if it exists\nUPDATE content_fields \nSET field_type = 'slug'\nWHERE field_name = 'slug' AND collection_id = 'blog-posts-collection';\n\n-- Update news slug field if it exists\nUPDATE content_fields \nSET field_type = 'slug'\nWHERE field_name = 'slug' AND collection_id = 'news-collection';\n"
+  },
+  {
+    id: "028",
+    name: "Fix Slug Field Type In Schemas",
+    filename: "028_fix_slug_field_type_in_schemas.sql",
+    description: "Migration 028: Fix Slug Field Type In Schemas",
+    sql: `-- Migration: Fix slug field type in collection schemas
+-- Description: Update slug fields in collection schemas to use 'slug' type instead of 'string'
+-- Created: 2026-01-10
+
+-- Update pages-collection schema
+UPDATE collections 
+SET schema = REPLACE(
+  schema,
+  '"slug":{"type":"string"',
+  '"slug":{"type":"slug"'
+)
+WHERE id = 'pages-collection' AND schema LIKE '%"slug":{"type":"string"%';
+
+-- Update blog-posts-collection schema if it exists
+UPDATE collections 
+SET schema = REPLACE(
+  schema,
+  '"slug":{"type":"string"',
+  '"slug":{"type":"slug"'
+)
+WHERE id = 'blog-posts-collection' AND schema LIKE '%"slug":{"type":"string"%';
+
+-- Update news-collection schema if it exists
+UPDATE collections 
+SET schema = REPLACE(
+  schema,
+  '"slug":{"type":"string"',
+  '"slug":{"type":"slug"'
+)
+WHERE id = 'news-collection' AND schema LIKE '%"slug":{"type":"string"%';
+`
   }
 ];
 var migrationsByIdMap = new Map(
@@ -1849,6 +1895,6 @@ var MigrationService = class {
   }
 };
 
-export { MigrationService };
-//# sourceMappingURL=chunk-5WBEHFCJ.js.map
-//# sourceMappingURL=chunk-5WBEHFCJ.js.map
+exports.MigrationService = MigrationService;
+//# sourceMappingURL=chunk-GEW3CH7I.cjs.map
+//# sourceMappingURL=chunk-GEW3CH7I.cjs.map

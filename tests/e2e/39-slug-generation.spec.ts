@@ -15,11 +15,36 @@ test.describe('Slug Generation', () => {
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
     
-    // Type in title - use type() to trigger input events
-    await titleField.type('My Awesome New Page 2024')
+    // Fill the title field and manually dispatch input event
+    await titleField.fill('My Awesome New Page 2024')
+    await titleField.evaluate((el) => {
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    })
     
-    // Wait for slug to auto-generate (don't use fixed timeout, wait for actual value!)
-    await expect(slugField).toHaveValue('my-awesome-new-page-2024', { timeout: 10000 })
+    // Wait for slug to auto-generate (account for 500ms debounce + API call)
+    await expect(slugField).toHaveValue('my-awesome-new-page-2024', { timeout: 15000 })
+    
+    // Should show available status
+    const statusDiv = page.locator('#field-slug-status')
+    await expect(statusDiv).toContainText('Available', { timeout: 5000 })
+  })
+
+  test('should auto-generate slug for blog posts collection', async ({ page }) => {
+    await page.goto('/admin/content/new?collection=col-blog_posts-1bdbe310')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
+    
+    const titleField = page.locator('input[name="title"]')
+    const slugField = page.locator('input[name="slug"]')
+    
+    // Fill the title field and manually dispatch input event
+    await titleField.fill('My First Blog Post 2024')
+    await titleField.evaluate((el) => {
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    })
+    
+    // Wait for slug to auto-generate (account for 500ms debounce + API call)
+    await expect(slugField).toHaveValue('my-first-blog-post-2024', { timeout: 15000 })
     
     // Should show available status
     const statusDiv = page.locator('#field-slug-status')
@@ -35,13 +60,14 @@ test.describe('Slug Generation', () => {
     const slugField = page.locator('input[name="slug"]')
     
     // Type title with special characters
-    await titleField.type('Hello World! @#$% Test 2024')
+    await titleField.fill('Hello World! @#$% Test 2024')
+    await titleField.evaluate((el) => el.dispatchEvent(new Event('input', { bubbles: true })))
     
-    // Wait for auto-generation
-    await page.waitForTimeout(1000)
+    // Wait for auto-generation (debounce + API call)
+    await page.waitForTimeout(1500)
     
     // Slug should clean special chars
-    await expect(slugField).toHaveValue('hello-world-test-2024')
+    await expect(slugField).toHaveValue('hello-world-test-2024', { timeout: 15000 })
   })
 
   test('should stop auto-generating after manual edit', async ({ page }) => {
@@ -53,17 +79,19 @@ test.describe('Slug Generation', () => {
     const slugField = page.locator('input[name="slug"]')
     
     // Auto-generate first
-    await titleField.type('Initial Title')
-    await page.waitForTimeout(1000)
-    await expect(slugField).toHaveValue('initial-title')
+    await titleField.fill('Initial Title')
+    await titleField.evaluate((el) => el.dispatchEvent(new Event('input', { bubbles: true })))
+    await page.waitForTimeout(1500)
+    await expect(slugField).toHaveValue('initial-title', { timeout: 15000 })
     
     // Manually edit slug
     await slugField.fill('my-custom-slug')
     await page.waitForTimeout(1000)
     
     // Change title again
-    await titleField.type('Changed Title')
-    await page.waitForTimeout(1000)
+    await titleField.fill('Changed Title')
+    await titleField.evaluate((el) => el.dispatchEvent(new Event('input', { bubbles: true })))
+    await page.waitForTimeout(1500)
     
     // Slug should NOT auto-update
     await expect(slugField).toHaveValue('my-custom-slug')
@@ -79,13 +107,15 @@ test.describe('Slug Generation', () => {
     const regenerateBtn = page.locator('button:has-text("Regenerate from title")')
     
     // Set title and manually edit slug
-    await titleField.type('Original Title')
-    await page.waitForTimeout(500)
+    await titleField.fill('Original Title')
+    await titleField.evaluate((el) => el.dispatchEvent(new Event('input', { bubbles: true })))
+    await page.waitForTimeout(1500)
     await slugField.fill('custom-slug')
     
     // Update title
-    await titleField.type('Brand New Title 2024')
-    await page.waitForTimeout(500)
+    await titleField.fill('Brand New Title 2024')
+    await titleField.evaluate((el) => el.dispatchEvent(new Event('input', { bubbles: true })))
+    await page.waitForTimeout(1500)
     
     // Slug still custom (auto-generation stopped)
     await expect(slugField).toHaveValue('custom-slug')
@@ -202,8 +232,9 @@ test.describe('Slug Generation', () => {
     await expect(slugField).toHaveValue(originalSlug)
     
     // Change title
-    await titleField.type('Completely Different Title')
-    await page.waitForTimeout(1000)
+    await titleField.fill('Completely Different Title')
+    await titleField.evaluate((el) => el.dispatchEvent(new Event('input', { bubbles: true })))
+    await page.waitForTimeout(1500)
     
     // Slug should NOT auto-change in edit mode
     await expect(slugField).toHaveValue(originalSlug)
@@ -234,8 +265,9 @@ test.describe('Slug Generation', () => {
     const regenerateBtn = page.locator('button:has-text("Regenerate from title")')
     
     // Change title
-    await titleField.type('Brand New Page Name')
-    await page.waitForTimeout(500)
+    await titleField.fill('Brand New Page Name')
+    await titleField.evaluate((el) => el.dispatchEvent(new Event('input', { bubbles: true })))
+    await page.waitForTimeout(1500)
     
     // Slug still shows old value
     await expect(slugField).toHaveValue('regen-test-page')
@@ -258,7 +290,8 @@ test.describe('Slug Generation', () => {
     const statusDiv = page.locator('#field-slug-status')
     
     // Type title
-    await titleField.type('Checking Status Test')
+    await titleField.fill('Checking Status Test')
+    await titleField.evaluate((el) => el.dispatchEvent(new Event('input', { bubbles: true })))
     
     // Immediately check status (before debounce completes)
     await page.waitForTimeout(200)
