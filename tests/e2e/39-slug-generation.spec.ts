@@ -15,18 +15,15 @@ test.describe('Slug Generation', () => {
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
     
-    // Type in title - use type() instead of fill() to trigger input events
+    // Type in title - use type() to trigger input events
     await titleField.type('My Awesome New Page 2024')
     
-    // Wait for auto-generation and debounce
-    await page.waitForTimeout(2000)
-    
-    // Slug should auto-generate
-    await expect(slugField).toHaveValue('my-awesome-new-page-2024')
+    // Wait for slug to auto-generate (don't use fixed timeout, wait for actual value!)
+    await expect(slugField).toHaveValue('my-awesome-new-page-2024', { timeout: 10000 })
     
     // Should show available status
     const statusDiv = page.locator('#field-slug-status')
-    await expect(statusDiv).toContainText('Available')
+    await expect(statusDiv).toContainText('Available', { timeout: 5000 })
   })
 
   test('should handle special characters in slug generation', async ({ page }) => {
