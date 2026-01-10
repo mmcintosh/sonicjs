@@ -115,7 +115,9 @@ test.describe('Slug Generation', () => {
     
     // Save the content
     await page.click('button[name="status"][value="published"]')
-    await page.waitForTimeout(2000)
+    // Wait for navigation to content list (more reliable than arbitrary timeout)
+    await page.waitForURL(/\/admin\/content\?/, { timeout: 15000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
     
     // Now try to create another with same slug
     await page.goto('/admin/content/new?collectionId=pages-collection')
@@ -151,7 +153,9 @@ test.describe('Slug Generation', () => {
     await expect(page.locator('input[name="slug"]')).toHaveValue(slugValue)
     
     await page.click('button[name="status"][value="published"]')
-    await page.waitForTimeout(2000)
+    // Wait for navigation to content list
+    await page.waitForURL(/\/admin\/content\?/, { timeout: 15000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
     
     // Try to use same slug in news collection (if it exists)
     // If news collection doesn't exist, this test will be skipped
@@ -187,16 +191,22 @@ test.describe('Slug Generation', () => {
     await expect(page.locator('input[name="slug"]')).toHaveValue(originalSlug)
     
     await page.click('button[name="status"][value="published"]')
-    await page.waitForTimeout(2000)
+    // Wait for navigation to content list
+    await page.waitForURL(/\/admin\/content\?/, { timeout: 15000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
     
-    // Navigate to content list and find the item
+    // Navigate to content list and find the item (already there, but refresh)
     await page.goto('/admin/content?collectionId=pages-collection')
-    await page.waitForTimeout(1000)
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
+    await page.waitForSelector('table', { timeout: 10000 })
     
     // Click on the content to edit it
     const contentLink = page.locator(`a:has-text("Edit Mode Test Page")`).first()
     await contentLink.click()
-    await page.waitForTimeout(1000)
+    // Wait for edit page to load
+    await page.waitForURL(/\/admin\/content\/edit\//, { timeout: 15000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
@@ -230,7 +240,10 @@ test.describe('Slug Generation', () => {
     
     const contentLink = page.locator(`a:has-text("Regen Test Page")`).first()
     await contentLink.click()
-    await page.waitForTimeout(1000)
+    // Wait for edit page to load
+    await page.waitForURL(/\/admin\/content\/edit\//, { timeout: 15000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
+    await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
     const titleField = page.locator('input[name="title"]')
     const slugField = page.locator('input[name="slug"]')
@@ -286,7 +299,9 @@ test.describe('Slug Generation', () => {
     await page.fill('input[name="title"]', 'Submission Test Original')
     await page.waitForTimeout(1000)
     await page.click('button[name="status"][value="published"]')
-    await page.waitForTimeout(2000)
+    // Wait for navigation to content list
+    await page.waitForURL(/\/admin\/content\?/, { timeout: 15000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
     
     // Try to create duplicate
     await page.goto('/admin/content/new?collectionId=pages-collection')
