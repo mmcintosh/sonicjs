@@ -38,7 +38,7 @@ test.describe('Slug Generation', () => {
     const slugField = page.locator('input[name="slug"]')
     
     // Type title with special characters
-    await titleField.fill('Hello World! @#$% Test 2024')
+    await titleField.type('Hello World! @#$% Test 2024')
     
     // Wait for auto-generation
     await page.waitForTimeout(1000)
@@ -56,7 +56,7 @@ test.describe('Slug Generation', () => {
     const slugField = page.locator('input[name="slug"]')
     
     // Auto-generate first
-    await titleField.fill('Initial Title')
+    await titleField.type('Initial Title')
     await page.waitForTimeout(1000)
     await expect(slugField).toHaveValue('initial-title')
     
@@ -65,7 +65,7 @@ test.describe('Slug Generation', () => {
     await page.waitForTimeout(1000)
     
     // Change title again
-    await titleField.fill('Changed Title')
+    await titleField.type('Changed Title')
     await page.waitForTimeout(1000)
     
     // Slug should NOT auto-update
@@ -82,12 +82,12 @@ test.describe('Slug Generation', () => {
     const regenerateBtn = page.locator('button:has-text("Regenerate from title")')
     
     // Set title and manually edit slug
-    await titleField.fill('Original Title')
+    await titleField.type('Original Title')
     await page.waitForTimeout(500)
     await slugField.fill('custom-slug')
     
     // Update title
-    await titleField.fill('Brand New Title 2024')
+    await titleField.type('Brand New Title 2024')
     await page.waitForTimeout(500)
     
     // Slug still custom (auto-generation stopped)
@@ -205,7 +205,7 @@ test.describe('Slug Generation', () => {
     await expect(slugField).toHaveValue(originalSlug)
     
     // Change title
-    await titleField.fill('Completely Different Title')
+    await titleField.type('Completely Different Title')
     await page.waitForTimeout(1000)
     
     // Slug should NOT auto-change in edit mode
@@ -237,7 +237,7 @@ test.describe('Slug Generation', () => {
     const regenerateBtn = page.locator('button:has-text("Regenerate from title")')
     
     // Change title
-    await titleField.fill('Brand New Page Name')
+    await titleField.type('Brand New Page Name')
     await page.waitForTimeout(500)
     
     // Slug still shows old value
@@ -261,7 +261,7 @@ test.describe('Slug Generation', () => {
     const statusDiv = page.locator('#field-slug-status')
     
     // Type title
-    await titleField.fill('Checking Status Test')
+    await titleField.type('Checking Status Test')
     
     // Immediately check status (before debounce completes)
     await page.waitForTimeout(200)
