@@ -158,7 +158,7 @@ test.describe('Slug Generation', () => {
     
     // Should show as unavailable
     const statusDiv = page.locator('#field-slug-status')
-    await expect(statusDiv).toContainText('Already in use')
+    await expect(statusDiv).toContainText('already in use')
     
     // Form should have validation error
     const isInvalid = await slugField.evaluate((el: HTMLInputElement) => !el.validity.valid)
@@ -331,7 +331,7 @@ test.describe('Slug Generation', () => {
     await page.waitForTimeout(1500)
     
     // Should show error
-    await expect(page.locator('#field-slug-status')).toContainText('Already in use')
+    await expect(page.locator('#field-slug-status')).toContainText('already in use')
     
     // Try to submit
     await page.click('button[name="action"][value="save_and_publish"]')
