@@ -141,7 +141,7 @@ test.describe('Slug Generation', () => {
     await expect(slugField).toHaveValue('test-duplicate-page')
     
     // Save the content
-    await page.click('button[name="status"][value="published"]')
+    await page.click('button[name="action"][value="save_and_publish"]')
     await page.waitForTimeout(2000)
     
     // Now try to create another with same slug
@@ -177,7 +177,7 @@ test.describe('Slug Generation', () => {
     const slugValue = 'test-cross-collection'
     await expect(page.locator('input[name="slug"]')).toHaveValue(slugValue)
     
-    await page.click('button[name="status"][value="published"]')
+    await page.click('button[name="action"][value="save_and_publish"]')
     await page.waitForTimeout(2000)
     
     // Try to use same slug in news collection (if it exists)
@@ -213,7 +213,7 @@ test.describe('Slug Generation', () => {
     const originalSlug = 'edit-mode-test-page'
     await expect(page.locator('input[name="slug"]')).toHaveValue(originalSlug)
     
-    await page.click('button[name="status"][value="published"]')
+    await page.click('button[name="action"][value="save_and_publish"]')
     await page.waitForTimeout(2000)
     
     // Navigate to content list and find the item
@@ -249,7 +249,7 @@ test.describe('Slug Generation', () => {
     await page.fill('input[name="title"]', 'Regen Test Page')
     await page.waitForTimeout(1000)
     
-    await page.click('button[name="status"][value="published"]')
+    await page.click('button[name="action"][value="save_and_publish"]')
     await page.waitForTimeout(2000)
     
     // Navigate to edit
@@ -315,7 +315,7 @@ test.describe('Slug Generation', () => {
     
     await page.fill('input[name="title"]', 'Submission Test Original')
     await page.waitForTimeout(1000)
-    await page.click('button[name="status"][value="published"]')
+    await page.click('button[name="action"][value="save_and_publish"]')
     await page.waitForTimeout(2000)
     
     // Try to create duplicate
@@ -334,7 +334,7 @@ test.describe('Slug Generation', () => {
     await expect(page.locator('#field-slug-status')).toContainText('Already in use')
     
     // Try to submit
-    await page.click('button[name="status"][value="published"]')
+    await page.click('button[name="action"][value="save_and_publish"]')
     
     // Should still be on form (not navigate away)
     await page.waitForTimeout(1000)
