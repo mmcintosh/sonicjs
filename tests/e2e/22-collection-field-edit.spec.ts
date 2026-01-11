@@ -190,6 +190,9 @@ test.describe('Collection Field Edit', () => {
 
     // Wait for the field name input to be populated (JS uses setTimeout)
     await expect(page.locator('#modal-field-name')).not.toHaveValue('', { timeout: 5000 });
+    
+    // Wait for checkboxes to be populated
+    await page.waitForTimeout(500);
 
     // Verify all properties are populated
     expect(await page.locator('#modal-field-name').inputValue()).toBe('complete_field');
@@ -251,6 +254,7 @@ test.describe('Collection Field Edit', () => {
 
     // Wait for the field type to be populated (JS uses setTimeout)
     await expect(page.locator('#field-type')).not.toHaveValue('', { timeout: 5000 });
+    await page.waitForTimeout(500);
 
     // Verify field type and options are populated
     expect(await page.locator('#field-type').inputValue()).toBe('select');
