@@ -4,9 +4,17 @@ on:
   pull_request_target:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/deploy-www.yml'
   push:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/deploy-www.yml'
 
 jobs:
   # Authorization job - gates fork PRs behind environment approval

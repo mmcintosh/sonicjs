@@ -169,6 +169,31 @@ git push origin <branch-name>
 7. Create PR to lane711/sonicjs (ONLY with explicit approval)
 ```
 
+### CI Skip for Documentation Changes
+
+Documentation-only commits don't need to waste CI resources:
+
+#### Method 1: Path-Based Skipping (Automatic)
+The workflow is configured to skip CI for:
+- Changes to `docs/**`
+- Changes to `*.md` files (README, CONTRIBUTING, etc.)
+- Changes to www deployment workflow
+
+#### Method 2: Commit Message Skip (Manual)
+Add `[skip ci]` or `[ci skip]` to commit message:
+```bash
+git commit -m "docs: update API reference [skip ci]"
+```
+
+#### When to Skip CI:
+- ✅ Documentation-only changes
+- ✅ README updates
+- ✅ Comment changes
+- ✅ Markdown file edits
+- ❌ **DO NOT SKIP** for code changes
+- ❌ **DO NOT SKIP** for test changes
+- ❌ **DO NOT SKIP** for config changes
+
 ### CI Monitoring
 - Fork CI URL: `https://github.com/mmcintosh/sonicjs/actions`
 - Check CI results after every push to fork
