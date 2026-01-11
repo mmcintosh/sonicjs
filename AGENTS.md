@@ -39,6 +39,29 @@ These instructions mirror the workflow Claude Code already follows in Conductor 
 - **Regression focus**: When fixing bugs, first reproduce with a failing test (unit or e2e) before applying the fix.
 - Document any required seed data or setup in the PR/test plan so reviewers and CI know how to run it.
 
+## 🚨 NO-PUSH PROTOCOL (CRITICAL - ALWAYS ACTIVE)
+
+**READ THIS CAREFULLY - VIOLATION IS A CRITICAL ERROR**
+
+### Absolute Rules:
+1. ❌ **NEVER** push to `lane711/sonicjs` (upstream) without explicit user approval
+2. ❌ **NEVER** create Pull Requests to `lane711/sonicjs` without explicit user approval
+3. ✅ **ALWAYS** push to `mmcintosh/sonicjs` (fork) for CI testing
+4. ✅ **ALWAYS** wait for user to explicitly request PR creation
+5. ✅ **ALWAYS** use `git push origin <branch>` (origin = fork)
+
+### Git Remotes:
+```
+origin   → mmcintosh/sonicjs (FORK - PUSH HERE)
+upstream → lane711/sonicjs   (UPSTREAM - NEVER PUSH)
+```
+
+### Why This Exists:
+In the past, AI agents created unwanted PRs to the upstream repository, causing disruption to the lead developer. This protocol prevents that from happening again.
+
+### Full Protocol Documentation:
+See `docs/ai/NO_PUSH_PROTOCOL.md` for complete details, examples, and emergency procedures.
+
 ## Commit, PR, and CI Workflow
 - Branches are created by Conductor; keep names descriptive (`fix-auth-timeout`, `feat-media-upload`).
 - Follow the Claude Code commit template:
@@ -53,7 +76,9 @@ These instructions mirror the workflow Claude Code already follows in Conductor 
   Co-Authored-By: Claude <noreply@anthropic.com>
   ```
   Types: `fix`, `feat`, `refactor`, `test`, `docs`, `chore`.
-- Before creating a PR run: `npm run type-check && npm test && npm run e2e`. CI repeats these plus deploys a Workers preview with a fresh D1 instance.
+- Before pushing run: `npm run type-check && npm test && npm run e2e`. CI repeats these plus deploys a Workers preview with a fresh D1 instance.
+- **ALWAYS push to fork ONLY**: `git push origin <branch-name>` (never upstream)
+- **NEVER create a PR** unless user explicitly requests it
 - PR body should mirror `.github/pull_request_template.md`: include summary, linked issue, detailed change bullets, and explicit test commands + outcomes (unit + E2E).
 - Keep docs in sync (`docs/`, `www/src/app/*.mdx`, READMEs). Mention any migrations or plugin contract changes.
 

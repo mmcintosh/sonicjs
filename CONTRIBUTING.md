@@ -16,14 +16,52 @@ Thank you for your interest in contributing to SonicJS!
    git clone https://github.com/YOUR_USERNAME/sonicjs.git
    cd sonicjs
    ```
-3. **Install dependencies:**
+3. **Add upstream remote:**
+   ```bash
+   git remote add upstream https://github.com/lane711/sonicjs.git
+   git remote -v  # Verify remotes
+   ```
+4. **Install dependencies:**
    ```bash
    npm install
    ```
-4. **Start development:**
+5. **Start development:**
    ```bash
    npm run dev
    ```
+
+## ⚠️ Important: Fork-Based Workflow
+
+**Always work through your fork - never push directly to `lane711/sonicjs`**
+
+### Correct Workflow:
+```bash
+# ✅ Create feature branch
+git checkout -b feature/my-feature
+
+# ✅ Make changes and commit
+git add .
+git commit -m "feat: my feature"
+
+# ✅ Push to YOUR fork (origin)
+git push origin feature/my-feature
+
+# ✅ Create PR from your fork to upstream
+# Go to GitHub and create PR from YOUR_USERNAME:feature/my-feature → lane711:main
+```
+
+### What NOT to do:
+```bash
+# ❌ NEVER push directly to upstream
+git push upstream feature/my-feature  # DON'T DO THIS
+
+# ❌ NEVER work directly on main branch
+git checkout main
+# make changes...  # DON'T DO THIS
+```
+
+### For AI Agents:
+If you're an AI coding agent, **READ** `docs/ai/NO_PUSH_PROTOCOL.md` for strict rules about repository operations. Violation of the protocol is considered a critical error.
 
 ## Before You Start
 
