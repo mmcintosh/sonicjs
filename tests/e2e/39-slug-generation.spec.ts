@@ -29,8 +29,8 @@ test.describe('Slug Generation', () => {
     await expect(statusDiv).toContainText('Available', { timeout: 5000 })
   })
 
-  test('should auto-generate slug for blog posts collection', async ({ page }) => {
-    await page.goto('/admin/content/new?collection=col-blog_posts-1bdbe310')
+  test('should auto-generate slug for pages collection', async ({ page }) => {
+    await page.goto('/admin/content/new?collection=pages-collection')
     await page.waitForLoadState('networkidle', { timeout: 15000 })
     await page.waitForSelector('input[name="title"]', { timeout: 10000 })
     
@@ -38,13 +38,13 @@ test.describe('Slug Generation', () => {
     const slugField = page.locator('input[name="slug"]')
     
     // Fill the title field and manually dispatch input event
-    await titleField.fill('My First Blog Post 2024')
+    await titleField.fill('My Second Test Page 2024')
     await titleField.evaluate((el) => {
       el.dispatchEvent(new Event('input', { bubbles: true }));
     })
     
     // Wait for slug to auto-generate (account for 500ms debounce + API call)
-    await expect(slugField).toHaveValue('my-first-blog-post-2024', { timeout: 15000 })
+    await expect(slugField).toHaveValue('my-second-test-page-2024', { timeout: 15000 })
     
     // Should show available status
     const statusDiv = page.locator('#field-slug-status')
@@ -180,25 +180,25 @@ test.describe('Slug Generation', () => {
     await page.click('button[name="action"][value="save_and_publish"]')
     await page.waitForTimeout(2000)
     
-    // Try to use same slug in news collection (if it exists)
-    // If news collection doesn't exist, this test will be skipped
-    const newsCollectionExists = await page.goto('/admin/content/new?collection=news-collection')
-      .then(() => true)
-      .catch(() => false)
+    // Try to use same slug in news collection
+    await page.goto('/admin/content/new?collection=news-collection')
+    await page.waitForLoadState('networkidle', { timeout: 15000 })
     
-    if (newsCollectionExists) {
-      await page.fill('input[name="title"]', 'Different Content Same Slug')
-      
-      // Use same slug
-      await page.fill('input[name="slug"]', slugValue)
-      await page.waitForTimeout(1500)
-      
-      // Should show as available (different collection)
-      const statusDiv = page.locator('#field-slug-status')
-      await expect(statusDiv).toContainText('Available')
-    } else {
-      test.skip()
-    }
+    // Wait for the form to load
+    const titleField = page.locator('input[name="title"]')
+    await expect(titleField).toBeVisible({ timeout: 10000 })
+    
+    await titleField.fill('Different Content Same Slug')
+    await page.waitForTimeout(500)
+    
+    // Use same slug
+    const slugField = page.locator('input[name="slug"]')
+    await slugField.fill(slugValue)
+    await page.waitForTimeout(1500)
+    
+    // Should show as available (different collection)
+    const statusDiv = page.locator('#field-slug-status')
+    await expect(statusDiv).toContainText('Available', { timeout: 5000 })
   })
 
   test('should not auto-change slug when editing existing content', async ({ page }) => {
