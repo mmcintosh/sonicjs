@@ -131,8 +131,12 @@ jobs:
             echo "KV namespace ID: $KV_ID"
             echo "kv_id=$KV_ID" >> $GITHUB_OUTPUT
             
-            # Update wrangler.toml with KV ID
-            sed -i "s/id = \"[^\"]*\"/id = \"$KV_ID\"/" wrangler.toml
+            # Update wrangler.toml with KV ID (use awk to target only the main id line, not preview_id)
+            awk -v kv_id="$KV_ID" '
+              /^\[\[kv_namespaces\]\]/ { in_kv=1 }
+              in_kv && /^id = / { print "id = \"" kv_id "\""; in_kv=0; next }
+              { print }
+            ' wrangler.toml > wrangler.toml.tmp && mv wrangler.toml.tmp wrangler.toml
           fi
 
           # Update wrangler.toml with the new database ID
