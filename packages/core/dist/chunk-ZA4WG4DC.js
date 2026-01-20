@@ -1,7 +1,7 @@
-import { getCacheService, CACHE_CONFIGS, getLogger, SettingsService } from './chunk-4PTABHLC.js';
-import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-GKMBLNUT.js';
+import { getCacheService, CACHE_CONFIGS, getLogger, SettingsService } from './chunk-3YNNVSMC.js';
+import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-CCZHSTGJ.js';
 import { PluginService } from './chunk-SGAG6FD3.js';
-import { MigrationService } from './chunk-LEFYPY2D.js';
+import { MigrationService } from './chunk-SZRSKKE3.js';
 import { init_admin_layout_catalyst_template, renderDesignPage, renderCheckboxPage, renderTestimonialsList, renderCodeExamplesList, renderAlert, renderTable, renderPagination, renderConfirmationDialog, getConfirmationDialogScript, renderAdminLayoutCatalyst, renderAdminLayout, adminLayoutV2, renderForm } from './chunk-V5LBQN3I.js';
 import { PluginBuilder } from './chunk-QDBNW7KQ.js';
 import { QueryFilterBuilder, sanitizeInput, getCoreVersion, escapeHtml, getBlocksFieldConfig, parseBlocksValue } from './chunk-BHNDALCA.js';
@@ -1752,7 +1752,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-CZW7MJET.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-IDBG4C5R.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -1777,7 +1777,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-CZW7MJET.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-IDBG4C5R.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -1796,7 +1796,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-CZW7MJET.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-IDBG4C5R.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -18745,6 +18745,7 @@ function renderCollectionFormPage(data) {
               >
                 <option value="">Select field type...</option>
                 <option value="text">Text</option>
+                <option value="slug">URL Slug</option>
                 ${data.editorPlugins?.tinymce ? '<option value="richtext">Rich Text (TinyMCE)</option>' : ""}
                 ${data.editorPlugins?.quill ? '<option value="quill">Rich Text (Quill)</option>' : ""}
                 ${data.editorPlugins?.easyMdx ? '<option value="mdxeditor">EasyMDX</option>' : ""}
@@ -19608,10 +19609,16 @@ adminCollectionsRoutes.get("/:id", async (c) => {
             fieldOptions = {};
           }
         }
+        let fieldType = row.field_type;
+        if (fieldOptions && typeof fieldOptions === "object" && "type" in fieldOptions && (fieldOptions.type === "slug" || fieldOptions.format === "slug")) {
+          fieldType = "slug";
+        } else if (row.field_name === "slug" && row.field_type === "text") {
+          fieldType = "slug";
+        }
         return {
           id: row.id,
           field_name: row.field_name,
-          field_type: row.field_type,
+          field_type: fieldType,
           field_label: row.field_label,
           field_options: fieldOptions,
           field_order: row.field_order,
@@ -19779,6 +19786,14 @@ adminCollectionsRoutes.post("/:id/fields", async (c) => {
     } catch (e) {
       console.error("Error parsing field options:", e);
     }
+    let finalFieldOptions = parsedOptions;
+    if (fieldType === "slug") {
+      finalFieldOptions = {
+        ...parsedOptions,
+        type: "slug",
+        format: "slug"
+      };
+    }
     if (schema) {
       if (!schema.properties) {
         schema.properties = {};
@@ -19839,7 +19854,7 @@ adminCollectionsRoutes.post("/:id/fields", async (c) => {
       fieldName,
       fieldType,
       fieldLabel,
-      fieldOptions,
+      JSON.stringify(finalFieldOptions),
       nextOrder,
       isRequired ? 1 : 0,
       isSearchable ? 1 : 0,
@@ -21921,5 +21936,5 @@ var ROUTES_INFO = {
 };
 
 export { ROUTES_INFO, adminCheckboxRoutes, adminCollectionsRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_api_default, admin_code_examples_default, admin_content_default, admin_testimonials_default, api_content_crud_default, api_default, api_media_default, api_system_default, auth_default, checkAdminUserExists, router, test_cleanup_default, userRoutes };
-//# sourceMappingURL=chunk-YVHEVHOB.js.map
-//# sourceMappingURL=chunk-YVHEVHOB.js.map
+//# sourceMappingURL=chunk-ZA4WG4DC.js.map
+//# sourceMappingURL=chunk-ZA4WG4DC.js.map
