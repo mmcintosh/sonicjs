@@ -17,9 +17,16 @@ database_name = "sonicjs-worktree-fix-admin-content-form"
 database_id = "f2c8a7cb-fb84-4c88-92cc-12bfe9548b74"
 migrations_dir = "../packages/core/migrations"
 
-# Note: R2 bucket and KV namespace bindings removed for CI compatibility
-# The GitHub Actions workflow from main branch doesn't create these resources dynamically
-# These can be added back when running locally or when the workflow is updated
+# R2 Bucket for media storage
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "my-sonicjs-app-media"
+
+# KV Cache (using Infowall account IDs)
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "b03d586f143e40c8b9da02fb54b2d557"
+preview_id = "6cd51bcf46d246798e54af26929134f9"
 
 # Environment variables
 [vars]
