@@ -26,12 +26,11 @@ migrations_dir = "../packages/core/migrations"
 binding = "MEDIA_BUCKET"
 bucket_name = "my-sonicjs-app-media"
 
-# KV Cache - Commented out for CI (not required for basic functionality)
-# Uncomment and create KV namespace if caching is needed
-# [[kv_namespaces]]
-# binding = "CACHE_KV"
-# id = "your-kv-namespace-id"
-# preview_id = "your-kv-preview-id"
+# KV Cache
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "b03d586f143e40c8b9da02fb54b2d557"
+preview_id = "6cd51bcf46d246798e54af26929134f9"
 
 # Environment variables
 [vars]
