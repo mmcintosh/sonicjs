@@ -3,6 +3,10 @@ main = "src/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+# Account ID (required when you have multiple Cloudflare accounts)
+# Using Infowall account
+account_id = "f61c658f1de7911b0a529f38308adb21"
+
 # Cloudflare Workers settings
 workers_dev = true
 

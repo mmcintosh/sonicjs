@@ -31,26 +31,21 @@ const config: SonicJSConfig = {
   plugins: {
     directory: './src/plugins',
     autoLoad: false,  // Set to true to auto-load custom plugins
-    disableAll: false,  // Enable plugins
-    enabled: ['email', 'contact-form']  // Enable specific plugins
+    disableAll: false  // Enable plugins
   }
 }
 
 // Create the core application
 const coreApp = createSonicJSApp(config)
 
-// Create main app and mount plugin routes manually
-// (Plugin auto-mounting not yet implemented in core)
+// Create main app and mount plugin routes
 const app = new Hono()
 
-// Mount plugin routes
-if (contactFormPlugin.routes) {
-  for (const route of contactFormPlugin.routes) {
-    app.route(route.path, route.handler)
-  }
-}
+// Mount contact form plugin routes explicitly
+app.route('/', contactFormPlugin.routes![0].handler) // Public routes
+app.route('/admin/plugins/contact-form', contactFormPlugin.routes![1].handler) // Admin routes
 
-// Mount core app last (catch-all)
+// Mount core app
 app.route('/', coreApp)
 
 export default app
