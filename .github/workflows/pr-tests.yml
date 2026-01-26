@@ -117,24 +117,25 @@ jobs:
 
           # 2. Create KV namespace
           echo "Creating KV namespace..."
-          EXISTING_KV=$(npx wrangler kv namespace list --json 2>/dev/null | jq -r ".[] | select(.title == \"$DB_NAME\") | .id" || echo "")
-          if [ -n "$EXISTING_KV" ]; then
-            echo "✅ KV namespace exists: $EXISTING_KV"
-            KV_ID="$EXISTING_KV"
-          else
-            KV_OUTPUT=$(npx wrangler kv namespace create "$DB_NAME" 2>&1)
-            echo "$KV_OUTPUT"
-            KV_ID=$(echo "$KV_OUTPUT" | grep -oP 'id\s*=\s*"\K[^"]+' | head -1)
-            if [ -z "$KV_ID" ]; then
-              # Fallback: list all KV namespaces and find ours
-              KV_ID=$(npx wrangler kv namespace list --json 2>/dev/null | jq -r ".[] | select(.title == \"$DB_NAME\") | .id")
-            fi
+          # Create KV namespace (will reuse if exists)
+          KV_OUTPUT=$(npx wrangler kv namespace create "$DB_NAME" 2>&1)
+          echo "$KV_OUTPUT"
+          
+          # Extract KV ID from output
+          KV_ID=$(echo "$KV_OUTPUT" | grep -oP 'id\s*=\s*"\K[^"]+' | head -1)
+          
+          # If creation failed or ID not found, try to list and find it
+          if [ -z "$KV_ID" ]; then
+            echo "Trying to find existing KV namespace..."
+            KV_LIST=$(npx wrangler kv namespace list 2>&1)
+            echo "KV List output: $KV_LIST"
+            # Try to extract ID from the list (format may vary)
+            KV_ID=$(echo "$KV_LIST" | grep "$DB_NAME" | grep -oP '[a-f0-9]{32}' | head -1)
           fi
           
           if [ -z "$KV_ID" ]; then
             echo "Error: Failed to get KV ID"
-            echo "KV_OUTPUT was: $KV_OUTPUT"
-            npx wrangler kv namespace list
+            echo "Full KV_OUTPUT: $KV_OUTPUT"
             exit 1
           fi
           
