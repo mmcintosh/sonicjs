@@ -217,7 +217,7 @@ export const bundledMigrations: BundledMigration[] = [
     name: 'Add Turnstile To Forms',
     filename: '030_add_turnstile_to_forms.sql',
     description: 'Migration 030: Add Turnstile To Forms',
-    sql: "-- Add Turnstile configuration to forms table\n-- This allows per-form Turnstile settings with global fallback\n\nALTER TABLE forms ADD COLUMN turnstile_enabled INTEGER DEFAULT 0 CHECK (turnstile_enabled IN (0, 1));\nALTER TABLE forms ADD COLUMN turnstile_settings TEXT;\n\n-- Set default to inherit global settings for existing forms\nUPDATE forms \nSET turnstile_settings = '{\"inherit\":true}' \nWHERE turnstile_settings IS NULL;\n\n-- Add index for faster lookups\nCREATE INDEX IF NOT EXISTS idx_forms_turnstile ON forms(turnstile_enabled) WHERE turnstile_enabled = 1;\n"
+    sql: "-- Add Turnstile configuration to forms table\n-- This allows per-form Turnstile settings with global fallback\n\nALTER TABLE forms ADD COLUMN turnstile_enabled INTEGER DEFAULT 0 CHECK (turnstile_enabled IN (0, 1));\nALTER TABLE forms ADD COLUMN turnstile_settings TEXT;\n\n-- Set default to inherit global settings for existing forms\nUPDATE forms \nSET turnstile_settings = '{\"inherit\":true}' \nWHERE turnstile_settings IS NULL;\n\n-- Add index for faster lookups (D1 doesn't support partial indexes with WHERE clause)\nCREATE INDEX IF NOT EXISTS idx_forms_turnstile ON forms(turnstile_enabled);\n"
   },
   {
     id: '031',

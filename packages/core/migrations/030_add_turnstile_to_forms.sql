@@ -9,5 +9,5 @@ UPDATE forms
 SET turnstile_settings = '{"inherit":true}' 
 WHERE turnstile_settings IS NULL;
 
--- Add index for faster lookups
-CREATE INDEX IF NOT EXISTS idx_forms_turnstile ON forms(turnstile_enabled) WHERE turnstile_enabled = 1;
+-- Add index for faster lookups (D1 doesn't support partial indexes with WHERE clause)
+CREATE INDEX IF NOT EXISTS idx_forms_turnstile ON forms(turnstile_enabled);
