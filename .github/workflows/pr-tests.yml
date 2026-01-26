@@ -124,22 +124,40 @@ jobs:
           set -e
           
           echo "KV creation exit code: $KV_EXIT_CODE"
-          echo "KV creation output:"
-          echo "$KV_OUTPUT"
           
           # Extract KV ID from output (works if creation succeeded)
           KV_ID=$(echo "$KV_OUTPUT" | grep -oP 'id\s*=\s*"\K[a-f0-9]{32}' | head -1)
           
           # If ID not found (probably because namespace already exists), list and find it
           if [ -z "$KV_ID" ]; then
-            echo "Extracting ID from namespace list..."
-            # List returns valid JSON, so we can use jq
-            KV_ID=$(npx wrangler kv namespace list --json 2>/dev/null | jq -r ".[] | select(.title == \"$DB_NAME\") | .id")
+            echo "Namespace already exists, fetching ID from list..."
+            set +e
+            KV_LIST_OUTPUT=$(npx wrangler kv namespace list --json 2>&1)
+            KV_LIST_EXIT=$?
+            set -e
+            
+            echo "List exit code: $KV_LIST_EXIT"
+            echo "List output (first 500 chars):"
+            echo "$KV_LIST_OUTPUT" | head -c 500
+            echo ""
+            
+            # Try jq parsing
+            set +e
+            KV_ID=$(echo "$KV_LIST_OUTPUT" | jq -r ".[] | select(.title == \"$DB_NAME\") | .id" 2>&1)
+            JQ_EXIT=$?
+            set -e
+            
+            if [ $JQ_EXIT -ne 0 ]; then
+              echo "jq parsing failed, trying grep fallback..."
+              # Extract using grep if jq fails
+              KV_ID=$(echo "$KV_LIST_OUTPUT" | grep -A 3 "\"title\": \"$DB_NAME\"" | grep "\"id\":" | grep -oP '[a-f0-9]{32}' | head -1)
+            fi
           fi
           
           if [ -z "$KV_ID" ]; then
             echo "❌ Error: Failed to get KV ID"
-            echo "The namespace may not exist or there's an API issue"
+            echo "Full list output:"
+            echo "$KV_LIST_OUTPUT"
             exit 1
           fi
           
