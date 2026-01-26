@@ -57,6 +57,38 @@ These instructions mirror the workflow Claude Code already follows in Conductor 
 - PR body should mirror `.github/pull_request_template.md`: include summary, linked issue, detailed change bullets, and explicit test commands + outcomes (unit + E2E).
 - Keep docs in sync (`docs/`, `www/src/app/*.mdx`, READMEs). Mention any migrations or plugin contract changes.
 
+### ⚠️ CRITICAL: Workflow File Changes and pull_request_target
+
+**When fixing `.github/workflows/pr-tests.yml` or any workflow using `pull_request_target`:**
+
+The `pull_request_target` event **ALWAYS runs the workflow from the BASE branch** (`main`), NOT from the PR branch. This is a GitHub security feature.
+
+**Required workflow when fixing CI:**
+1. Make changes to workflow file on PR branch and commit
+2. **Immediately cherry-pick that commit to `main` branch**
+3. Push `main` to fork
+4. Trigger CI on PR branch (new push or empty commit)
+5. Only then will your workflow fixes actually run
+
+**Commands:**
+```bash
+git add .github/workflows/pr-tests.yml
+git commit -m "fix: your workflow fix"
+COMMIT_SHA=$(git log --oneline -1 | awk '{print $1}')
+git stash  # if needed
+git checkout main
+git cherry-pick $COMMIT_SHA
+git push origin main
+git checkout your-branch
+git commit --allow-empty -m "chore: trigger CI with workflow fix"
+git push
+```
+
+❌ **Common mistake**: Fixing workflow on PR branch, pushing, and wondering why CI still fails with old code
+✅ **Correct**: Always cherry-pick workflow changes to `main` immediately
+
+📖 **See detailed explanation**: `docs/ci/PULL_REQUEST_TARGET_GOTCHA.md`
+
 ## Available Agents
 
 Specialized agents are defined in `.claude/commands/`. All agents are prefixed with `sonicjs-` for namespacing.
