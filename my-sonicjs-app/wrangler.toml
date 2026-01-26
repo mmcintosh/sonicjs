@@ -14,15 +14,17 @@ database_name = "temp-will-be-replaced-by-ci"
 database_id = "temp-will-be-replaced-by-ci"
 migrations_dir = "./migrations"
 
-# R2 Bucket for media storage (using CI bucket)
+# R2 Bucket for media storage
+# Note: bucket_name is automatically updated by GitHub Actions
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"
-bucket_name = "sonicjs-ci-media"
+bucket_name = "temp-will-be-replaced-by-ci"
 
-# KV Cache (using CI namespace)
+# KV Cache
+# Note: id is automatically updated by GitHub Actions
 [[kv_namespaces]]
 binding = "CACHE_KV"
-id = "a16f8246fc294d809c90b0fb2df6d363"
+id = "temp-will-be-replaced-by-ci"
 
 # Environment variables
 [vars]
