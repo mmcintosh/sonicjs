@@ -130,24 +130,4 @@ interface CodeExamplesListData {
 }
 declare function renderCodeExamplesList(data: CodeExamplesListData): string;
 
-interface FormsDocsPageData {
-    user?: {
-        name: string;
-        email: string;
-        role: string;
-    };
-    version?: string;
-}
-declare function renderFormsDocsPage(data: FormsDocsPageData): string;
-
-interface FormsExamplesPageData {
-    user?: {
-        name: string;
-        email: string;
-        role: string;
-    };
-    version?: string;
-}
-declare function renderFormsExamplesPage(data: FormsExamplesPageData): string;
-
-export { type AdminLayoutCatalystData, type AdminLayoutData, type CheckboxPageData, type DesignPageData, type FormsDocsPageData, type FormsExamplesPageData, renderAdminLayout, renderAdminLayoutCatalyst, renderCheckboxPage, renderCodeExamplesList, renderDesignPage, renderFormsDocsPage, renderFormsExamplesPage, renderLogo, renderTestimonialsList };
+export { type AdminLayoutCatalystData, type AdminLayoutData, type CheckboxPageData, type DesignPageData, renderAdminLayout, renderAdminLayoutCatalyst, renderCheckboxPage, renderCodeExamplesList, renderDesignPage, renderLogo, renderTestimonialsList };
