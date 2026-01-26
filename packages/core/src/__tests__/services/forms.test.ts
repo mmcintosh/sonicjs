@@ -104,12 +104,10 @@ describe('Forms Service', () => {
 
   describe('Form Schema Validation', () => {
     it('should validate Form.io schema structure', () => {
-      const isValidSchema = (schema: any) => {
-        return (
-          schema &&
-          typeof schema === 'object' &&
-          Array.isArray(schema.components)
-        )
+      const isValidSchema = (schema: any): boolean => {
+        if (!schema || typeof schema !== 'object') return false
+        if (!Array.isArray(schema.components)) return false
+        return true
       }
 
       // Valid schemas
@@ -229,8 +227,9 @@ describe('Forms Service', () => {
     })
 
     it('should handle empty submission data', () => {
-      const isValidSubmission = (data: any) => {
-        return data && typeof data === 'object'
+      const isValidSubmission = (data: any): boolean => {
+        if (!data || typeof data !== 'object') return false
+        return true
       }
 
       expect(isValidSubmission({})).toBe(true)
@@ -241,13 +240,17 @@ describe('Forms Service', () => {
 
     it('should sanitize submission data', () => {
       const sanitizeData = (data: any) => {
-        // Remove any dangerous keys
+        // Use JSON parse/stringify to remove prototype pollution
+        // Then filter out dangerous keys
         const dangerous = ['__proto__', 'constructor', 'prototype']
-        const sanitized = { ...data }
+        const cleaned = JSON.parse(JSON.stringify(data))
+        const sanitized: Record<string, any> = {}
         
-        dangerous.forEach(key => {
-          delete sanitized[key]
-        })
+        for (const key in cleaned) {
+          if (cleaned.hasOwnProperty(key) && !dangerous.includes(key)) {
+            sanitized[key] = cleaned[key]
+          }
+        }
         
         return sanitized
       }
@@ -261,8 +264,8 @@ describe('Forms Service', () => {
       const sanitized = sanitizeData(maliciousData)
       
       expect(sanitized.name).toBe('John')
-      expect(sanitized.__proto__).toBeUndefined()
-      expect(sanitized.constructor).toBeUndefined()
+      expect(Object.prototype.hasOwnProperty.call(sanitized, '__proto__')).toBe(false)
+      expect(Object.prototype.hasOwnProperty.call(sanitized, 'constructor')).toBe(false)
     })
   })
 
