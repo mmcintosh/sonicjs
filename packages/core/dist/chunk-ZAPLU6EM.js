@@ -1,5 +1,3 @@
-'use strict';
-
 // src/db/migrations-bundle.ts
 var bundledMigrations = [
   {
@@ -1390,13 +1388,6 @@ INSERT OR IGNORE INTO plugins (
 `
   },
   {
-    id: "025",
-    name: "Rename Mdxeditor To Easy Mdx",
-    filename: "025_rename_mdxeditor_to_easy_mdx.sql",
-    description: "Migration 025: Rename Mdxeditor To Easy Mdx",
-    sql: "-- Rename mdxeditor-plugin to easy-mdx\n-- Migration: 025_rename_mdxeditor_to_easy_mdx\n-- Description: Update plugin ID from mdxeditor-plugin to easy-mdx to reflect the change to EasyMDE editor\n\n-- Update the plugin record if it exists with the old ID\nUPDATE plugins\nSET\n    id = 'easy-mdx',\n    name = 'easy-mdx',\n    display_name = 'EasyMDE Markdown Editor',\n    description = 'Lightweight markdown editor with live preview. Provides a simple and efficient editor with markdown support for richtext fields.'\nWHERE id = 'mdxeditor-plugin';\n\n-- Update any plugin_hooks references\nUPDATE plugin_hooks\nSET plugin_id = 'easy-mdx'\nWHERE plugin_id = 'mdxeditor-plugin';\n\n-- Update any plugin_activity_log references\nUPDATE plugin_activity_log\nSET plugin_id = 'easy-mdx'\nWHERE plugin_id = 'mdxeditor-plugin';\n"
-  },
-  {
     id: "026",
     name: "Add Otp Login",
     filename: "026_add_otp_login.sql",
@@ -1681,13 +1672,6 @@ INSERT OR IGNORE INTO forms (
 `
   },
   {
-    id: "029",
-    name: "Ai Search Plugin",
-    filename: "029_ai_search_plugin.sql",
-    description: "Migration 029: Ai Search Plugin",
-    sql: "-- AI Search plugin settings\nCREATE TABLE IF NOT EXISTS ai_search_settings (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  enabled BOOLEAN DEFAULT 0,\n  ai_mode_enabled BOOLEAN DEFAULT 1,\n  selected_collections TEXT, -- JSON array of collection IDs to index\n  dismissed_collections TEXT, -- JSON array of collection IDs user chose not to index\n  autocomplete_enabled BOOLEAN DEFAULT 1,\n  cache_duration INTEGER DEFAULT 1, -- hours\n  results_limit INTEGER DEFAULT 20,\n  index_media BOOLEAN DEFAULT 0,\n  index_status TEXT, -- JSON object with status per collection\n  last_indexed_at INTEGER,\n  created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),\n  updated_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)\n);\n\n-- Search history/analytics\nCREATE TABLE IF NOT EXISTS ai_search_history (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  query TEXT NOT NULL,\n  mode TEXT, -- 'ai' or 'keyword'\n  results_count INTEGER,\n  user_id INTEGER,\n  created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)\n);\n\n-- Index metadata tracking (per collection)\nCREATE TABLE IF NOT EXISTS ai_search_index_meta (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  collection_id INTEGER NOT NULL,\n  collection_name TEXT NOT NULL, -- Cache collection name for display\n  total_items INTEGER DEFAULT 0,\n  indexed_items INTEGER DEFAULT 0,\n  last_sync_at INTEGER,\n  status TEXT DEFAULT 'pending', -- 'pending', 'indexing', 'completed', 'error'\n  error_message TEXT,\n  UNIQUE(collection_id)\n);\n\n-- Indexes for performance\nCREATE INDEX IF NOT EXISTS idx_ai_search_history_created_at ON ai_search_history(created_at);\nCREATE INDEX IF NOT EXISTS idx_ai_search_history_mode ON ai_search_history(mode);\nCREATE INDEX IF NOT EXISTS idx_ai_search_index_meta_collection_id ON ai_search_index_meta(collection_id);\nCREATE INDEX IF NOT EXISTS idx_ai_search_index_meta_status ON ai_search_index_meta(status);\n"
-  },
-  {
     id: "030",
     name: "Add Turnstile To Forms",
     filename: "030_add_turnstile_to_forms.sql",
@@ -1695,7 +1679,8 @@ INSERT OR IGNORE INTO forms (
     sql: `-- Add Turnstile configuration to forms table
 -- This allows per-form Turnstile settings with global fallback
 
-ALTER TABLE forms ADD COLUMN turnstile_enabled INTEGER DEFAULT 0 CHECK (turnstile_enabled IN (0, 1));
+-- Add columns (D1 may not support CHECK constraints in ALTER TABLE)
+ALTER TABLE forms ADD COLUMN turnstile_enabled INTEGER DEFAULT 0;
 ALTER TABLE forms ADD COLUMN turnstile_settings TEXT;
 
 -- Set default to inherit global settings for existing forms
@@ -1704,8 +1689,15 @@ SET turnstile_settings = '{"inherit":true}'
 WHERE turnstile_settings IS NULL;
 
 -- Add index for faster lookups
-CREATE INDEX IF NOT EXISTS idx_forms_turnstile ON forms(turnstile_enabled) WHERE turnstile_enabled = 1;
+CREATE INDEX IF NOT EXISTS idx_forms_turnstile ON forms(turnstile_enabled);
 `
+  },
+  {
+    id: "031",
+    name: "Ai Search Plugin",
+    filename: "031_ai_search_plugin.sql",
+    description: "Migration 031: Ai Search Plugin",
+    sql: "-- AI Search plugin settings\nCREATE TABLE IF NOT EXISTS ai_search_settings (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  enabled BOOLEAN DEFAULT 0,\n  ai_mode_enabled BOOLEAN DEFAULT 1,\n  selected_collections TEXT, -- JSON array of collection IDs to index\n  dismissed_collections TEXT, -- JSON array of collection IDs user chose not to index\n  autocomplete_enabled BOOLEAN DEFAULT 1,\n  cache_duration INTEGER DEFAULT 1, -- hours\n  results_limit INTEGER DEFAULT 20,\n  index_media BOOLEAN DEFAULT 0,\n  index_status TEXT, -- JSON object with status per collection\n  last_indexed_at INTEGER,\n  created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),\n  updated_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)\n);\n\n-- Search history/analytics\nCREATE TABLE IF NOT EXISTS ai_search_history (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  query TEXT NOT NULL,\n  mode TEXT, -- 'ai' or 'keyword'\n  results_count INTEGER,\n  user_id INTEGER,\n  created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)\n);\n\n-- Index metadata tracking (per collection)\nCREATE TABLE IF NOT EXISTS ai_search_index_meta (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  collection_id INTEGER NOT NULL,\n  collection_name TEXT NOT NULL, -- Cache collection name for display\n  total_items INTEGER DEFAULT 0,\n  indexed_items INTEGER DEFAULT 0,\n  last_sync_at INTEGER,\n  status TEXT DEFAULT 'pending', -- 'pending', 'indexing', 'completed', 'error'\n  error_message TEXT,\n  UNIQUE(collection_id)\n);\n\n-- Indexes for performance\nCREATE INDEX IF NOT EXISTS idx_ai_search_history_created_at ON ai_search_history(created_at);\nCREATE INDEX IF NOT EXISTS idx_ai_search_history_mode ON ai_search_history(mode);\nCREATE INDEX IF NOT EXISTS idx_ai_search_index_meta_collection_id ON ai_search_index_meta(collection_id);\nCREATE INDEX IF NOT EXISTS idx_ai_search_index_meta_status ON ai_search_index_meta(status);\n"
   }
 ];
 var migrationsByIdMap = new Map(
@@ -2113,6 +2105,6 @@ var MigrationService = class {
   }
 };
 
-exports.MigrationService = MigrationService;
-//# sourceMappingURL=chunk-CG6YEPKP.cjs.map
-//# sourceMappingURL=chunk-CG6YEPKP.cjs.map
+export { MigrationService };
+//# sourceMappingURL=chunk-ZAPLU6EM.js.map
+//# sourceMappingURL=chunk-ZAPLU6EM.js.map
