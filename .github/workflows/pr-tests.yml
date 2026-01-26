@@ -131,19 +131,23 @@ jobs:
           # If ID not found (probably because namespace already exists), list and find it
           if [ -z "$KV_ID" ]; then
             echo "Namespace already exists, fetching ID from list..."
-            set +e
-            # Don't use --json flag (not supported in older wrangler versions)
+            # Note: list returns JSON even without --json flag
             KV_LIST_OUTPUT=$(npx wrangler kv namespace list 2>&1)
-            KV_LIST_EXIT=$?
-            set -e
             
-            echo "List exit code: $KV_LIST_EXIT"
             echo "List output:"
             echo "$KV_LIST_OUTPUT"
             
-            # Extract the 32-char hex ID from the line containing our namespace title
-            # Format is typically: { id: "abc123...", title: "namespace-name" }
-            KV_ID=$(echo "$KV_LIST_OUTPUT" | grep "$DB_NAME" | grep -oP '[a-f0-9]{32}' | head -1)
+            # Parse JSON with jq
+            set +e
+            KV_ID=$(echo "$KV_LIST_OUTPUT" | jq -r ".[] | select(.title == \"$DB_NAME\") | .id" 2>&1)
+            JQ_EXIT=$?
+            set -e
+            
+            if [ $JQ_EXIT -ne 0 ] || [ -z "$KV_ID" ]; then
+              echo "jq parsing failed or ID not found, trying grep fallback..."
+              # Fallback: extract any 32-char hex near our namespace title
+              KV_ID=$(echo "$KV_LIST_OUTPUT" | grep -B2 "$DB_NAME" | grep -oP '[a-f0-9]{32}' | head -1)
+            fi
           fi
           
           if [ -z "$KV_ID" ]; then
