@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import type { Bindings } from '../../../../app'
+import { rateLimit } from '../../../../middleware'
 import { AISearchService } from '../services/ai-search'
 import type { SearchQuery } from '../types'
 
@@ -13,11 +14,16 @@ type Variables = {
 
 const apiRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
+// Rate limiting: 60 search requests per minute per IP
+const searchRateLimit = rateLimit({ limit: 60, windowSeconds: 60, keyPrefix: 'search' })
+// Rate limiting: 120 suggest requests per minute per IP (lighter endpoint)
+const suggestRateLimit = rateLimit({ limit: 120, windowSeconds: 60, keyPrefix: 'suggest' })
+
 /**
  * POST /api/search
  * Execute search query
  */
-apiRoutes.post('/', async (c) => {
+apiRoutes.post('/', searchRateLimit, async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
@@ -67,7 +73,7 @@ apiRoutes.post('/', async (c) => {
  * GET /api/search/suggest
  * Get search suggestions (autocomplete)
  */
-apiRoutes.get('/suggest', async (c) => {
+apiRoutes.get('/suggest', suggestRateLimit, async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
