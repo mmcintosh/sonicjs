@@ -88,9 +88,9 @@ apiRoutes.post('/', async (c) => {
 
             const elapsed = Date.now() - startTime
             experimentMeta = {
-              experiment_id: activeExp.id,
-              experiment_mode: activeExp.mode,
-              experiment_variant: variant,
+              id: activeExp.id,
+              mode: activeExp.mode,
+              variant: variant,
               result_origins: interleaved.origins,
             }
 
@@ -122,9 +122,9 @@ apiRoutes.post('/', async (c) => {
               : await service.search(query)
 
             experimentMeta = {
-              experiment_id: activeExp.id,
-              experiment_mode: activeExp.mode,
-              experiment_variant: variant,
+              id: activeExp.id,
+              mode: activeExp.mode,
+              variant: variant,
             }
 
             expService.trackSearchEvent({

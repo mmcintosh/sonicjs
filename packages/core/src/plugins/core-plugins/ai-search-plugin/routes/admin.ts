@@ -73,7 +73,7 @@ adminRoutes.get('/', async (c) => {
       renderSearchDashboard({
         settings,
         collections: collections || [],
-        newCollections: newCollections || [],
+        newCollections: (newCollections || []).map(n => ({ id: String(n.collection.id), name: n.collection.name })),
         indexStatus: indexStatus || {},
         analytics,
         fts5Status,

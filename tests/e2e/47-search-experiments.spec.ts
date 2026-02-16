@@ -13,6 +13,20 @@ test.describe('Search A/B Testing Experiments', () => {
     await ensureAdminUserExists(page)
     await ensureWorkflowTablesExist(page)
     await loginAsAdmin(page)
+
+    // EXP-2 fix: clean up any orphaned running experiments from previous test runs
+    try {
+      const listResp = await page.request.get(ADMIN_API)
+      if (listResp.ok()) {
+        const listJson = await listResp.json()
+        const running = (listJson.data || []).filter((e: any) => e.status === 'running')
+        for (const exp of running) {
+          await page.request.post(`${ADMIN_API}/${exp.id}/complete`, { data: {} })
+        }
+      }
+    } catch {
+      // Best-effort cleanup
+    }
   })
 
   // =============================================
