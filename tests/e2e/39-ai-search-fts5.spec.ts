@@ -229,12 +229,8 @@ test.describe('AI Search - FTS5 Full-Text Search', () => {
 
   test.describe('FTS5 Settings Page UI', () => {
     test('should show FTS5 section on settings page', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
-
-      // Switch to Configuration tab where FTS5 settings live
-      await page.click('#tab-btn-configuration')
-      await page.waitForTimeout(1000)
 
       // Should show FTS5 Full-Text Search heading
       const fts5Heading = page.locator('text=FTS5 Full-Text Search')
@@ -256,23 +252,15 @@ test.describe('AI Search - FTS5 Full-Text Search', () => {
     })
 
     test('should show FTS5 reindex button on settings page', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
-
-      // Switch to Configuration tab
-      await page.click('#tab-btn-configuration')
-      await page.waitForTimeout(1000)
 
       const reindexBtn = page.locator('#fts5-reindex-btn')
       await expect(reindexBtn).toBeVisible({ timeout: 10000 })
     })
 
     test('should show FTS5 queries in analytics', async ({ page }) => {
-      await page.goto('/admin/search')
-      await page.waitForTimeout(2000)
-
-      // Switch to Analytics tab where query stats live
-      await page.click('#tab-btn-analytics')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Should show FTS5 Queries stat in analytics section

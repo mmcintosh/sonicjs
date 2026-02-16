@@ -1,12 +1,12 @@
 'use strict';
 
 var chunkVNLR35GO_cjs = require('./chunk-VNLR35GO.cjs');
-var chunkZS5MYHCW_cjs = require('./chunk-ZS5MYHCW.cjs');
+var chunkUODPGQLQ_cjs = require('./chunk-UODPGQLQ.cjs');
 var chunkMPT5PA6U_cjs = require('./chunk-MPT5PA6U.cjs');
-var chunkRZWYEWXM_cjs = require('./chunk-RZWYEWXM.cjs');
+var chunkI6RW6P7M_cjs = require('./chunk-I6RW6P7M.cjs');
 var chunkSHCYIZAN_cjs = require('./chunk-SHCYIZAN.cjs');
 var chunk6FHNRRJ3_cjs = require('./chunk-6FHNRRJ3.cjs');
-var chunk5HMR2SJW_cjs = require('./chunk-5HMR2SJW.cjs');
+var chunkUOEIMC67_cjs = require('./chunk-UOEIMC67.cjs');
 var chunkRCQ2HIQD_cjs = require('./chunk-RCQ2HIQD.cjs');
 var hono = require('hono');
 var cors = require('hono/cors');
@@ -32,14 +32,19 @@ var FTS5Service = class {
     highlightTag: "mark"
   };
   options;
+  synonymService;
+  /** Set synonym service for query expansion */
+  setSynonymService(service) {
+    this.synonymService = service;
+  }
   /**
    * Search using FTS5 with BM25 ranking and highlighting
    * Auto-indexes any missing content in selected collections before searching
    */
-  async search(query, settings) {
+  async search(query, settings, weightOverrides) {
     const startTime = Date.now();
     try {
-      const escapedQuery = this.sanitizeFTS5Query(query.query);
+      let escapedQuery = this.sanitizeFTS5Query(query.query);
       if (!escapedQuery || escapedQuery === '""') {
         return {
           results: [],
@@ -47,6 +52,9 @@ var FTS5Service = class {
           query_time_ms: Date.now() - startTime,
           mode: "fts5"
         };
+      }
+      if (this.synonymService && settings.query_synonyms_enabled !== false) {
+        escapedQuery = await this.expandWithSynonyms(escapedQuery);
       }
       const collections = query.filters?.collections?.length ? query.filters.collections : settings.selected_collections;
       if (collections.length === 0) {
@@ -60,12 +68,15 @@ var FTS5Service = class {
       await this.ensureCollectionsIndexed(collections);
       const collectionPlaceholders = collections.map(() => "?").join(", ");
       const tag = this.options.highlightTag || "mark";
+      const titleBoost = weightOverrides?.titleBoost ?? this.options.titleBoost;
+      const slugBoost = weightOverrides?.slugBoost ?? this.options.slugBoost;
+      const bodyBoost = weightOverrides?.bodyBoost ?? this.options.bodyBoost;
       const sql = `
         SELECT
           fts.content_id,
           fts.collection_id,
           fts.title,
-          bm25(content_fts, ${this.options.titleBoost}, ${this.options.slugBoost}, ${this.options.bodyBoost}, 0, 0) as score,
+          bm25(content_fts, ${titleBoost}, ${slugBoost}, ${bodyBoost}, 0, 0) as score,
           snippet(content_fts, 2, '<${tag}>', '</${tag}>', '...', ${this.options.snippetLength}) as body_snippet,
           highlight(content_fts, 0, '<${tag}>', '</${tag}>') as title_highlight,
           c.slug,
@@ -163,39 +174,74 @@ var FTS5Service = class {
           VALUES (?, ?, ?, 'indexed')
         `).bind(contentId, content.collection_id, Date.now())
       ]);
-      console.log(`[FTS5Service] Indexed content ${contentId}`);
     } catch (error) {
       console.error(`[FTS5Service] Error indexing ${contentId}:`, error);
       throw error;
     }
   }
   /**
-   * Index all published content in a collection
+   * Index all published content in a collection (bulk approach).
+   * Fetches all content in one query, processes text in memory,
+   * then inserts in D1 batches for efficiency.
    */
-  async indexCollection(collectionId) {
-    console.log(`[FTS5Service] Starting indexing for collection: ${collectionId}`);
+  async indexCollection(collectionId, onProgress) {
+    console.log(`[FTS5Service] Starting bulk indexing for collection: ${collectionId}`);
     try {
       const { results } = await this.db.prepare(`
-          SELECT id FROM content
+          SELECT id, title, slug, data, collection_id
+          FROM content
           WHERE collection_id = ? AND status != 'deleted'
         `).bind(collectionId).all();
       const totalItems = results?.length || 0;
       if (totalItems === 0) {
         console.log(`[FTS5Service] No content found in collection ${collectionId}`);
+        if (onProgress) await onProgress(0, 0);
         return { total_items: 0, indexed_items: 0, errors: 0 };
       }
+      await this.db.batch([
+        this.db.prepare("DELETE FROM content_fts WHERE collection_id = ?").bind(collectionId),
+        this.db.prepare("DELETE FROM content_fts_sync WHERE collection_id = ?").bind(collectionId)
+      ]);
       let indexedItems = 0;
       let errors = 0;
-      for (const item of results || []) {
-        try {
-          await this.indexContent(item.id);
-          indexedItems++;
-        } catch (error) {
-          console.error(`[FTS5Service] Error indexing item ${item.id}:`, error);
-          errors++;
+      const now = Date.now();
+      const BATCH_SIZE = 25;
+      for (let i = 0; i < totalItems; i += BATCH_SIZE) {
+        const batch = results.slice(i, i + BATCH_SIZE);
+        const statements = [];
+        for (const item of batch) {
+          try {
+            const bodyText = this.extractSearchableText(item.data);
+            statements.push(
+              this.db.prepare(`
+                INSERT INTO content_fts(title, slug, body, content_id, collection_id)
+                VALUES (?, ?, ?, ?, ?)
+              `).bind(item.title || "", item.slug || "", bodyText, item.id, item.collection_id)
+            );
+            statements.push(
+              this.db.prepare(`
+                INSERT OR REPLACE INTO content_fts_sync(content_id, collection_id, indexed_at, status)
+                VALUES (?, ?, ?, 'indexed')
+              `).bind(item.id, item.collection_id, now)
+            );
+          } catch (error) {
+            errors++;
+          }
+        }
+        if (statements.length > 0) {
+          try {
+            await this.db.batch(statements);
+            indexedItems += statements.length / 2;
+          } catch (error) {
+            console.error(`[FTS5Service] Batch insert error at offset ${i}:`, error);
+            errors += batch.length;
+          }
+        }
+        if (onProgress) {
+          await onProgress(indexedItems, totalItems);
         }
       }
-      console.log(`[FTS5Service] Indexing complete: ${indexedItems}/${totalItems} items, ${errors} errors`);
+      console.log(`[FTS5Service] Bulk indexing complete: ${indexedItems}/${totalItems} items, ${errors} errors`);
       return {
         total_items: totalItems,
         indexed_items: indexedItems,
@@ -205,6 +251,64 @@ var FTS5Service = class {
       console.error(`[FTS5Service] Error indexing collection ${collectionId}:`, error);
       throw error;
     }
+  }
+  /**
+   * Index a batch of content items from a collection using batch D1 inserts.
+   * Returns the number remaining so the caller can loop.
+   */
+  async indexCollectionBatch(collectionId, batchSize = 200) {
+    const { results } = await this.db.prepare(`
+        SELECT c.id, c.title, c.slug, c.data, c.collection_id
+        FROM content c
+        LEFT JOIN content_fts_sync s ON c.id = s.content_id
+        WHERE c.collection_id = ? AND c.status != 'deleted'
+          AND s.content_id IS NULL
+        LIMIT ?
+      `).bind(collectionId, batchSize).all();
+    const toIndex = results || [];
+    const now = Date.now();
+    let indexed = 0;
+    const SUB_BATCH = 25;
+    for (let i = 0; i < toIndex.length; i += SUB_BATCH) {
+      const batch = toIndex.slice(i, i + SUB_BATCH);
+      const statements = [];
+      for (const item of batch) {
+        try {
+          const bodyText = this.extractSearchableText(item.data);
+          statements.push(
+            this.db.prepare(
+              "INSERT INTO content_fts(title, slug, body, content_id, collection_id) VALUES (?, ?, ?, ?, ?)"
+            ).bind(item.title || "", item.slug || "", bodyText, item.id, item.collection_id)
+          );
+          statements.push(
+            this.db.prepare(
+              "INSERT OR REPLACE INTO content_fts_sync(content_id, collection_id, indexed_at, status) VALUES (?, ?, ?, 'indexed')"
+            ).bind(item.id, item.collection_id, now)
+          );
+        } catch (error) {
+        }
+      }
+      if (statements.length > 0) {
+        try {
+          await this.db.batch(statements);
+          indexed += statements.length / 2;
+        } catch (error) {
+          console.error(`[FTS5Service] Batch insert error at offset ${i}:`, error);
+        }
+      }
+    }
+    const remainResult = await this.db.prepare(`
+        SELECT COUNT(*) as cnt FROM content c
+        LEFT JOIN content_fts_sync s ON c.id = s.content_id
+        WHERE c.collection_id = ? AND c.status != 'deleted'
+          AND s.content_id IS NULL
+      `).bind(collectionId).first();
+    const totalResult = await this.db.prepare("SELECT COUNT(*) as cnt FROM content WHERE collection_id = ? AND status != 'deleted'").bind(collectionId).first();
+    return {
+      indexed,
+      remaining: remainResult?.cnt || 0,
+      total: totalResult?.cnt || 0
+    };
   }
   /**
    * Remove content from FTS index
@@ -369,6 +473,36 @@ var FTS5Service = class {
     }
   }
   /**
+   * Expand a sanitized FTS5 query string with synonym terms.
+   * Input: "coffee*" (single) or "coffee OR beans" (multiple)
+   * Output: "coffee* OR espresso OR caffeine" or "coffee OR espresso OR beans"
+   */
+  async expandWithSynonyms(sanitizedQuery) {
+    try {
+      let terms;
+      let hasPrefixMatch = false;
+      if (sanitizedQuery.endsWith("*")) {
+        terms = [sanitizedQuery.slice(0, -1)];
+        hasPrefixMatch = true;
+      } else {
+        terms = sanitizedQuery.split(" OR ").map((t) => t.trim()).filter(Boolean);
+      }
+      if (terms.length === 0) return sanitizedQuery;
+      const expanded = await this.synonymService.expandQuery(terms);
+      if (expanded.length === terms.length) return sanitizedQuery;
+      const capped = expanded.slice(0, 20);
+      if (hasPrefixMatch && terms.length === 1) {
+        const original = terms[0] + "*";
+        const synonyms = capped.filter((t) => t !== terms[0]);
+        return [original, ...synonyms].join(" OR ");
+      }
+      return capped.join(" OR ");
+    } catch (error) {
+      console.error("[FTS5Service] Synonym expansion error (using original query):", error);
+      return sanitizedQuery;
+    }
+  }
+  /**
    * Sanitize user input for FTS5 MATCH clause
    * Removes operators and special characters that could cause errors
    */
@@ -376,15 +510,47 @@ var FTS5Service = class {
     if (!query || typeof query !== "string") {
       return '""';
     }
-    let sanitized = query.replace(/['"]/g, "").replace(/[()[\]{}]/g, "").replace(/\b(AND|OR|NOT|NEAR)\b/gi, "").replace(/\*/g, "").replace(/:/g, "").replace(/\^/g, "").replace(/-/g, " ").trim();
-    const terms = sanitized.split(/\s+/).filter((t) => t.length > 0);
+    let sanitized = query.replace(/-/g, " ").replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+    const stopWords = /* @__PURE__ */ new Set([
+      "a",
+      "an",
+      "the",
+      "is",
+      "are",
+      "was",
+      "were",
+      "be",
+      "to",
+      "of",
+      "in",
+      "on",
+      "at",
+      "by",
+      "or",
+      "and",
+      "not",
+      "for",
+      "it",
+      "as",
+      "do",
+      "if",
+      "no",
+      "so",
+      "up",
+      "but",
+      "its",
+      "has",
+      "had",
+      "near"
+    ]);
+    const terms = sanitized.split(/\s+/).filter((t) => t.length > 1 && !stopWords.has(t));
     if (terms.length === 0) {
       return '""';
     }
     if (terms.length === 1) {
-      return `"${terms[0]}"*`;
+      return `${terms[0]}*`;
     }
-    return terms.map((t) => `"${t}"`).join(" ");
+    return terms.join(" OR ");
   }
 };
 
@@ -449,7 +615,7 @@ apiContentCrudRoutes.get("/:id", async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.post("/", chunkZS5MYHCW_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.post("/", chunkUODPGQLQ_cjs.requireAuth(), async (c) => {
   try {
     const db = c.env.DB;
     const user = c.get("user");
@@ -521,7 +687,7 @@ apiContentCrudRoutes.post("/", chunkZS5MYHCW_cjs.requireAuth(), async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.put("/:id", chunkZS5MYHCW_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.put("/:id", chunkUODPGQLQ_cjs.requireAuth(), async (c) => {
   try {
     const id = c.req.param("id");
     const db = c.env.DB;
@@ -591,7 +757,7 @@ apiContentCrudRoutes.put("/:id", chunkZS5MYHCW_cjs.requireAuth(), async (c) => {
     }, 500);
   }
 });
-apiContentCrudRoutes.delete("/:id", chunkZS5MYHCW_cjs.requireAuth(), async (c) => {
+apiContentCrudRoutes.delete("/:id", chunkUODPGQLQ_cjs.requireAuth(), async (c) => {
   try {
     const id = c.req.param("id");
     const db = c.env.DB;
@@ -633,7 +799,7 @@ apiRoutes.use("*", async (c, next) => {
   c.header("X-Response-Time", `${totalTime}ms`);
 });
 apiRoutes.use("*", async (c, next) => {
-  const cacheEnabled = await chunkZS5MYHCW_cjs.isPluginActive(c.env.DB, "core-cache");
+  const cacheEnabled = await chunkUODPGQLQ_cjs.isPluginActive(c.env.DB, "core-cache");
   c.set("cacheEnabled", cacheEnabled);
   await next();
 });
@@ -1136,12 +1302,12 @@ apiRoutes.get("/content", async (c) => {
         });
       }
     }
-    const filter = chunk5HMR2SJW_cjs.QueryFilterBuilder.parseFromQuery(queryParams);
+    const filter = chunkUOEIMC67_cjs.QueryFilterBuilder.parseFromQuery(queryParams);
     if (!filter.limit) {
       filter.limit = 50;
     }
     filter.limit = Math.min(filter.limit, 1e3);
-    const builder3 = new chunk5HMR2SJW_cjs.QueryFilterBuilder();
+    const builder3 = new chunkUOEIMC67_cjs.QueryFilterBuilder();
     const queryResult = builder3.build("content", filter);
     if (queryResult.errors.length > 0) {
       return c.json({
@@ -1228,7 +1394,7 @@ apiRoutes.get("/collections/:collection/content", async (c) => {
     if (!collectionResult) {
       return c.json({ error: "Collection not found" }, 404);
     }
-    const filter = chunk5HMR2SJW_cjs.QueryFilterBuilder.parseFromQuery(queryParams);
+    const filter = chunkUOEIMC67_cjs.QueryFilterBuilder.parseFromQuery(queryParams);
     if (!filter.where) {
       filter.where = { and: [] };
     }
@@ -1244,7 +1410,7 @@ apiRoutes.get("/collections/:collection/content", async (c) => {
       filter.limit = 50;
     }
     filter.limit = Math.min(filter.limit, 1e3);
-    const builder3 = new chunk5HMR2SJW_cjs.QueryFilterBuilder();
+    const builder3 = new chunkUOEIMC67_cjs.QueryFilterBuilder();
     const queryResult = builder3.build("content", filter);
     if (queryResult.errors.length > 0) {
       return c.json({
@@ -1369,7 +1535,7 @@ var fileValidationSchema = zod.z.object({
   // 50MB max
 });
 var apiMediaRoutes = new hono.Hono();
-apiMediaRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+apiMediaRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 apiMediaRoutes.post("/upload", async (c) => {
   try {
     const user = c.get("user");
@@ -2113,8 +2279,8 @@ apiSystemRoutes.get("/env", (c) => {
 });
 var api_system_default = apiSystemRoutes;
 var adminApiRoutes = new hono.Hono();
-adminApiRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
-adminApiRoutes.use("*", chunkZS5MYHCW_cjs.requireRole(["admin", "editor"]));
+adminApiRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
+adminApiRoutes.use("*", chunkUODPGQLQ_cjs.requireRole(["admin", "editor"]));
 adminApiRoutes.get("/stats", async (c) => {
   try {
     const db = c.env.DB;
@@ -2624,7 +2790,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-KMWEHV7B.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-5TP2QTJP.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -2649,7 +2815,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-KMWEHV7B.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-5TP2QTJP.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -2668,7 +2834,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-KMWEHV7B.cjs');
+    const { MigrationService: MigrationService2 } = await import('./migrations-5TP2QTJP.cjs');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -3150,7 +3316,7 @@ authRoutes.post(
       if (existingUser) {
         return c.json({ error: "User with this email or username already exists" }, 400);
       }
-      const passwordHash = await chunkZS5MYHCW_cjs.AuthManager.hashPassword(password);
+      const passwordHash = await chunkUODPGQLQ_cjs.AuthManager.hashPassword(password);
       const userId = crypto.randomUUID();
       const now = /* @__PURE__ */ new Date();
       await db.prepare(`
@@ -3170,7 +3336,7 @@ authRoutes.post(
         now.getTime(),
         now.getTime()
       ).run();
-      const token = await chunkZS5MYHCW_cjs.AuthManager.generateToken(userId, normalizedEmail, "viewer");
+      const token = await chunkUODPGQLQ_cjs.AuthManager.generateToken(userId, normalizedEmail, "viewer");
       cookie.setCookie(c, "auth_token", token, {
         httpOnly: true,
         secure: true,
@@ -3223,11 +3389,11 @@ authRoutes.post("/login", async (c) => {
     if (!user) {
       return c.json({ error: "Invalid email or password" }, 401);
     }
-    const isValidPassword = await chunkZS5MYHCW_cjs.AuthManager.verifyPassword(password, user.password_hash);
+    const isValidPassword = await chunkUODPGQLQ_cjs.AuthManager.verifyPassword(password, user.password_hash);
     if (!isValidPassword) {
       return c.json({ error: "Invalid email or password" }, 401);
     }
-    const token = await chunkZS5MYHCW_cjs.AuthManager.generateToken(user.id, user.email, user.role);
+    const token = await chunkUODPGQLQ_cjs.AuthManager.generateToken(user.id, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: true,
@@ -3276,7 +3442,7 @@ authRoutes.get("/logout", (c) => {
   });
   return c.redirect("/auth/login?message=You have been logged out successfully");
 });
-authRoutes.get("/me", chunkZS5MYHCW_cjs.requireAuth(), async (c) => {
+authRoutes.get("/me", chunkUODPGQLQ_cjs.requireAuth(), async (c) => {
   try {
     const user = c.get("user");
     if (!user) {
@@ -3293,13 +3459,13 @@ authRoutes.get("/me", chunkZS5MYHCW_cjs.requireAuth(), async (c) => {
     return c.json({ error: "Failed to get user" }, 500);
   }
 });
-authRoutes.post("/refresh", chunkZS5MYHCW_cjs.requireAuth(), async (c) => {
+authRoutes.post("/refresh", chunkUODPGQLQ_cjs.requireAuth(), async (c) => {
   try {
     const user = c.get("user");
     if (!user) {
       return c.json({ error: "Not authenticated" }, 401);
     }
-    const token = await chunkZS5MYHCW_cjs.AuthManager.generateToken(user.userId, user.email, user.role);
+    const token = await chunkUODPGQLQ_cjs.AuthManager.generateToken(user.userId, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: true,
@@ -3359,7 +3525,7 @@ authRoutes.post("/register/form", async (c) => {
         </div>
       `);
     }
-    const passwordHash = await chunkZS5MYHCW_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunkUODPGQLQ_cjs.AuthManager.hashPassword(password);
     const role = isFirstUser ? "admin" : "viewer";
     const userId = crypto.randomUUID();
     const now = /* @__PURE__ */ new Date();
@@ -3379,7 +3545,7 @@ authRoutes.post("/register/form", async (c) => {
       now.getTime(),
       now.getTime()
     ).run();
-    const token = await chunkZS5MYHCW_cjs.AuthManager.generateToken(userId, normalizedEmail, role);
+    const token = await chunkUODPGQLQ_cjs.AuthManager.generateToken(userId, normalizedEmail, role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: false,
@@ -3431,7 +3597,7 @@ authRoutes.post("/login/form", async (c) => {
         </div>
       `);
     }
-    const isValidPassword = await chunkZS5MYHCW_cjs.AuthManager.verifyPassword(password, user.password_hash);
+    const isValidPassword = await chunkUODPGQLQ_cjs.AuthManager.verifyPassword(password, user.password_hash);
     if (!isValidPassword) {
       return c.html(html.html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -3439,7 +3605,7 @@ authRoutes.post("/login/form", async (c) => {
         </div>
       `);
     }
-    const token = await chunkZS5MYHCW_cjs.AuthManager.generateToken(user.id, user.email, user.role);
+    const token = await chunkUODPGQLQ_cjs.AuthManager.generateToken(user.id, user.email, user.role);
     cookie.setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: false,
@@ -3498,7 +3664,7 @@ authRoutes.post("/seed-admin", async (c) => {
     `).run();
     const existingAdmin = await db.prepare("SELECT id FROM users WHERE email = ? OR username = ?").bind("admin@sonicjs.com", "admin").first();
     if (existingAdmin) {
-      const passwordHash2 = await chunkZS5MYHCW_cjs.AuthManager.hashPassword("sonicjs!");
+      const passwordHash2 = await chunkUODPGQLQ_cjs.AuthManager.hashPassword("sonicjs!");
       await db.prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?").bind(passwordHash2, Date.now(), existingAdmin.id).run();
       return c.json({
         message: "Admin user already exists (password updated)",
@@ -3510,7 +3676,7 @@ authRoutes.post("/seed-admin", async (c) => {
         }
       });
     }
-    const passwordHash = await chunkZS5MYHCW_cjs.AuthManager.hashPassword("sonicjs!");
+    const passwordHash = await chunkUODPGQLQ_cjs.AuthManager.hashPassword("sonicjs!");
     const userId = "admin-user-id";
     const now = Date.now();
     const adminEmail = "admin@sonicjs.com".toLowerCase();
@@ -3730,7 +3896,7 @@ authRoutes.post("/accept-invitation", async (c) => {
     if (existingUsername) {
       return c.json({ error: "Username is already taken" }, 400);
     }
-    const passwordHash = await chunkZS5MYHCW_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunkUODPGQLQ_cjs.AuthManager.hashPassword(password);
     const updateStmt = db.prepare(`
       UPDATE users SET 
         username = ?,
@@ -3749,7 +3915,7 @@ authRoutes.post("/accept-invitation", async (c) => {
       Date.now(),
       invitedUser.id
     ).run();
-    const authToken = await chunkZS5MYHCW_cjs.AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role);
+    const authToken = await chunkUODPGQLQ_cjs.AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role);
     cookie.setCookie(c, "auth_token", authToken, {
       httpOnly: true,
       secure: true,
@@ -3979,7 +4145,7 @@ authRoutes.post("/reset-password", async (c) => {
     if (Date.now() > user.password_reset_expires) {
       return c.json({ error: "Reset token has expired" }, 400);
     }
-    const newPasswordHash = await chunkZS5MYHCW_cjs.AuthManager.hashPassword(password);
+    const newPasswordHash = await chunkUODPGQLQ_cjs.AuthManager.hashPassword(password);
     try {
       const historyStmt = db.prepare(`
         INSERT INTO password_history (id, user_id, password_hash, created_at)
@@ -8406,9 +8572,9 @@ function parseFieldValue(field, formData, options = {}) {
   const { skipValidation = false } = options;
   const value = formData.get(field.field_name);
   const errors = [];
-  const blocksConfig = chunk5HMR2SJW_cjs.getBlocksFieldConfig(field.field_options);
+  const blocksConfig = chunkUOEIMC67_cjs.getBlocksFieldConfig(field.field_options);
   if (blocksConfig) {
-    const parsed = chunk5HMR2SJW_cjs.parseBlocksValue(value, blocksConfig);
+    const parsed = chunkUOEIMC67_cjs.parseBlocksValue(value, blocksConfig);
     if (!skipValidation && field.is_required && parsed.value.length === 0) {
       parsed.errors.push(`${field.field_label} is required`);
     }
@@ -8518,7 +8684,7 @@ function extractFieldData(fields, formData, options = {}) {
   }
   return { data, errors };
 }
-adminContentRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+adminContentRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 async function getCollectionFields(db, collectionId) {
   const cache = chunkVNLR35GO_cjs.getCacheService(chunkVNLR35GO_cjs.CACHE_CONFIGS.collection);
   return cache.getOrSet(
@@ -10519,7 +10685,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="first_name"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.firstName || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.firstName || "")}"
                       required
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10530,7 +10696,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="last_name"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.lastName || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.lastName || "")}"
                       required
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10541,7 +10707,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="username"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.username || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.username || "")}"
                       required
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10552,7 +10718,7 @@ function renderUserEditPage(data) {
                     <input
                       type="email"
                       name="email"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.email || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.email || "")}"
                       required
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10563,7 +10729,7 @@ function renderUserEditPage(data) {
                     <input
                       type="tel"
                       name="phone"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.phone || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.phone || "")}"
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
                   </div>
@@ -10577,7 +10743,7 @@ function renderUserEditPage(data) {
                         class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 dark:bg-white/5 py-1.5 pl-3 pr-8 text-base text-zinc-950 dark:text-white outline outline-1 -outline-offset-1 outline-zinc-500/30 dark:outline-zinc-400/30 *:bg-white dark:*:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-zinc-500 dark:focus-visible:outline-zinc-400 sm:text-sm/6"
                       >
                         ${data.roles.map((role) => `
-                          <option value="${chunk5HMR2SJW_cjs.escapeHtml(role.value)}" ${data.userToEdit.role === role.value ? "selected" : ""}>${chunk5HMR2SJW_cjs.escapeHtml(role.label)}</option>
+                          <option value="${chunkUOEIMC67_cjs.escapeHtml(role.value)}" ${data.userToEdit.role === role.value ? "selected" : ""}>${chunkUOEIMC67_cjs.escapeHtml(role.label)}</option>
                         `).join("")}
                       </select>
                       <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-zinc-600 dark:text-zinc-400 sm:size-4">
@@ -10598,7 +10764,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="profile_display_name"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.profile?.displayName || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.profile?.displayName || "")}"
                       placeholder="Public display name"
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10609,7 +10775,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="profile_company"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.profile?.company || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.profile?.company || "")}"
                       placeholder="Company or organization"
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10620,7 +10786,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="profile_job_title"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.profile?.jobTitle || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.profile?.jobTitle || "")}"
                       placeholder="Job title or role"
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10631,7 +10797,7 @@ function renderUserEditPage(data) {
                     <input
                       type="url"
                       name="profile_website"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.profile?.website || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.profile?.website || "")}"
                       placeholder="https://example.com"
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10642,7 +10808,7 @@ function renderUserEditPage(data) {
                     <input
                       type="text"
                       name="profile_location"
-                      value="${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.profile?.location || "")}"
+                      value="${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.profile?.location || "")}"
                       placeholder="City, Country"
                       class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
                     />
@@ -10666,7 +10832,7 @@ function renderUserEditPage(data) {
                     rows="3"
                     placeholder="Short bio or description"
                     class="w-full rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white shadow-sm ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-white transition-shadow"
-                  >${chunk5HMR2SJW_cjs.escapeHtml(data.userToEdit.profile?.bio || "")}</textarea>
+                  >${chunkUOEIMC67_cjs.escapeHtml(data.userToEdit.profile?.bio || "")}</textarea>
                 </div>
               </div>
 
@@ -11566,7 +11732,7 @@ function renderUsersListPage(data) {
 
 // src/routes/admin-users.ts
 var userRoutes = new hono.Hono();
-userRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+userRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 userRoutes.get("/", (c) => {
   return c.redirect("/admin/dashboard");
 });
@@ -11665,12 +11831,12 @@ userRoutes.put("/profile", async (c) => {
   const db = c.env.DB;
   try {
     const formData = await c.req.formData();
-    const firstName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("first_name")?.toString());
-    const lastName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("last_name")?.toString());
-    const username = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("username")?.toString());
+    const firstName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("first_name")?.toString());
+    const lastName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("last_name")?.toString());
+    const username = chunkUOEIMC67_cjs.sanitizeInput(formData.get("username")?.toString());
     const email = formData.get("email")?.toString()?.trim().toLowerCase() || "";
-    const phone = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
-    const bio = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
+    const phone = chunkUOEIMC67_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
+    const bio = chunkUOEIMC67_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
     const timezone = formData.get("timezone")?.toString() || "UTC";
     const language = formData.get("language")?.toString() || "en";
     const emailNotifications = formData.get("email_notifications") === "1";
@@ -11721,7 +11887,7 @@ userRoutes.put("/profile", async (c) => {
       Date.now(),
       user.userId
     ).run();
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "profile.update",
@@ -11784,7 +11950,7 @@ userRoutes.post("/profile/avatar", async (c) => {
       SELECT first_name, last_name FROM users WHERE id = ?
     `);
     const userData = await userStmt.bind(user.userId).first();
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "profile.avatar_update",
@@ -11855,7 +12021,7 @@ userRoutes.post("/profile/password", async (c) => {
         dismissible: true
       }));
     }
-    const validPassword = await chunkZS5MYHCW_cjs.AuthManager.verifyPassword(currentPassword, userData.password_hash);
+    const validPassword = await chunkUODPGQLQ_cjs.AuthManager.verifyPassword(currentPassword, userData.password_hash);
     if (!validPassword) {
       return c.html(renderAlert2({
         type: "error",
@@ -11863,7 +12029,7 @@ userRoutes.post("/profile/password", async (c) => {
         dismissible: true
       }));
     }
-    const newPasswordHash = await chunkZS5MYHCW_cjs.AuthManager.hashPassword(newPassword);
+    const newPasswordHash = await chunkUODPGQLQ_cjs.AuthManager.hashPassword(newPassword);
     const historyStmt = db.prepare(`
       INSERT INTO password_history (id, user_id, password_hash, created_at)
       VALUES (?, ?, ?, ?)
@@ -11879,7 +12045,7 @@ userRoutes.post("/profile/password", async (c) => {
       WHERE id = ?
     `);
     await updateStmt.bind(newPasswordHash, Date.now(), user.userId).run();
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "profile.password_change",
@@ -11946,7 +12112,7 @@ userRoutes.get("/users", async (c) => {
     `);
     const countResult = await countStmt.bind(...params).first();
     const totalUsers = countResult?.total || 0;
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "users.list_view",
@@ -12048,12 +12214,12 @@ userRoutes.post("/users/new", async (c) => {
   const user = c.get("user");
   try {
     const formData = await c.req.formData();
-    const firstName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("first_name")?.toString());
-    const lastName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("last_name")?.toString());
-    const username = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("username")?.toString());
+    const firstName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("first_name")?.toString());
+    const lastName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("last_name")?.toString());
+    const username = chunkUOEIMC67_cjs.sanitizeInput(formData.get("username")?.toString());
     const email = formData.get("email")?.toString()?.trim().toLowerCase() || "";
-    const phone = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
-    const bio = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
+    const phone = chunkUOEIMC67_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
+    const bio = chunkUOEIMC67_cjs.sanitizeInput(formData.get("bio")?.toString()) || null;
     const role = formData.get("role")?.toString() || "viewer";
     const password = formData.get("password")?.toString() || "";
     const confirmPassword = formData.get("confirm_password")?.toString() || "";
@@ -12100,7 +12266,7 @@ userRoutes.post("/users/new", async (c) => {
         dismissible: true
       }));
     }
-    const passwordHash = await chunkZS5MYHCW_cjs.AuthManager.hashPassword(password);
+    const passwordHash = await chunkUODPGQLQ_cjs.AuthManager.hashPassword(password);
     const userId = crypto.randomUUID();
     const createStmt = db.prepare(`
       INSERT INTO users (
@@ -12123,7 +12289,7 @@ userRoutes.post("/users/new", async (c) => {
       Date.now(),
       Date.now()
     ).run();
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "user!.create",
@@ -12161,7 +12327,7 @@ userRoutes.get("/users/:id", async (c) => {
     if (!userRecord) {
       return c.json({ error: "User not found" }, 404);
     }
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "user!.view",
@@ -12269,20 +12435,20 @@ userRoutes.put("/users/:id", async (c) => {
   const userId = c.req.param("id");
   try {
     const formData = await c.req.formData();
-    const firstName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("first_name")?.toString());
-    const lastName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("last_name")?.toString());
-    const username = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("username")?.toString());
+    const firstName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("first_name")?.toString());
+    const lastName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("last_name")?.toString());
+    const username = chunkUOEIMC67_cjs.sanitizeInput(formData.get("username")?.toString());
     const email = formData.get("email")?.toString()?.trim().toLowerCase() || "";
-    const phone = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
+    const phone = chunkUOEIMC67_cjs.sanitizeInput(formData.get("phone")?.toString()) || null;
     const role = formData.get("role")?.toString() || "viewer";
     const isActive = formData.get("is_active") === "1";
     const emailVerified = formData.get("email_verified") === "1";
-    const profileDisplayName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("profile_display_name")?.toString()) || null;
-    const profileBio = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("profile_bio")?.toString()) || null;
-    const profileCompany = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("profile_company")?.toString()) || null;
-    const profileJobTitle = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("profile_job_title")?.toString()) || null;
+    const profileDisplayName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("profile_display_name")?.toString()) || null;
+    const profileBio = chunkUOEIMC67_cjs.sanitizeInput(formData.get("profile_bio")?.toString()) || null;
+    const profileCompany = chunkUOEIMC67_cjs.sanitizeInput(formData.get("profile_company")?.toString()) || null;
+    const profileJobTitle = chunkUOEIMC67_cjs.sanitizeInput(formData.get("profile_job_title")?.toString()) || null;
     const profileWebsite = formData.get("profile_website")?.toString()?.trim() || null;
-    const profileLocation = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("profile_location")?.toString()) || null;
+    const profileLocation = chunkUOEIMC67_cjs.sanitizeInput(formData.get("profile_location")?.toString()) || null;
     const profileDateOfBirthStr = formData.get("profile_date_of_birth")?.toString()?.trim() || null;
     const profileDateOfBirth = profileDateOfBirthStr ? new Date(profileDateOfBirthStr).getTime() : null;
     if (!firstName || !lastName || !username || !email) {
@@ -12386,7 +12552,7 @@ userRoutes.put("/users/:id", async (c) => {
         ).run();
       }
     }
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "user.update",
@@ -12431,7 +12597,7 @@ userRoutes.post("/users/:id/toggle", async (c) => {
       UPDATE users SET is_active = ?, updated_at = ? WHERE id = ?
     `);
     await toggleStmt.bind(active ? 1 : 0, Date.now(), userId).run();
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       active ? "user.activate" : "user.deactivate",
@@ -12472,7 +12638,7 @@ userRoutes.delete("/users/:id", async (c) => {
         DELETE FROM users WHERE id = ?
       `);
       await deleteStmt.bind(userId).run();
-      await chunkZS5MYHCW_cjs.logActivity(
+      await chunkUODPGQLQ_cjs.logActivity(
         db,
         user.userId,
         "user!.hard_delete",
@@ -12491,7 +12657,7 @@ userRoutes.delete("/users/:id", async (c) => {
         UPDATE users SET is_active = 0, updated_at = ? WHERE id = ?
       `);
       await deleteStmt.bind(Date.now(), userId).run();
-      await chunkZS5MYHCW_cjs.logActivity(
+      await chunkUODPGQLQ_cjs.logActivity(
         db,
         user.userId,
         "user!.soft_delete",
@@ -12518,8 +12684,8 @@ userRoutes.post("/invite-user", async (c) => {
     const formData = await c.req.formData();
     const email = formData.get("email")?.toString()?.trim().toLowerCase() || "";
     const role = formData.get("role")?.toString()?.trim() || "viewer";
-    const firstName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("first_name")?.toString());
-    const lastName = chunk5HMR2SJW_cjs.sanitizeInput(formData.get("last_name")?.toString());
+    const firstName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("first_name")?.toString());
+    const lastName = chunkUOEIMC67_cjs.sanitizeInput(formData.get("last_name")?.toString());
     if (!email || !firstName || !lastName) {
       return c.json({ error: "Email, first name, and last name are required" }, 400);
     }
@@ -12557,7 +12723,7 @@ userRoutes.post("/invite-user", async (c) => {
       Date.now(),
       Date.now()
     ).run();
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "user!.invite_sent",
@@ -12614,7 +12780,7 @@ userRoutes.post("/resend-invitation/:id", async (c) => {
       Date.now(),
       userId
     ).run();
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "user!.invitation_resent",
@@ -12650,7 +12816,7 @@ userRoutes.delete("/cancel-invitation/:id", async (c) => {
     }
     const deleteStmt = db.prepare(`DELETE FROM users WHERE id = ?`);
     await deleteStmt.bind(userId).run();
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "user!.invitation_cancelled",
@@ -12733,7 +12899,7 @@ userRoutes.get("/activity-logs", async (c) => {
       ...log,
       details: log.details ? JSON.parse(log.details) : null
     }));
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "activity.logs_viewed",
@@ -12840,7 +13006,7 @@ userRoutes.get("/activity-logs/export", async (c) => {
       csvRows.push(row.join(","));
     }
     const csvContent = csvRows.join("\n");
-    await chunkZS5MYHCW_cjs.logActivity(
+    await chunkUODPGQLQ_cjs.logActivity(
       db,
       user.userId,
       "activity.logs_exported",
@@ -14179,7 +14345,7 @@ var fileValidationSchema2 = zod.z.object({
   // 50MB max
 });
 var adminMediaRoutes = new hono.Hono();
-adminMediaRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+adminMediaRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 adminMediaRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -14765,7 +14931,7 @@ adminMediaRoutes.put("/:id", async (c) => {
     `);
   }
 });
-adminMediaRoutes.delete("/cleanup", chunkZS5MYHCW_cjs.requireRole("admin"), async (c) => {
+adminMediaRoutes.delete("/cleanup", chunkUODPGQLQ_cjs.requireRole("admin"), async (c) => {
   try {
     const db = c.env.DB;
     const allMediaStmt = db.prepare("SELECT id, r2_key, filename FROM media WHERE deleted_at IS NULL");
@@ -16988,7 +17154,7 @@ function renderEmailSettingsContent(plugin, settings) {
 
 // src/routes/admin-plugins.ts
 var adminPluginRoutes = new hono.Hono();
-adminPluginRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+adminPluginRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 var AVAILABLE_PLUGINS = [
   {
     id: "third-party-faq",
@@ -18393,7 +18559,7 @@ function renderLogConfigPage(data) {
 
 // src/routes/admin-logs.ts
 var adminLogsRoutes = new hono.Hono();
-adminLogsRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+adminLogsRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 adminLogsRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -20721,9 +20887,9 @@ function renderStorageUsage(databaseSizeBytes, mediaSizeBytes) {
 }
 
 // src/routes/admin-dashboard.ts
-var VERSION = chunk5HMR2SJW_cjs.getCoreVersion();
+var VERSION = chunkUOEIMC67_cjs.getCoreVersion();
 var router = new hono.Hono();
-router.use("*", chunkZS5MYHCW_cjs.requireAuth());
+router.use("*", chunkUODPGQLQ_cjs.requireAuth());
 router.get("/", async (c) => {
   const user = c.get("user");
   try {
@@ -22503,7 +22669,7 @@ function renderCollectionFormPage(data) {
 
 // src/routes/admin-collections.ts
 var adminCollectionsRoutes = new hono.Hono();
-adminCollectionsRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+adminCollectionsRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 adminCollectionsRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -24692,7 +24858,7 @@ function renderDatabaseToolsSettings(settings) {
 
 // src/routes/admin-settings.ts
 var adminSettingsRoutes = new hono.Hono();
-adminSettingsRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+adminSettingsRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 function getMockSettings(user) {
   return {
     general: {
@@ -24860,7 +25026,7 @@ adminSettingsRoutes.get("/database-tools", (c) => {
 adminSettingsRoutes.get("/api/migrations/status", async (c) => {
   try {
     const db = c.env.DB;
-    const migrationService = new chunkRZWYEWXM_cjs.MigrationService(db);
+    const migrationService = new chunkI6RW6P7M_cjs.MigrationService(db);
     const status = await migrationService.getMigrationStatus();
     return c.json({
       success: true,
@@ -24884,7 +25050,7 @@ adminSettingsRoutes.post("/api/migrations/run", async (c) => {
       }, 403);
     }
     const db = c.env.DB;
-    const migrationService = new chunkRZWYEWXM_cjs.MigrationService(db);
+    const migrationService = new chunkI6RW6P7M_cjs.MigrationService(db);
     const result = await migrationService.runPendingMigrations();
     return c.json({
       success: result.success,
@@ -24902,7 +25068,7 @@ adminSettingsRoutes.post("/api/migrations/run", async (c) => {
 adminSettingsRoutes.get("/api/migrations/validate", async (c) => {
   try {
     const db = c.env.DB;
-    const migrationService = new chunkRZWYEWXM_cjs.MigrationService(db);
+    const migrationService = new chunkI6RW6P7M_cjs.MigrationService(db);
     const validation = await migrationService.validateSchema();
     return c.json({
       success: true,
@@ -26780,7 +26946,7 @@ function renderFormCreatePage(data) {
 
 // src/routes/admin-forms.ts
 var adminFormsRoutes = new hono.Hono();
-adminFormsRoutes.use("*", chunkZS5MYHCW_cjs.requireAuth());
+adminFormsRoutes.use("*", chunkUODPGQLQ_cjs.requireAuth());
 adminFormsRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -27910,9 +28076,9 @@ function renderAPIReferencePage(data) {
 }
 
 // src/routes/admin-api-reference.ts
-var VERSION2 = chunk5HMR2SJW_cjs.getCoreVersion();
+var VERSION2 = chunkUOEIMC67_cjs.getCoreVersion();
 var router2 = new hono.Hono();
-router2.use("*", chunkZS5MYHCW_cjs.requireAuth());
+router2.use("*", chunkUODPGQLQ_cjs.requireAuth());
 var apiEndpoints = [
   // Auth endpoints
   {
@@ -28194,5 +28360,5 @@ exports.router = router;
 exports.router2 = router2;
 exports.test_cleanup_default = test_cleanup_default;
 exports.userRoutes = userRoutes;
-//# sourceMappingURL=chunk-QVIYLOFA.cjs.map
-//# sourceMappingURL=chunk-QVIYLOFA.cjs.map
+//# sourceMappingURL=chunk-UVNAA4Q6.cjs.map
+//# sourceMappingURL=chunk-UVNAA4Q6.cjs.map

@@ -1,10 +1,10 @@
 import { getCacheService, CACHE_CONFIGS, getLogger, SettingsService } from './chunk-G44QUVNM.js';
-import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-FOF2JJW5.js';
+import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity } from './chunk-EHPUHFVI.js';
 import { PluginService } from './chunk-YFJJU26H.js';
-import { MigrationService } from './chunk-HZXTNEFH.js';
+import { MigrationService } from './chunk-C4A6XMUJ.js';
 import { init_admin_layout_catalyst_template, renderDesignPage, renderCheckboxPage, renderTestimonialsList, renderCodeExamplesList, renderAlert, renderTable, renderPagination, renderConfirmationDialog, getConfirmationDialogScript, renderAdminLayoutCatalyst, renderAdminLayout, adminLayoutV2, renderForm } from './chunk-VCH6HXVP.js';
 import { PluginBuilder, TurnstileService } from './chunk-J5WGMRSU.js';
-import { QueryFilterBuilder, sanitizeInput, getCoreVersion, escapeHtml, getBlocksFieldConfig, parseBlocksValue } from './chunk-34QIAULP.js';
+import { QueryFilterBuilder, sanitizeInput, getCoreVersion, escapeHtml, getBlocksFieldConfig, parseBlocksValue } from './chunk-7DXWBEQP.js';
 import { metricsTracker } from './chunk-FICTAGD4.js';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -30,14 +30,19 @@ var FTS5Service = class {
     highlightTag: "mark"
   };
   options;
+  synonymService;
+  /** Set synonym service for query expansion */
+  setSynonymService(service) {
+    this.synonymService = service;
+  }
   /**
    * Search using FTS5 with BM25 ranking and highlighting
    * Auto-indexes any missing content in selected collections before searching
    */
-  async search(query, settings) {
+  async search(query, settings, weightOverrides) {
     const startTime = Date.now();
     try {
-      const escapedQuery = this.sanitizeFTS5Query(query.query);
+      let escapedQuery = this.sanitizeFTS5Query(query.query);
       if (!escapedQuery || escapedQuery === '""') {
         return {
           results: [],
@@ -45,6 +50,9 @@ var FTS5Service = class {
           query_time_ms: Date.now() - startTime,
           mode: "fts5"
         };
+      }
+      if (this.synonymService && settings.query_synonyms_enabled !== false) {
+        escapedQuery = await this.expandWithSynonyms(escapedQuery);
       }
       const collections = query.filters?.collections?.length ? query.filters.collections : settings.selected_collections;
       if (collections.length === 0) {
@@ -58,12 +66,15 @@ var FTS5Service = class {
       await this.ensureCollectionsIndexed(collections);
       const collectionPlaceholders = collections.map(() => "?").join(", ");
       const tag = this.options.highlightTag || "mark";
+      const titleBoost = weightOverrides?.titleBoost ?? this.options.titleBoost;
+      const slugBoost = weightOverrides?.slugBoost ?? this.options.slugBoost;
+      const bodyBoost = weightOverrides?.bodyBoost ?? this.options.bodyBoost;
       const sql = `
         SELECT
           fts.content_id,
           fts.collection_id,
           fts.title,
-          bm25(content_fts, ${this.options.titleBoost}, ${this.options.slugBoost}, ${this.options.bodyBoost}, 0, 0) as score,
+          bm25(content_fts, ${titleBoost}, ${slugBoost}, ${bodyBoost}, 0, 0) as score,
           snippet(content_fts, 2, '<${tag}>', '</${tag}>', '...', ${this.options.snippetLength}) as body_snippet,
           highlight(content_fts, 0, '<${tag}>', '</${tag}>') as title_highlight,
           c.slug,
@@ -161,39 +172,74 @@ var FTS5Service = class {
           VALUES (?, ?, ?, 'indexed')
         `).bind(contentId, content.collection_id, Date.now())
       ]);
-      console.log(`[FTS5Service] Indexed content ${contentId}`);
     } catch (error) {
       console.error(`[FTS5Service] Error indexing ${contentId}:`, error);
       throw error;
     }
   }
   /**
-   * Index all published content in a collection
+   * Index all published content in a collection (bulk approach).
+   * Fetches all content in one query, processes text in memory,
+   * then inserts in D1 batches for efficiency.
    */
-  async indexCollection(collectionId) {
-    console.log(`[FTS5Service] Starting indexing for collection: ${collectionId}`);
+  async indexCollection(collectionId, onProgress) {
+    console.log(`[FTS5Service] Starting bulk indexing for collection: ${collectionId}`);
     try {
       const { results } = await this.db.prepare(`
-          SELECT id FROM content
+          SELECT id, title, slug, data, collection_id
+          FROM content
           WHERE collection_id = ? AND status != 'deleted'
         `).bind(collectionId).all();
       const totalItems = results?.length || 0;
       if (totalItems === 0) {
         console.log(`[FTS5Service] No content found in collection ${collectionId}`);
+        if (onProgress) await onProgress(0, 0);
         return { total_items: 0, indexed_items: 0, errors: 0 };
       }
+      await this.db.batch([
+        this.db.prepare("DELETE FROM content_fts WHERE collection_id = ?").bind(collectionId),
+        this.db.prepare("DELETE FROM content_fts_sync WHERE collection_id = ?").bind(collectionId)
+      ]);
       let indexedItems = 0;
       let errors = 0;
-      for (const item of results || []) {
-        try {
-          await this.indexContent(item.id);
-          indexedItems++;
-        } catch (error) {
-          console.error(`[FTS5Service] Error indexing item ${item.id}:`, error);
-          errors++;
+      const now = Date.now();
+      const BATCH_SIZE = 25;
+      for (let i = 0; i < totalItems; i += BATCH_SIZE) {
+        const batch = results.slice(i, i + BATCH_SIZE);
+        const statements = [];
+        for (const item of batch) {
+          try {
+            const bodyText = this.extractSearchableText(item.data);
+            statements.push(
+              this.db.prepare(`
+                INSERT INTO content_fts(title, slug, body, content_id, collection_id)
+                VALUES (?, ?, ?, ?, ?)
+              `).bind(item.title || "", item.slug || "", bodyText, item.id, item.collection_id)
+            );
+            statements.push(
+              this.db.prepare(`
+                INSERT OR REPLACE INTO content_fts_sync(content_id, collection_id, indexed_at, status)
+                VALUES (?, ?, ?, 'indexed')
+              `).bind(item.id, item.collection_id, now)
+            );
+          } catch (error) {
+            errors++;
+          }
+        }
+        if (statements.length > 0) {
+          try {
+            await this.db.batch(statements);
+            indexedItems += statements.length / 2;
+          } catch (error) {
+            console.error(`[FTS5Service] Batch insert error at offset ${i}:`, error);
+            errors += batch.length;
+          }
+        }
+        if (onProgress) {
+          await onProgress(indexedItems, totalItems);
         }
       }
-      console.log(`[FTS5Service] Indexing complete: ${indexedItems}/${totalItems} items, ${errors} errors`);
+      console.log(`[FTS5Service] Bulk indexing complete: ${indexedItems}/${totalItems} items, ${errors} errors`);
       return {
         total_items: totalItems,
         indexed_items: indexedItems,
@@ -203,6 +249,64 @@ var FTS5Service = class {
       console.error(`[FTS5Service] Error indexing collection ${collectionId}:`, error);
       throw error;
     }
+  }
+  /**
+   * Index a batch of content items from a collection using batch D1 inserts.
+   * Returns the number remaining so the caller can loop.
+   */
+  async indexCollectionBatch(collectionId, batchSize = 200) {
+    const { results } = await this.db.prepare(`
+        SELECT c.id, c.title, c.slug, c.data, c.collection_id
+        FROM content c
+        LEFT JOIN content_fts_sync s ON c.id = s.content_id
+        WHERE c.collection_id = ? AND c.status != 'deleted'
+          AND s.content_id IS NULL
+        LIMIT ?
+      `).bind(collectionId, batchSize).all();
+    const toIndex = results || [];
+    const now = Date.now();
+    let indexed = 0;
+    const SUB_BATCH = 25;
+    for (let i = 0; i < toIndex.length; i += SUB_BATCH) {
+      const batch = toIndex.slice(i, i + SUB_BATCH);
+      const statements = [];
+      for (const item of batch) {
+        try {
+          const bodyText = this.extractSearchableText(item.data);
+          statements.push(
+            this.db.prepare(
+              "INSERT INTO content_fts(title, slug, body, content_id, collection_id) VALUES (?, ?, ?, ?, ?)"
+            ).bind(item.title || "", item.slug || "", bodyText, item.id, item.collection_id)
+          );
+          statements.push(
+            this.db.prepare(
+              "INSERT OR REPLACE INTO content_fts_sync(content_id, collection_id, indexed_at, status) VALUES (?, ?, ?, 'indexed')"
+            ).bind(item.id, item.collection_id, now)
+          );
+        } catch (error) {
+        }
+      }
+      if (statements.length > 0) {
+        try {
+          await this.db.batch(statements);
+          indexed += statements.length / 2;
+        } catch (error) {
+          console.error(`[FTS5Service] Batch insert error at offset ${i}:`, error);
+        }
+      }
+    }
+    const remainResult = await this.db.prepare(`
+        SELECT COUNT(*) as cnt FROM content c
+        LEFT JOIN content_fts_sync s ON c.id = s.content_id
+        WHERE c.collection_id = ? AND c.status != 'deleted'
+          AND s.content_id IS NULL
+      `).bind(collectionId).first();
+    const totalResult = await this.db.prepare("SELECT COUNT(*) as cnt FROM content WHERE collection_id = ? AND status != 'deleted'").bind(collectionId).first();
+    return {
+      indexed,
+      remaining: remainResult?.cnt || 0,
+      total: totalResult?.cnt || 0
+    };
   }
   /**
    * Remove content from FTS index
@@ -367,6 +471,36 @@ var FTS5Service = class {
     }
   }
   /**
+   * Expand a sanitized FTS5 query string with synonym terms.
+   * Input: "coffee*" (single) or "coffee OR beans" (multiple)
+   * Output: "coffee* OR espresso OR caffeine" or "coffee OR espresso OR beans"
+   */
+  async expandWithSynonyms(sanitizedQuery) {
+    try {
+      let terms;
+      let hasPrefixMatch = false;
+      if (sanitizedQuery.endsWith("*")) {
+        terms = [sanitizedQuery.slice(0, -1)];
+        hasPrefixMatch = true;
+      } else {
+        terms = sanitizedQuery.split(" OR ").map((t) => t.trim()).filter(Boolean);
+      }
+      if (terms.length === 0) return sanitizedQuery;
+      const expanded = await this.synonymService.expandQuery(terms);
+      if (expanded.length === terms.length) return sanitizedQuery;
+      const capped = expanded.slice(0, 20);
+      if (hasPrefixMatch && terms.length === 1) {
+        const original = terms[0] + "*";
+        const synonyms = capped.filter((t) => t !== terms[0]);
+        return [original, ...synonyms].join(" OR ");
+      }
+      return capped.join(" OR ");
+    } catch (error) {
+      console.error("[FTS5Service] Synonym expansion error (using original query):", error);
+      return sanitizedQuery;
+    }
+  }
+  /**
    * Sanitize user input for FTS5 MATCH clause
    * Removes operators and special characters that could cause errors
    */
@@ -374,15 +508,47 @@ var FTS5Service = class {
     if (!query || typeof query !== "string") {
       return '""';
     }
-    let sanitized = query.replace(/['"]/g, "").replace(/[()[\]{}]/g, "").replace(/\b(AND|OR|NOT|NEAR)\b/gi, "").replace(/\*/g, "").replace(/:/g, "").replace(/\^/g, "").replace(/-/g, " ").trim();
-    const terms = sanitized.split(/\s+/).filter((t) => t.length > 0);
+    let sanitized = query.replace(/-/g, " ").replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+    const stopWords = /* @__PURE__ */ new Set([
+      "a",
+      "an",
+      "the",
+      "is",
+      "are",
+      "was",
+      "were",
+      "be",
+      "to",
+      "of",
+      "in",
+      "on",
+      "at",
+      "by",
+      "or",
+      "and",
+      "not",
+      "for",
+      "it",
+      "as",
+      "do",
+      "if",
+      "no",
+      "so",
+      "up",
+      "but",
+      "its",
+      "has",
+      "had",
+      "near"
+    ]);
+    const terms = sanitized.split(/\s+/).filter((t) => t.length > 1 && !stopWords.has(t));
     if (terms.length === 0) {
       return '""';
     }
     if (terms.length === 1) {
-      return `"${terms[0]}"*`;
+      return `${terms[0]}*`;
     }
-    return terms.map((t) => `"${t}"`).join(" ");
+    return terms.join(" OR ");
   }
 };
 
@@ -2622,7 +2788,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-2GFMWQQR.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-JUV3N3FA.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -2647,7 +2813,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-2GFMWQQR.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-JUV3N3FA.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -2666,7 +2832,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-2GFMWQQR.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-JUV3N3FA.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -28167,5 +28333,5 @@ var ROUTES_INFO = {
 };
 
 export { FTS5Service, ROUTES_INFO, adminCheckboxRoutes, adminCollectionsRoutes, adminDesignRoutes, adminFormsRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_api_default, admin_code_examples_default, admin_content_default, admin_testimonials_default, api_content_crud_default, api_default, api_media_default, api_system_default, auth_default, getConfirmationDialogScript2 as getConfirmationDialogScript, public_forms_default, renderConfirmationDialog2 as renderConfirmationDialog, router, router2, test_cleanup_default, userRoutes };
-//# sourceMappingURL=chunk-UC7D7NXZ.js.map
-//# sourceMappingURL=chunk-UC7D7NXZ.js.map
+//# sourceMappingURL=chunk-JQWMW6T4.js.map
+//# sourceMappingURL=chunk-JQWMW6T4.js.map

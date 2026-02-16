@@ -10,6 +10,7 @@ import { RankingPipelineService } from '../services/ranking-pipeline.service'
 import { SynonymService } from '../services/synonym.service'
 import { EmbeddingService } from '../services/embedding.service'
 import { ChunkingService } from '../services/chunking.service'
+import { renderSettingsPage } from '../components/settings-page'
 import type { AISearchSettings, SearchQuery } from '../types'
 
 type Variables = {
@@ -32,10 +33,59 @@ adminRoutes.use('*', requireAuth())
 
 /**
  * GET /admin/plugins/ai-search
- * Redirect to the dedicated Search admin page
+ * Render settings page
  */
 adminRoutes.get('/', async (c) => {
-  return c.redirect('/admin/search')
+  try {
+    const user = c.get('user')
+    const db = c.env.DB
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE_INDEX
+
+    const service = new AISearchService(db, ai, vectorize)
+    const indexer = new IndexManager(db, ai, vectorize)
+
+    // Get settings
+    const settings = await service.getSettings()
+
+    // Get all collections with status
+    const collections = await service.getAllCollections()
+
+    // If no collections, try direct query
+    if (collections.length === 0) {
+      const directQuery = await db.prepare('SELECT id, name, display_name FROM collections WHERE is_active = 1').all()
+      if (directQuery.results && directQuery.results.length > 0) {
+        console.log('[AI Search Settings Route] Direct DB query found:', directQuery.results.length, 'collections')
+      }
+    }
+
+    // Get new collections notifications
+    const newCollections = await service.detectNewCollections()
+
+    // Get index status for all collections
+    const indexStatus = await indexer.getAllIndexStatus()
+
+    // Get analytics
+    const analytics = await service.getSearchAnalytics()
+
+    return c.html(
+      renderSettingsPage({
+        settings,
+        collections: collections || [],
+        newCollections: newCollections || [],
+        indexStatus: indexStatus || {},
+        analytics,
+        user: {
+          name: user.email,
+          email: user.email,
+          role: user.role,
+        },
+      })
+    )
+  } catch (error) {
+    console.error('Error rendering AI Search settings:', error)
+    return c.html(`<p>Error loading settings: ${error instanceof Error ? error.message : String(error)}</p>`, 500)
+  }
 })
 
 /**

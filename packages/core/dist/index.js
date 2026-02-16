@@ -1,19 +1,19 @@
-import { FTS5Service, renderConfirmationDialog, getConfirmationDialogScript, api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminFormsRoutes, adminSettingsRoutes, public_forms_default, router2, admin_content_default, adminMediaRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-UC7D7NXZ.js';
-export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-UC7D7NXZ.js';
+import { FTS5Service, renderConfirmationDialog, getConfirmationDialogScript, api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminFormsRoutes, adminSettingsRoutes, public_forms_default, router2, admin_content_default, adminMediaRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-JQWMW6T4.js';
+export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-JQWMW6T4.js';
 import { SettingsService, schema_exports } from './chunk-G44QUVNM.js';
 export { Logger, apiTokens, collections, content, contentVersions, getLogger, initLogger, insertCollectionSchema, insertContentSchema, insertLogConfigSchema, insertMediaSchema, insertPluginActivityLogSchema, insertPluginAssetSchema, insertPluginHookSchema, insertPluginRouteSchema, insertPluginSchema, insertSystemLogSchema, insertUserSchema, insertWorkflowHistorySchema, logConfig, media, pluginActivityLog, pluginAssets, pluginHooks, pluginRoutes, plugins, selectCollectionSchema, selectContentSchema, selectLogConfigSchema, selectMediaSchema, selectPluginActivityLogSchema, selectPluginAssetSchema, selectPluginHookSchema, selectPluginRouteSchema, selectPluginSchema, selectSystemLogSchema, selectUserSchema, selectWorkflowHistorySchema, systemLogs, users, workflowHistory } from './chunk-G44QUVNM.js';
-import { requireAuth, AuthManager, metricsMiddleware, bootstrapMiddleware } from './chunk-FOF2JJW5.js';
-export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware } from './chunk-FOF2JJW5.js';
+import { requireAuth, AuthManager, metricsMiddleware, bootstrapMiddleware } from './chunk-EHPUHFVI.js';
+export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware } from './chunk-EHPUHFVI.js';
 export { PluginBootstrapService, PluginService as PluginServiceClass, cleanupRemovedCollections, fullCollectionSync, getAvailableCollectionNames, getManagedCollections, isCollectionManaged, loadCollectionConfig, loadCollectionConfigs, registerCollections, syncCollection, syncCollections, validateCollectionConfig } from './chunk-YFJJU26H.js';
-export { MigrationService } from './chunk-HZXTNEFH.js';
+export { MigrationService } from './chunk-C4A6XMUJ.js';
 export { renderFilterBar } from './chunk-H7AMQWVI.js';
 import { init_admin_layout_catalyst_template, renderAdminLayout, renderAdminLayoutCatalyst } from './chunk-VCH6HXVP.js';
 export { getConfirmationDialogScript, renderAlert, renderConfirmationDialog, renderForm, renderFormField, renderPagination, renderTable } from './chunk-VCH6HXVP.js';
 export { HookSystemImpl, HookUtils, PluginManager as PluginManagerClass, PluginRegistryImpl, PluginValidator as PluginValidatorClass, ScopedHookSystem as ScopedHookSystemClass } from './chunk-CJYFSKH7.js';
 import { PluginBuilder } from './chunk-J5WGMRSU.js';
 export { PluginBuilder, PluginHelpers } from './chunk-J5WGMRSU.js';
-import { package_default, getCoreVersion } from './chunk-34QIAULP.js';
-export { QueryFilterBuilder, SONICJS_VERSION, TemplateRenderer, buildQuery, escapeHtml, getCoreVersion, renderTemplate, sanitizeInput, sanitizeObject, templateRenderer } from './chunk-34QIAULP.js';
+import { package_default, getCoreVersion } from './chunk-7DXWBEQP.js';
+export { QueryFilterBuilder, SONICJS_VERSION, TemplateRenderer, buildQuery, escapeHtml, getCoreVersion, renderTemplate, sanitizeInput, sanitizeObject, templateRenderer } from './chunk-7DXWBEQP.js';
 import './chunk-X7ZAEI5S.js';
 export { metricsTracker } from './chunk-FICTAGD4.js';
 export { HOOKS } from './chunk-LOUJRBXV.js';
@@ -1323,20 +1323,20 @@ var SeedDataService = class {
     for (let i = 0; i < paragraphCount && i < shuffled.length; i++) {
       selected.push(shuffled[i]);
     }
-    let html3 = `<h1>${title}</h1>
+    let html4 = `<h1>${title}</h1>
 `;
     const subheadings = ["Key Concepts", "Practical Considerations", "Best Practices", "Looking Ahead", "Implementation Details", "Common Pitfalls"];
     let subheadingIndex = 0;
     for (let i = 0; i < selected.length; i++) {
       if (i > 0 && i % 2 === 0 && subheadingIndex < subheadings.length) {
-        html3 += `<h2>${subheadings[subheadingIndex]}</h2>
+        html4 += `<h2>${subheadings[subheadingIndex]}</h2>
 `;
         subheadingIndex++;
       }
-      html3 += `<p>${selected[i]}</p>
+      html4 += `<p>${selected[i]}</p>
 `;
     }
-    return html3;
+    return html4;
   }
   // ============================================================================
   // Content Generation (Rich)
@@ -2713,21 +2713,27 @@ var EmbeddingService = class {
     }
   }
   /**
-   * Generate embeddings for multiple texts (batch processing)
+   * Generate embeddings for multiple texts using native batch API.
+   * Workers AI supports up to 100 texts per call for bge-base-en-v1.5.
    */
-  async generateBatch(texts) {
+  async generateBatch(texts, onProgress) {
     try {
-      const batchSize = 10;
-      const batches = [];
-      for (let i = 0; i < texts.length; i += batchSize) {
-        batches.push(texts.slice(i, i + batchSize));
-      }
+      const batchSize = 50;
       const allEmbeddings = [];
-      for (const batch of batches) {
-        const batchEmbeddings = await Promise.all(
-          batch.map((text) => this.generateEmbedding(text))
-        );
-        allEmbeddings.push(...batchEmbeddings);
+      for (let i = 0; i < texts.length; i += batchSize) {
+        const batch = texts.slice(i, i + batchSize);
+        const preprocessed = batch.map((t) => this.preprocessText(t));
+        const response = await this.ai.run("@cf/baai/bge-base-en-v1.5", {
+          text: preprocessed
+        });
+        if (response.data && Array.isArray(response.data)) {
+          allEmbeddings.push(...response.data);
+        } else {
+          throw new Error(`Unexpected embedding response at batch offset ${i}`);
+        }
+        if (onProgress) {
+          await onProgress(allEmbeddings.length, texts.length);
+        }
       }
       return allEmbeddings;
     } catch (error) {
@@ -2902,9 +2908,11 @@ var CustomRAGService = class {
   embeddingService;
   chunkingService;
   /**
-   * Index all content from a collection
+   * Index all content from a collection.
+   * onProgress reports (phase, processedItems, totalItems) so callers can update UI.
+   * Phases: 'chunking' → 'embedding' → 'storing'
    */
-  async indexCollection(collectionId) {
+  async indexCollection(collectionId, onProgress) {
     console.log(`[CustomRAG] Starting indexing for collection: ${collectionId}`);
     try {
       const { results: contentItems } = await this.db.prepare(`
@@ -2920,6 +2928,7 @@ var CustomRAGService = class {
         console.log(`[CustomRAG] No content found in collection ${collectionId}`);
         return { total_items: 0, total_chunks: 0, indexed_chunks: 0, errors: 0 };
       }
+      if (onProgress) await onProgress("chunking", 0, totalItems);
       const items = (contentItems || []).map((item) => ({
         id: item.id,
         collection_id: item.collection_id,
@@ -2937,12 +2946,17 @@ var CustomRAGService = class {
       const chunks = this.chunkingService.chunkContentBatch(items);
       const totalChunks = chunks.length;
       console.log(`[CustomRAG] Generated ${totalChunks} chunks from ${totalItems} items`);
+      if (onProgress) await onProgress("embedding", 0, totalChunks);
       const embeddings = await this.embeddingService.generateBatch(
         chunks.map((c) => `${c.title}
 
-${c.text}`)
+${c.text}`),
+        onProgress ? async (completed, total) => {
+          await onProgress("embedding", completed, total);
+        } : void 0
       );
       console.log(`[CustomRAG] Generated ${embeddings.length} embeddings`);
+      if (onProgress) await onProgress("storing", 0, totalChunks);
       let indexedChunks = 0;
       let errors = 0;
       const batchSize = 100;
@@ -2959,14 +2973,13 @@ ${c.text}`)
                 collection_id: chunk.collection_id,
                 title: chunk.title,
                 text: chunk.text.substring(0, 500),
-                // Store snippet for display
                 chunk_index: chunk.chunk_index,
                 ...chunk.metadata
               }
             }))
           );
           indexedChunks += chunkBatch.length;
-          console.log(`[CustomRAG] Indexed batch ${i / batchSize + 1}: ${chunkBatch.length} chunks`);
+          if (onProgress) await onProgress("storing", indexedChunks, totalChunks);
         } catch (error) {
           console.error(`[CustomRAG] Error indexing batch ${i / batchSize + 1}:`, error);
           errors += chunkBatch.length;
@@ -3247,6 +3260,7 @@ ${c.text}`)
 };
 
 // src/plugins/core-plugins/ai-search-plugin/services/hybrid-search.service.ts
+var RRF_K = 60;
 var HybridSearchService = class {
   constructor(fts5Service, customRAG) {
     this.fts5Service = fts5Service;
@@ -3255,14 +3269,26 @@ var HybridSearchService = class {
   /**
    * Run FTS5 + AI searches in parallel, merge with RRF
    * Uses Promise.allSettled for partial failure tolerance
+   *
+   * Each sub-search retrieves 3x the final limit to give RRF a larger
+   * candidate pool. This prevents relevant docs from one system being
+   * displaced by irrelevant docs from the other when results are sliced.
    */
   async search(query, settings) {
     const startTime = Date.now();
+    const finalLimit = query.limit || settings.results_limit || 20;
+    const candidateLimit = finalLimit * 3;
+    const expandedQuery = { ...query, limit: candidateLimit };
+    const fts5Weights = {
+      titleBoost: settings.fts5_title_boost,
+      slugBoost: settings.fts5_slug_boost,
+      bodyBoost: settings.fts5_body_boost
+    };
     const searches = [
-      this.fts5Service.search(query, settings)
+      this.fts5Service.search(expandedQuery, settings, fts5Weights)
     ];
     if (this.customRAG?.isAvailable()) {
-      searches.push(this.customRAG.search(query, settings));
+      searches.push(this.customRAG.search(expandedQuery, settings));
     }
     const settled = await Promise.allSettled(searches);
     const fulfilled = [];
@@ -3281,42 +3307,59 @@ var HybridSearchService = class {
         mode: "hybrid"
       };
     }
-    return this.mergeWithRRF(fulfilled, query, settings, startTime);
+    if (fulfilled.length === 1) {
+      const single = fulfilled[0];
+      return {
+        results: single.results,
+        total: single.total,
+        suggestions: single.suggestions,
+        mode: "hybrid",
+        query_time_ms: Date.now() - startTime
+      };
+    }
+    return this.mergeWithRRF(fulfilled[0], fulfilled[1], query, settings, startTime);
   }
   /**
-   * Reciprocal Rank Fusion (Cormack et al. 2009)
-   * score(d) = Σ 1/(k + rank(d))  where k=60
+   * Reciprocal Rank Fusion (RRF)
+   *
+   * For each document d, compute:
+   *   RRF_score(d) = Σ 1/(k + rank_i(d))
+   * where rank_i(d) is the 1-based rank of d in system i.
+   *
+   * Docs found by both systems get two contributions (higher score).
+   * k=60 smooths out rank differences (standard value).
    */
-  mergeWithRRF(responses, query, settings, startTime) {
-    const K = 60;
-    const scoreMap = /* @__PURE__ */ new Map();
-    for (const response of responses) {
-      response.results.forEach((result, rank) => {
-        const id = result.id;
-        const rrfContribution = 1 / (K + rank + 1);
-        if (scoreMap.has(id)) {
-          const existing = scoreMap.get(id);
-          existing.rrfScore += rrfContribution;
-          if (result.highlights) existing.result.highlights = result.highlights;
-          if (result.bm25_score) existing.result.bm25_score = result.bm25_score;
-          if (result.relevance_score) existing.result.relevance_score = result.relevance_score;
-        } else {
-          scoreMap.set(id, {
-            result: { ...result },
-            rrfScore: rrfContribution
-          });
-        }
-      });
-    }
+  mergeWithRRF(fts5Response, aiResponse, query, settings, startTime) {
+    const rrfScores = /* @__PURE__ */ new Map();
+    const docData = /* @__PURE__ */ new Map();
+    aiResponse.results.forEach((doc, i) => {
+      const rank = i + 1;
+      const score = 1 / (RRF_K + rank);
+      rrfScores.set(doc.id, (rrfScores.get(doc.id) || 0) + score);
+      docData.set(doc.id, { ...doc });
+    });
+    fts5Response.results.forEach((doc, i) => {
+      const rank = i + 1;
+      const score = 1 / (RRF_K + rank);
+      rrfScores.set(doc.id, (rrfScores.get(doc.id) || 0) + score);
+      const existing = docData.get(doc.id);
+      if (existing) {
+        if (doc.highlights) existing.highlights = doc.highlights;
+        if (doc.bm25_score) existing.bm25_score = doc.bm25_score;
+      } else {
+        docData.set(doc.id, { ...doc });
+      }
+    });
+    const sorted = [...rrfScores.entries()].sort((a, b) => b[1] - a[1]);
     const limit = query.limit || settings.results_limit || 20;
-    const merged = Array.from(scoreMap.values()).sort((a, b) => b.rrfScore - a.rrfScore).slice(0, limit).map(({ result, rrfScore }) => ({
-      ...result,
-      rrf_score: rrfScore
+    const results = sorted.slice(0, limit).map(([id, score]) => ({
+      ...docData.get(id),
+      relevance_score: score
     }));
     return {
       mode: "hybrid",
-      results: merged,
-      total: scoreMap.size,
+      results,
+      total: rrfScores.size,
       query_time_ms: Date.now() - startTime
     };
   }
@@ -3371,6 +3414,313 @@ var QueryRewriterService = class {
    */
   static shouldRewrite(query) {
     return query.length >= 15;
+  }
+};
+
+// src/plugins/core-plugins/ai-search-plugin/types.ts
+var DEFAULT_RANKING_PIPELINE = [
+  { type: "exactMatch", weight: 10, enabled: true },
+  { type: "bm25", weight: 5, enabled: true },
+  { type: "semantic", weight: 3, enabled: true },
+  { type: "recency", weight: 1, enabled: true, config: { half_life_days: 30 } },
+  { type: "popularity", weight: 0, enabled: false },
+  { type: "custom", weight: 0, enabled: false }
+];
+
+// src/plugins/core-plugins/ai-search-plugin/services/ranking-pipeline.service.ts
+function clampWeight(val, fallback) {
+  const n = Number(val);
+  return isNaN(n) || !isFinite(n) ? fallback : Math.round(Math.min(10, Math.max(0, n)) * 10) / 10;
+}
+var VALID_STAGE_TYPES = /* @__PURE__ */ new Set(["exactMatch", "bm25", "semantic", "recency", "popularity", "custom"]);
+var RankingPipelineService = class {
+  constructor(db) {
+    this.db = db;
+  }
+  // === Config CRUD ===
+  async getConfig() {
+    try {
+      const row = await this.db.prepare("SELECT pipeline_json FROM ai_search_ranking_config WHERE id = 'default' LIMIT 1").first();
+      if (!row?.pipeline_json) {
+        return structuredClone(DEFAULT_RANKING_PIPELINE);
+      }
+      return this.validateStages(JSON.parse(row.pipeline_json));
+    } catch {
+      return structuredClone(DEFAULT_RANKING_PIPELINE);
+    }
+  }
+  async saveConfig(stages) {
+    const validated = this.validateStages(stages);
+    await this.db.prepare(`
+        INSERT INTO ai_search_ranking_config (id, pipeline_json, updated_at)
+        VALUES ('default', ?, unixepoch())
+        ON CONFLICT(id) DO UPDATE SET pipeline_json = excluded.pipeline_json, updated_at = excluded.updated_at
+      `).bind(JSON.stringify(validated)).run();
+  }
+  validateStages(stages) {
+    if (!Array.isArray(stages)) return structuredClone(DEFAULT_RANKING_PIPELINE);
+    return stages.filter((s) => VALID_STAGE_TYPES.has(s.type)).map((s) => ({
+      type: s.type,
+      weight: clampWeight(s.weight, 0),
+      enabled: Boolean(s.enabled),
+      config: s.config || void 0
+    }));
+  }
+  // === Pipeline Execution ===
+  async apply(response, query) {
+    const results = response.results;
+    if (results.length === 0) return response;
+    const stages = await this.getConfig();
+    const activeStages = stages.filter((s) => s.enabled && s.weight > 0);
+    if (activeStages.length === 0) return response;
+    const totalWeight = activeStages.reduce((sum, s) => sum + s.weight, 0);
+    if (totalWeight === 0) return response;
+    let minBM25 = Infinity;
+    let maxBM25 = -Infinity;
+    const hasBM25 = activeStages.some((s) => s.type === "bm25");
+    if (hasBM25) {
+      for (const r of results) {
+        if (r.bm25_score != null) {
+          if (r.bm25_score < minBM25) minBM25 = r.bm25_score;
+          if (r.bm25_score > maxBM25) maxBM25 = r.bm25_score;
+        }
+      }
+      if (minBM25 === Infinity) {
+        minBM25 = 0;
+        maxBM25 = 0;
+      }
+    }
+    const contentIds = results.map((r) => r.id);
+    let popularityScores = /* @__PURE__ */ new Map();
+    let customScores = /* @__PURE__ */ new Map();
+    const needsPopularity = activeStages.some((s) => s.type === "popularity");
+    const needsCustom = activeStages.some((s) => s.type === "custom");
+    if (needsPopularity) {
+      popularityScores = await this.getContentScores(contentIds, "popularity");
+      this.normalizeScoresMinMax(popularityScores);
+    }
+    if (needsCustom) {
+      customScores = await this.getContentScores(contentIds, "custom");
+    }
+    for (const result of results) {
+      let weightedSum = 0;
+      for (const stage of activeStages) {
+        let score = 0;
+        switch (stage.type) {
+          case "exactMatch":
+            score = this.scoreExactMatch(result, query);
+            break;
+          case "bm25":
+            score = this.scoreBM25(result, minBM25, maxBM25);
+            break;
+          case "semantic":
+            score = this.scoreSemantic(result);
+            break;
+          case "recency":
+            score = this.scoreRecency(result, stage.config?.half_life_days ?? 30);
+            break;
+          case "popularity":
+            score = popularityScores.get(result.id) ?? 0;
+            break;
+          case "custom":
+            score = Math.max(0, Math.min(1, customScores.get(result.id) ?? 0));
+            break;
+        }
+        weightedSum += stage.weight * score;
+      }
+      result.pipeline_score = weightedSum / totalWeight;
+    }
+    results.sort((a, b) => (b.pipeline_score ?? 0) - (a.pipeline_score ?? 0));
+    return { ...response, results };
+  }
+  // === Content Scores CRUD ===
+  async getContentScores(contentIds, scoreType) {
+    if (contentIds.length === 0) return /* @__PURE__ */ new Map();
+    try {
+      const placeholders = contentIds.map(() => "?").join(",");
+      const { results } = await this.db.prepare(`SELECT content_id, score FROM ai_search_content_scores WHERE content_id IN (${placeholders}) AND score_type = ?`).bind(...contentIds, scoreType).all();
+      const map = /* @__PURE__ */ new Map();
+      for (const row of results || []) {
+        map.set(row.content_id, row.score);
+      }
+      return map;
+    } catch {
+      return /* @__PURE__ */ new Map();
+    }
+  }
+  async setContentScore(contentId, scoreType, score) {
+    const clamped = Math.max(0, Math.min(1, score));
+    await this.db.prepare(`
+        INSERT INTO ai_search_content_scores (content_id, score_type, score, updated_at)
+        VALUES (?, ?, ?, unixepoch())
+        ON CONFLICT(content_id, score_type) DO UPDATE SET score = excluded.score, updated_at = excluded.updated_at
+      `).bind(contentId, scoreType, clamped).run();
+  }
+  async deleteContentScore(contentId, scoreType) {
+    await this.db.prepare("DELETE FROM ai_search_content_scores WHERE content_id = ? AND score_type = ?").bind(contentId, scoreType).run();
+  }
+  // === Scoring Functions ===
+  scoreExactMatch(result, query) {
+    if (!query || !result.title) return 0;
+    return result.title.toLowerCase().includes(query.toLowerCase()) ? 1 : 0;
+  }
+  scoreBM25(result, minBM25, maxBM25) {
+    if (result.bm25_score == null) return 0;
+    if (maxBM25 === minBM25) return 1;
+    return (result.bm25_score - minBM25) / (maxBM25 - minBM25);
+  }
+  scoreSemantic(result) {
+    return result.relevance_score ?? 0;
+  }
+  scoreRecency(result, halfLifeDays) {
+    if (!result.created_at) return 0;
+    const nowMs = Date.now();
+    const createdMs = result.created_at > 1e12 ? result.created_at : result.created_at * 1e3;
+    const ageDays = (nowMs - createdMs) / (1e3 * 60 * 60 * 24);
+    if (ageDays <= 0) return 1;
+    if (halfLifeDays <= 0) return 0;
+    return Math.exp(-Math.LN2 * ageDays / halfLifeDays);
+  }
+  /** Min-max normalize a map of scores in-place */
+  normalizeScoresMinMax(scores) {
+    if (scores.size === 0) return;
+    let min = Infinity;
+    let max = -Infinity;
+    for (const v of scores.values()) {
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    if (max === min) {
+      for (const k of scores.keys()) scores.set(k, scores.size > 0 ? 1 : 0);
+      return;
+    }
+    for (const [k, v] of scores) {
+      scores.set(k, (v - min) / (max - min));
+    }
+  }
+};
+
+// src/plugins/core-plugins/ai-search-plugin/services/synonym.service.ts
+var SynonymService = class {
+  constructor(db) {
+    this.db = db;
+  }
+  // === CRUD ===
+  async getAll() {
+    try {
+      const { results } = await this.db.prepare("SELECT id, terms, enabled, created_at, updated_at FROM ai_search_synonyms ORDER BY created_at DESC").all();
+      return (results || []).map((row) => ({
+        id: row.id,
+        terms: JSON.parse(row.terms),
+        enabled: row.enabled === 1,
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      }));
+    } catch {
+      return [];
+    }
+  }
+  async getById(id) {
+    try {
+      const row = await this.db.prepare("SELECT id, terms, enabled, created_at, updated_at FROM ai_search_synonyms WHERE id = ?").bind(id).first();
+      if (!row) return null;
+      return {
+        id: row.id,
+        terms: JSON.parse(row.terms),
+        enabled: row.enabled === 1,
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      };
+    } catch {
+      return null;
+    }
+  }
+  async create(terms, enabled = true) {
+    const sanitized = this.sanitizeTerms(terms);
+    if (sanitized.length < 2) {
+      throw new Error("A synonym group must have at least 2 terms");
+    }
+    const id = crypto.randomUUID().replace(/-/g, "");
+    await this.db.prepare("INSERT INTO ai_search_synonyms (id, terms, enabled) VALUES (?, ?, ?)").bind(id, JSON.stringify(sanitized), enabled ? 1 : 0).run();
+    const created = await this.getById(id);
+    if (!created) throw new Error("Failed to create synonym group");
+    return created;
+  }
+  async update(id, data) {
+    const existing = await this.getById(id);
+    if (!existing) return null;
+    const terms = data.terms !== void 0 ? this.sanitizeTerms(data.terms) : existing.terms;
+    if (terms.length < 2) {
+      throw new Error("A synonym group must have at least 2 terms");
+    }
+    const enabled = data.enabled !== void 0 ? data.enabled : existing.enabled;
+    await this.db.prepare("UPDATE ai_search_synonyms SET terms = ?, enabled = ?, updated_at = unixepoch() WHERE id = ?").bind(JSON.stringify(terms), enabled ? 1 : 0, id).run();
+    return this.getById(id);
+  }
+  async delete(id) {
+    const result = await this.db.prepare("DELETE FROM ai_search_synonyms WHERE id = ?").bind(id).run();
+    return (result.meta?.changes ?? 0) > 0;
+  }
+  // === Query Expansion ===
+  /**
+   * Expand an array of sanitized search terms using enabled synonym groups.
+   * For each input term, if it appears in a group, all other terms from
+   * that group are added. Returns deduplicated expanded term list.
+   */
+  async expandQuery(terms) {
+    const groups = await this.getEnabled();
+    if (groups.length === 0) return terms;
+    const synonymMap = /* @__PURE__ */ new Map();
+    for (const group of groups) {
+      const lowerTerms = group.terms.map((t) => t.toLowerCase());
+      for (const term of lowerTerms) {
+        if (!synonymMap.has(term)) {
+          synonymMap.set(term, /* @__PURE__ */ new Set());
+        }
+        for (const synonym of lowerTerms) {
+          synonymMap.get(term).add(synonym);
+        }
+      }
+    }
+    const expanded = /* @__PURE__ */ new Set();
+    for (const term of terms) {
+      expanded.add(term.toLowerCase());
+      const synonyms = synonymMap.get(term.toLowerCase());
+      if (synonyms) {
+        for (const syn of synonyms) {
+          expanded.add(syn);
+        }
+      }
+    }
+    return Array.from(expanded);
+  }
+  // === Helpers ===
+  async getEnabled() {
+    try {
+      const { results } = await this.db.prepare("SELECT id, terms, enabled, created_at, updated_at FROM ai_search_synonyms WHERE enabled = 1").all();
+      return (results || []).map((row) => ({
+        id: row.id,
+        terms: JSON.parse(row.terms),
+        enabled: row.enabled === 1,
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      }));
+    } catch {
+      return [];
+    }
+  }
+  /** Sanitize terms: trim, lowercase, deduplicate, remove empties */
+  sanitizeTerms(terms) {
+    const seen = /* @__PURE__ */ new Set();
+    const result = [];
+    for (const raw of terms) {
+      const term = raw.trim().toLowerCase();
+      if (term && !seen.has(term)) {
+        seen.add(term);
+        result.push(term);
+      }
+    }
+    return result;
   }
 };
 
@@ -3433,12 +3783,19 @@ var AISearchService = class {
       this.reranker = new RerankerService(this.ai);
       console.log("[AISearchService] Query rewriter and reranker initialized");
     }
+    this.synonymService = new SynonymService(db);
+    if (this.fts5Service) {
+      this.fts5Service.setSynonymService(this.synonymService);
+    }
+    this.rankingPipeline = new RankingPipelineService(db);
   }
   customRAG;
   fts5Service;
   hybridService;
   queryRewriter;
   reranker;
+  rankingPipeline;
+  synonymService;
   /**
    * Get plugin settings
    */
@@ -3468,7 +3825,10 @@ var AISearchService = class {
       results_limit: 20,
       index_media: false,
       query_rewriting_enabled: false,
-      reranking_enabled: true
+      reranking_enabled: true,
+      fts5_title_boost: 5,
+      fts5_slug_boost: 2,
+      fts5_body_boost: 1
     };
   }
   /**
@@ -3628,21 +3988,28 @@ var AISearchService = class {
         mode: query.mode
       };
     }
+    let result;
     if (query.mode === "hybrid") {
-      return this.searchHybrid(query, settings);
+      result = await this.searchHybrid(query, settings);
+    } else if (query.mode === "fts5") {
+      result = await this.searchFTS5(query, settings);
+    } else if (query.mode === "ai" && settings.ai_mode_enabled && this.customRAG?.isAvailable()) {
+      result = await this.searchAI(query, settings);
+    } else {
+      result = await this.searchKeyword(query, settings);
     }
-    if (query.mode === "fts5") {
-      return this.searchFTS5(query, settings);
+    try {
+      result = await this.rankingPipeline.apply(result, query.query);
+    } catch (error) {
+      console.warn("[AISearchService] Ranking pipeline error (preserving original order):", error);
     }
-    if (query.mode === "ai" && settings.ai_mode_enabled && this.customRAG?.isAvailable()) {
-      return this.searchAI(query, settings);
-    }
-    return this.searchKeyword(query, settings);
+    return result;
   }
   /**
    * FTS5 full-text search with BM25 ranking, stemming, and highlighting
    */
   async searchFTS5(query, settings) {
+    const startTime = Date.now();
     try {
       if (!this.fts5Service) {
         console.warn("[AISearchService] FTS5 service not initialized, falling back to keyword search");
@@ -3652,8 +4019,13 @@ var AISearchService = class {
         console.warn("[AISearchService] FTS5 table not available, falling back to keyword search");
         return this.searchKeyword(query, settings);
       }
-      const result = await this.fts5Service.search(query, settings);
-      await this.logSearch(query.query, "fts5", result.results.length);
+      const result = await this.fts5Service.search(query, settings, {
+        titleBoost: settings.fts5_title_boost,
+        slugBoost: settings.fts5_slug_boost,
+        bodyBoost: settings.fts5_body_boost
+      });
+      const elapsed = Date.now() - startTime;
+      await this.logSearch(query.query, "fts5", result.results.length, elapsed);
       return result;
     } catch (error) {
       console.error("[AISearchService] FTS5 search error, falling back to keyword:", error);
@@ -3684,16 +4056,8 @@ var AISearchService = class {
         }
       }
       let result = await this.hybridService.search(searchQuery, settings);
-      const rerankingEnabled = settings.reranking_enabled ?? true;
-      if (rerankingEnabled && this.reranker && result.results.length > 1) {
-        const limit = query.limit || settings.results_limit || 20;
-        result = {
-          ...result,
-          results: await this.reranker.rerank(query.query, result.results, limit),
-          query_time_ms: Date.now() - startTime
-        };
-      }
-      await this.logSearch(query.query, "hybrid", result.results.length);
+      const elapsed = Date.now() - startTime;
+      await this.logSearch(query.query, "hybrid", result.results.length, elapsed);
       return result;
     } catch (error) {
       console.error("[AISearchService] Hybrid search error, falling back to keyword:", error);
@@ -3704,12 +4068,15 @@ var AISearchService = class {
    * AI-powered semantic search using Custom RAG
    */
   async searchAI(query, settings) {
+    const startTime = Date.now();
     try {
       if (!this.customRAG) {
         console.warn("[AISearchService] CustomRAG not available, falling back to keyword search");
         return this.searchKeyword(query, settings);
       }
       const result = await this.customRAG.search(query, settings);
+      const elapsed = Date.now() - startTime;
+      await this.logSearch(query.query, "ai", result.results.length, elapsed);
       return result;
     } catch (error) {
       console.error("[AISearchService] AI search error, falling back to keyword:", error);
@@ -3784,20 +4151,28 @@ var AISearchService = class {
         LIMIT ? OFFSET ?
       `);
       const { results } = await resultsStmt.bind(...params, limit, offset).all();
-      const searchResults = (results || []).map((row) => ({
-        id: String(row.id),
-        title: row.title || "Untitled",
-        slug: row.slug || "",
-        collection_id: String(row.collection_id),
-        collection_name: row.collection_display_name || row.collection_name,
-        snippet: this.extractSnippet(row.data, query.query),
-        status: row.status,
-        created_at: Number(row.created_at),
-        updated_at: Number(row.updated_at),
-        author_name: row.author_email
-      }));
+      const searchResults = (results || []).map((row) => {
+        const snippet = this.extractSnippet(row.data, query.query);
+        const titleHighlight = this.highlightText(row.title || "Untitled", query.query);
+        return {
+          id: String(row.id),
+          title: row.title || "Untitled",
+          slug: row.slug || "",
+          collection_id: String(row.collection_id),
+          collection_name: row.collection_display_name || row.collection_name,
+          snippet,
+          highlights: {
+            title: titleHighlight,
+            body: snippet
+          },
+          status: row.status,
+          created_at: Number(row.created_at),
+          updated_at: Number(row.updated_at),
+          author_name: row.author_email
+        };
+      });
       const queryTime = Date.now() - startTime;
-      await this.logSearch(query.query, query.mode, searchResults.length);
+      await this.logSearch(query.query, query.mode, searchResults.length, queryTime);
       return {
         results: searchResults,
         total,
@@ -3849,9 +4224,26 @@ var AISearchService = class {
       const end = Math.min(text.length, index + query.length + 120);
       const prefix = start > 0 ? "..." : "";
       const suffix = end < text.length ? "..." : "";
-      return prefix + text.substring(start, end) + suffix;
+      const excerpt = text.substring(start, end);
+      return prefix + this.highlightText(excerpt, query) + suffix;
     } catch {
       return data.substring(0, 200) + "...";
+    }
+  }
+  /**
+   * Highlight query terms in text with <mark> tags
+   * Case-insensitive, highlights all occurrences
+   */
+  highlightText(text, query) {
+    if (!text || !query) return text;
+    try {
+      const words = query.trim().split(/\s+/).filter((w) => w.length > 1);
+      if (words.length === 0) return text;
+      const escaped = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+      const pattern = new RegExp(`(${escaped.join("|")})`, "gi");
+      return text.replace(pattern, "<mark>$1</mark>");
+    } catch {
+      return text;
     }
   }
   /**
@@ -3902,13 +4294,13 @@ var AISearchService = class {
   /**
    * Log search query to history
    */
-  async logSearch(query, mode, resultsCount) {
+  async logSearch(query, mode, resultsCount, responseTimeMs) {
     try {
       const stmt = this.db.prepare(`
-        INSERT INTO ai_search_history (query, mode, results_count, created_at)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO ai_search_history (query, mode, results_count, response_time_ms, created_at)
+        VALUES (?, ?, ?, ?, ?)
       `);
-      await stmt.bind(query, mode, resultsCount, Date.now()).run();
+      await stmt.bind(query, mode, resultsCount, responseTimeMs ?? null, Date.now()).run();
     } catch (error) {
       console.error("Error logging search:", error);
     }
@@ -3972,6 +4364,97 @@ var AISearchService = class {
     }
   }
   /**
+   * Get extended analytics for the Analytics tab
+   */
+  async getAnalyticsExtended() {
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1e3;
+    const todayStart = /* @__PURE__ */ new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayStartMs = todayStart.getTime();
+    try {
+      const [
+        totalResult,
+        todayResult,
+        modeResults,
+        avgResults,
+        zeroCountResult,
+        avgTimeResult,
+        popularResults,
+        zeroResultResults,
+        recentResults,
+        dailyResults
+      ] = await Promise.all([
+        // Total queries (30 days)
+        this.db.prepare("SELECT COUNT(*) as count FROM ai_search_history WHERE created_at >= ?").bind(thirtyDaysAgo).first(),
+        // Queries today
+        this.db.prepare("SELECT COUNT(*) as count FROM ai_search_history WHERE created_at >= ?").bind(todayStartMs).first(),
+        // Mode breakdown
+        this.db.prepare("SELECT mode, COUNT(*) as count FROM ai_search_history WHERE created_at >= ? GROUP BY mode").bind(thirtyDaysAgo).all(),
+        // Average results per query
+        this.db.prepare("SELECT AVG(results_count) as avg_results FROM ai_search_history WHERE created_at >= ?").bind(thirtyDaysAgo).first(),
+        // Zero result count
+        this.db.prepare("SELECT COUNT(*) as count FROM ai_search_history WHERE created_at >= ? AND results_count = 0").bind(thirtyDaysAgo).first(),
+        // Average response time
+        this.db.prepare("SELECT AVG(response_time_ms) as avg_time FROM ai_search_history WHERE created_at >= ? AND response_time_ms IS NOT NULL").bind(thirtyDaysAgo).first(),
+        // Popular queries (top 15)
+        this.db.prepare("SELECT query, COUNT(*) as count FROM ai_search_history WHERE created_at >= ? GROUP BY query ORDER BY count DESC LIMIT 15").bind(thirtyDaysAgo).all(),
+        // Zero-result queries (top 20)
+        this.db.prepare("SELECT query, COUNT(*) as count FROM ai_search_history WHERE created_at >= ? AND results_count = 0 GROUP BY query ORDER BY count DESC LIMIT 20").bind(thirtyDaysAgo).all(),
+        // Recent queries (last 25)
+        this.db.prepare("SELECT query, mode, results_count, response_time_ms, created_at FROM ai_search_history ORDER BY created_at DESC LIMIT 25").all(),
+        // Daily counts for last 30 days
+        this.db.prepare(`
+          SELECT date(created_at / 1000, 'unixepoch') as date, COUNT(*) as count
+          FROM ai_search_history
+          WHERE created_at >= ?
+          GROUP BY date(created_at / 1000, 'unixepoch')
+          ORDER BY date ASC
+        `).bind(thirtyDaysAgo).all()
+      ]);
+      const totalQueries = totalResult?.count || 0;
+      const zeroCount = zeroCountResult?.count || 0;
+      const modes = modeResults?.results || [];
+      return {
+        total_queries: totalQueries,
+        queries_today: todayResult?.count || 0,
+        ai_queries: modes.find((r) => r.mode === "ai")?.count || 0,
+        keyword_queries: modes.find((r) => r.mode === "keyword")?.count || 0,
+        fts5_queries: modes.find((r) => r.mode === "fts5")?.count || 0,
+        hybrid_queries: modes.find((r) => r.mode === "hybrid")?.count || 0,
+        avg_results_per_query: Math.round((avgResults?.avg_results ?? 0) * 10) / 10,
+        zero_result_rate: totalQueries > 0 ? Math.round(zeroCount / totalQueries * 1e3) / 10 : 0,
+        avg_response_time_ms: Math.round(avgTimeResult?.avg_time ?? 0),
+        popular_queries: (popularResults?.results || []).map((r) => ({ query: r.query, count: r.count })),
+        zero_result_queries: (zeroResultResults?.results || []).map((r) => ({ query: r.query, count: r.count })),
+        recent_queries: (recentResults?.results || []).map((r) => ({
+          query: r.query,
+          mode: r.mode,
+          results_count: r.results_count,
+          response_time_ms: r.response_time_ms,
+          created_at: r.created_at
+        })),
+        daily_counts: (dailyResults?.results || []).map((r) => ({ date: r.date, count: r.count }))
+      };
+    } catch (error) {
+      console.error("Error getting extended analytics:", error);
+      return {
+        total_queries: 0,
+        queries_today: 0,
+        ai_queries: 0,
+        keyword_queries: 0,
+        fts5_queries: 0,
+        hybrid_queries: 0,
+        avg_results_per_query: 0,
+        zero_result_rate: 0,
+        avg_response_time_ms: 0,
+        popular_queries: [],
+        zero_result_queries: [],
+        recent_queries: [],
+        daily_counts: []
+      };
+    }
+  }
+  /**
    * Verify Custom RAG is available
    */
   verifyBinding() {
@@ -3989,6 +4472,18 @@ var AISearchService = class {
   getFTS5Service() {
     return this.fts5Service;
   }
+  /**
+   * Get ranking pipeline service instance (for admin routes)
+   */
+  getRankingPipeline() {
+    return this.rankingPipeline;
+  }
+  /**
+   * Get synonym service instance (for admin routes)
+   */
+  getSynonymService() {
+    return this.synonymService;
+  }
 };
 
 // src/plugins/core-plugins/ai-search-plugin/services/indexer.ts
@@ -3997,12 +4492,14 @@ var IndexManager = class {
     this.db = db;
     this.ai = ai;
     this.vectorize = vectorize;
+    this.fts5Service = new FTS5Service(db);
     if (this.ai && this.vectorize) {
       this.customRAG = new CustomRAGService(db, ai, vectorize);
       console.log("[IndexManager] Custom RAG initialized");
     }
   }
   customRAG;
+  fts5Service;
   /**
    * Index all content items within a collection using Custom RAG
    */
@@ -4015,21 +4512,71 @@ var IndexManager = class {
       if (!collection) {
         throw new Error(`Collection ${collectionId} not found`);
       }
+      const countResult = await this.db.prepare(
+        "SELECT COUNT(*) as cnt FROM content WHERE collection_id = ? AND status != 'deleted'"
+      ).bind(collectionId).first();
+      const totalItems = countResult?.cnt || 0;
       await this.updateIndexStatus(collectionId, {
         collection_id: collectionId,
         collection_name: collection.display_name,
-        total_items: 0,
+        total_items: totalItems,
         indexed_items: 0,
         status: "indexing"
       });
       if (this.customRAG?.isAvailable()) {
         console.log(`[IndexManager] Using Custom RAG to index collection ${collectionId}`);
-        const result = await this.customRAG.indexCollection(collectionId);
+        let highWaterMark = 0;
+        let result;
+        try {
+          result = await this.customRAG.indexCollection(
+            collectionId,
+            async (phase, processed, total) => {
+              let itemProgress;
+              if (phase === "chunking") {
+                itemProgress = 0;
+              } else if (phase === "embedding") {
+                itemProgress = Math.round(processed / Math.max(total, 1) * totalItems * 0.9);
+              } else {
+                itemProgress = Math.round(totalItems * 0.9 + processed / Math.max(total, 1) * totalItems * 0.1);
+              }
+              itemProgress = Math.min(totalItems, itemProgress);
+              if (itemProgress > highWaterMark) {
+                highWaterMark = itemProgress;
+              }
+              await this.updateIndexStatus(collectionId, {
+                collection_id: collectionId,
+                collection_name: collection.display_name,
+                total_items: totalItems,
+                indexed_items: highWaterMark,
+                status: "indexing"
+              });
+            }
+          );
+        } catch (ragError) {
+          console.error(`[IndexManager] CustomRAG indexing failed for ${collectionId}:`, ragError);
+          await this.updateIndexStatus(collectionId, {
+            collection_id: collectionId,
+            collection_name: collection.display_name,
+            total_items: totalItems,
+            indexed_items: highWaterMark,
+            status: "error",
+            error_message: ragError instanceof Error ? ragError.message : String(ragError)
+          });
+          return {
+            collection_id: collectionId,
+            collection_name: collection.display_name,
+            total_items: totalItems,
+            indexed_items: highWaterMark,
+            status: "error",
+            error_message: ragError instanceof Error ? ragError.message : String(ragError)
+          };
+        }
         const finalStatus = {
           collection_id: collectionId,
           collection_name: collection.display_name,
           total_items: result.total_items,
-          indexed_items: result.indexed_chunks,
+          indexed_items: result.total_items,
+          // Use total_items, not chunks, for final display
           last_sync_at: Date.now(),
           status: result.errors > 0 ? "error" : "completed",
           error_message: result.errors > 0 ? `${result.errors} errors during indexing` : void 0
@@ -4037,27 +4584,45 @@ var IndexManager = class {
         await this.updateIndexStatus(collectionId, finalStatus);
         return finalStatus;
       }
-      console.warn(`[IndexManager] Custom RAG not available, skipping vector indexing for ${collectionId}`);
-      const countResult = await this.db.prepare(
+      console.log(`[IndexManager] Using FTS5 to index collection ${collectionId}`);
+      const fts5Available = await this.fts5Service.isAvailable();
+      if (fts5Available) {
+        const fts5Result = await this.fts5Service.indexCollection(
+          collectionId,
+          async (indexed, total) => {
+            await this.updateIndexStatus(collectionId, {
+              collection_id: collectionId,
+              collection_name: collection.display_name,
+              total_items: total,
+              indexed_items: indexed,
+              status: "indexing"
+            });
+          }
+        );
+        const fallbackStatus2 = {
+          collection_id: collectionId,
+          collection_name: collection.display_name,
+          total_items: fts5Result.total_items,
+          indexed_items: fts5Result.indexed_items,
+          last_sync_at: Date.now(),
+          status: fts5Result.errors > 0 ? "error" : "completed",
+          error_message: fts5Result.errors > 0 ? `${fts5Result.errors} errors during FTS5 indexing` : void 0
+        };
+        await this.updateIndexStatus(collectionId, fallbackStatus2);
+        return fallbackStatus2;
+      }
+      console.warn(`[IndexManager] No FTS5 available, counting content items for ${collectionId}`);
+      const fallbackCount = await this.db.prepare(
         "SELECT COUNT(*) as cnt FROM content WHERE collection_id = ?"
       ).bind(collectionId).first();
-      const totalItems = countResult?.cnt || 0;
-      let fts5Indexed = 0;
-      try {
-        const fts5Count = await this.db.prepare(
-          "SELECT COUNT(*) as cnt FROM content_fts WHERE collection_id = ?"
-        ).bind(collectionId).first();
-        fts5Indexed = fts5Count?.cnt || 0;
-      } catch {
-      }
       const fallbackStatus = {
         collection_id: collectionId,
         collection_name: collection.display_name,
-        total_items: totalItems,
-        indexed_items: fts5Indexed,
+        total_items: fallbackCount?.cnt || 0,
+        indexed_items: 0,
         last_sync_at: Date.now(),
         status: "completed",
-        error_message: fts5Indexed > 0 ? void 0 : "Using FTS5/keyword search (Vectorize not available)"
+        error_message: "No search index available (Vectorize and FTS5 both unavailable)"
       };
       await this.updateIndexStatus(collectionId, fallbackStatus);
       return fallbackStatus;
@@ -4294,6 +4859,513 @@ var IndexManager = class {
   }
 };
 
+// src/plugins/core-plugins/ai-search-plugin/data/benchmark-datasets.ts
+var BENCHMARK_DATASETS = [
+  {
+    id: "scifact",
+    name: "BEIR SciFact",
+    description: "Scientific fact verification \u2014 abstracts from S2ORC",
+    corpus_size: 5183,
+    query_count: 1109,
+    avg_qrels_per_query: 1.1,
+    license: "CC BY-SA 4.0"
+  },
+  {
+    id: "nfcorpus",
+    name: "BEIR NFCorpus",
+    description: "Bio-medical IR \u2014 NutritionFacts clinical documents",
+    corpus_size: 3633,
+    query_count: 323,
+    avg_qrels_per_query: 38.2,
+    license: "Mixed (see dataset)"
+  },
+  {
+    id: "fiqa",
+    name: "BEIR FiQA-2018",
+    description: "Financial Q&A \u2014 opinion-based questions from StackExchange/Reddit",
+    corpus_size: 57638,
+    query_count: 648,
+    avg_qrels_per_query: 2.6,
+    license: "Mixed (see dataset)"
+  }
+];
+
+// src/plugins/core-plugins/ai-search-plugin/services/benchmark.service.ts
+var BenchmarkService = class {
+  constructor(db, kv, vectorize, dataset = "scifact") {
+    this.db = db;
+    this.kv = kv;
+    this.vectorize = vectorize;
+    this.dataset = dataset;
+    this.idPrefix = `beir-${dataset}-`;
+    this.collectionId = `benchmark-${dataset}-collection`;
+    if (!BENCHMARK_DATASETS.find((d) => d.id === dataset)) {
+      throw new Error(`Unknown benchmark dataset: ${dataset}`);
+    }
+  }
+  dataset;
+  data = null;
+  idPrefix;
+  collectionId;
+  /**
+   * Load dataset from KV on first access. Cached for lifetime of the service instance.
+   *
+   * Corpus data may be stored as a single key or chunked across multiple keys
+   * (for datasets that exceed the 25 MiB KV value limit). Chunked data uses:
+   *   benchmark:{dataset}:corpus:meta  → { chunks: N, total: M }
+   *   benchmark:{dataset}:corpus:0     → first slice
+   *   benchmark:{dataset}:corpus:1     → second slice
+   *   ...
+   */
+  async loadData() {
+    if (this.data) return this.data;
+    const corpusKey = `benchmark:${this.dataset}:corpus`;
+    const [corpus, queries, qrels, corpusMeta] = await Promise.all([
+      this.kv.get(corpusKey, "json"),
+      this.kv.get(
+        `benchmark:${this.dataset}:queries`,
+        "json"
+      ),
+      this.kv.get(
+        `benchmark:${this.dataset}:qrels`,
+        "json"
+      ),
+      this.kv.get(
+        `${corpusKey}:meta`,
+        "json"
+      )
+    ]);
+    let resolvedCorpus = corpus;
+    if (!resolvedCorpus && corpusMeta) {
+      console.log(
+        `[BenchmarkService] Loading chunked corpus: ${corpusMeta.chunks} chunks, ${corpusMeta.total} docs`
+      );
+      const chunkPromises = [];
+      for (let i = 0; i < corpusMeta.chunks; i++) {
+        chunkPromises.push(
+          this.kv.get(`${corpusKey}:${i}`, "json")
+        );
+      }
+      const chunks = await Promise.all(chunkPromises);
+      resolvedCorpus = [];
+      for (const chunk of chunks) {
+        if (!chunk) {
+          throw new Error(
+            `Missing corpus chunk for dataset "${this.dataset}". Re-upload with: npx tsx scripts/generate-benchmark-data.ts --dataset ${this.dataset}`
+          );
+        }
+        resolvedCorpus.push(...chunk);
+      }
+      console.log(
+        `[BenchmarkService] Reassembled ${resolvedCorpus.length} docs from ${corpusMeta.chunks} chunks`
+      );
+    }
+    if (!resolvedCorpus || !queries || !qrels) {
+      throw new Error(
+        `Benchmark dataset "${this.dataset}" not found in KV. Run: npx tsx scripts/generate-benchmark-data.ts --dataset ${this.dataset}`
+      );
+    }
+    this.data = { corpus: resolvedCorpus, queries, qrels };
+    return this.data;
+  }
+  /**
+   * Get the subset of corpus documents: only those referenced in qrels + noise.
+   * Deterministic selection (sorted by ID) so results are reproducible.
+   */
+  async getSubsetCorpus() {
+    const { corpus, qrels } = await this.loadData();
+    const relevantDocIds = new Set(qrels.map((qr) => qr.doc_id));
+    const relevantDocs = corpus.filter((doc) => relevantDocIds.has(doc._id));
+    const noiseDocs = corpus.filter((doc) => !relevantDocIds.has(doc._id)).slice(0, 200);
+    return [...relevantDocs, ...noiseDocs];
+  }
+  /**
+   * Seed benchmark documents into the content table.
+   * Uses a dedicated collection per dataset created on-the-fly.
+   * Idempotent — skips if data already exists.
+   */
+  async seed(authorId, useSubset = true, onProgress) {
+    const existing = await this.db.prepare(
+      `SELECT COUNT(*) as count FROM content WHERE id LIKE '${this.idPrefix}%'`
+    ).first();
+    if (existing && existing.count > 0) {
+      return { seeded: existing.count, skipped: true };
+    }
+    const collectionId = await this.ensureBenchmarkCollection();
+    const { corpus: fullCorpus } = await this.loadData();
+    const corpus = useSubset ? await this.getSubsetCorpus() : fullCorpus;
+    const now = Date.now();
+    const batchSize = 50;
+    let inserted = 0;
+    for (let i = 0; i < corpus.length; i += batchSize) {
+      const batch = corpus.slice(i, i + batchSize);
+      const batchOps = batch.map((doc) => {
+        const id = `${this.idPrefix}${doc._id}`;
+        const slug = `${this.idPrefix}${doc._id}`;
+        const safeText = doc.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const data = JSON.stringify({
+          content: `<p>${safeText}</p>`,
+          excerpt: doc.text.substring(0, 200),
+          tags: [`beir-${this.dataset}`, "benchmark"]
+        });
+        return this.db.prepare(
+          `INSERT OR IGNORE INTO content
+             (id, collection_id, slug, title, data, status, author_id, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, 'published', ?, ?, ?)`
+        ).bind(id, collectionId, slug, doc.title, data, authorId, now, now);
+      });
+      await this.db.batch(batchOps);
+      inserted += batch.length;
+      if (onProgress) {
+        onProgress({
+          phase: "inserting",
+          inserted,
+          total: corpus.length
+        });
+      }
+    }
+    if (onProgress) {
+      onProgress({
+        phase: "complete",
+        inserted: corpus.length,
+        total: corpus.length
+      });
+    }
+    return { seeded: corpus.length, skipped: false };
+  }
+  /**
+   * Remove all benchmark documents and related index entries for this dataset.
+   */
+  async purge() {
+    const result = await this.db.prepare(
+      `DELETE FROM content WHERE id LIKE '${this.idPrefix}%'`
+    ).run();
+    try {
+      await this.db.batch([
+        this.db.prepare(
+          `DELETE FROM content_fts WHERE content_id LIKE '${this.idPrefix}%'`
+        ),
+        this.db.prepare(
+          `DELETE FROM content_fts_sync WHERE content_id LIKE '${this.idPrefix}%'`
+        )
+      ]);
+    } catch (error) {
+      console.warn("[BenchmarkService] FTS5 cleanup skipped:", error);
+    }
+    try {
+      await this.db.prepare("DELETE FROM collections WHERE id = ?").bind(this.collectionId).run();
+    } catch (error) {
+      console.warn("[BenchmarkService] Collection cleanup skipped:", error);
+    }
+    try {
+      await this.db.prepare(
+        "DELETE FROM ai_search_index_meta WHERE collection_id = ?"
+      ).bind(this.collectionId).run();
+    } catch (error) {
+    }
+    if (this.vectorize) {
+      try {
+        const { corpus } = await this.loadData();
+        const vectorIds = [];
+        for (const doc of corpus) {
+          for (let i = 0; i < 5; i++) {
+            vectorIds.push(`${this.idPrefix}${doc._id}-chunk-${i}`);
+          }
+        }
+        const batchSize = 1e3;
+        for (let i = 0; i < vectorIds.length; i += batchSize) {
+          const batch = vectorIds.slice(i, i + batchSize);
+          await this.vectorize.deleteByIds(batch);
+        }
+        console.log(
+          `[BenchmarkService] Deleted up to ${vectorIds.length} vectors from Vectorize`
+        );
+      } catch (error) {
+        console.warn(
+          "[BenchmarkService] Vectorize cleanup error (non-fatal):",
+          error
+        );
+      }
+    }
+    return result.meta?.changes || 0;
+  }
+  /**
+   * Run benchmark queries against a search function and compute IR metrics.
+   */
+  async evaluate(searchFn, mode = "fts5", limit = 10, maxQueries = 0) {
+    const { corpus, queries, qrels } = await this.loadData();
+    const startTime = Date.now();
+    const perQuery = [];
+    const qrelsMap = /* @__PURE__ */ new Map();
+    for (const qrel of qrels) {
+      if (!qrelsMap.has(qrel.query_id))
+        qrelsMap.set(qrel.query_id, /* @__PURE__ */ new Map());
+      qrelsMap.get(qrel.query_id).set(qrel.doc_id, qrel.score);
+    }
+    const queriesWithJudgments = queries.filter(
+      (q) => qrelsMap.has(q._id) && qrelsMap.get(q._id).size > 0
+    );
+    const queriesToRun = maxQueries > 0 ? queriesWithJudgments.slice(0, maxQueries) : queriesWithJudgments;
+    let totalNDCG = 0;
+    let totalPrecision = 0;
+    let totalRecall = 0;
+    let totalMRR = 0;
+    for (const query of queriesToRun) {
+      const relevantDocs = qrelsMap.get(query._id);
+      const queryStart = Date.now();
+      let response;
+      try {
+        response = await searchFn(query.text, mode, limit);
+      } catch (error) {
+        console.error(
+          `[BenchmarkService] Search error for query ${query._id}:`,
+          error
+        );
+        perQuery.push({
+          query_id: query._id,
+          query_text: query.text,
+          ndcg: 0,
+          precision: 0,
+          recall: 0,
+          mrr: 0,
+          hits: 0,
+          expected: relevantDocs.size,
+          returned: 0,
+          query_time_ms: Date.now() - queryStart
+        });
+        continue;
+      }
+      const queryTime = Date.now() - queryStart;
+      const rankedDocIds = response.results.map(
+        (r) => r.id.startsWith(this.idPrefix) ? r.id.slice(this.idPrefix.length) : r.id
+      );
+      const ndcg = computeNDCG(rankedDocIds, relevantDocs, limit);
+      const precision = computePrecision(rankedDocIds, relevantDocs, limit);
+      const recall = computeRecall(rankedDocIds, relevantDocs);
+      const mrr = computeMRR(rankedDocIds, relevantDocs);
+      totalNDCG += ndcg;
+      totalPrecision += precision;
+      totalRecall += recall;
+      totalMRR += mrr;
+      perQuery.push({
+        query_id: query._id,
+        query_text: query.text,
+        ndcg,
+        precision,
+        recall,
+        mrr,
+        hits: rankedDocIds.filter((id) => relevantDocs.has(id)).length,
+        expected: relevantDocs.size,
+        returned: rankedDocIds.length,
+        query_time_ms: queryTime
+      });
+    }
+    const totalTime = Date.now() - startTime;
+    const evaluated = queriesToRun.length;
+    return {
+      mode,
+      limit,
+      corpus_size: corpus.length,
+      queries_evaluated: evaluated,
+      total_time_ms: totalTime,
+      avg_query_time_ms: evaluated > 0 ? Math.round(totalTime / evaluated) : 0,
+      metrics: {
+        ndcg_at_k: evaluated > 0 ? totalNDCG / evaluated : 0,
+        precision_at_k: evaluated > 0 ? totalPrecision / evaluated : 0,
+        recall_at_k: evaluated > 0 ? totalRecall / evaluated : 0,
+        mrr: evaluated > 0 ? totalMRR / evaluated : 0
+      },
+      per_query: perQuery
+    };
+  }
+  /**
+   * Get the list of query IDs that have relevance judgments, optionally limited.
+   */
+  async getEvaluableQueryIds(maxQueries = 0) {
+    const { queries, qrels } = await this.loadData();
+    const qrelsMap = /* @__PURE__ */ new Map();
+    for (const qrel of qrels) {
+      if (!qrelsMap.has(qrel.query_id))
+        qrelsMap.set(qrel.query_id, /* @__PURE__ */ new Map());
+      qrelsMap.get(qrel.query_id).set(qrel.doc_id, qrel.score);
+    }
+    const ids = queries.filter((q) => qrelsMap.has(q._id) && qrelsMap.get(q._id).size > 0).map((q) => q._id);
+    return maxQueries > 0 ? ids.slice(0, maxQueries) : ids;
+  }
+  /**
+   * Evaluate a batch of queries by their IDs.
+   * Returns per-query results for the batch so the client can accumulate and compute aggregates.
+   */
+  async evaluateBatch(searchFn, mode, limit, queryIds) {
+    const { queries, qrels } = await this.loadData();
+    const qrelsMap = /* @__PURE__ */ new Map();
+    for (const qrel of qrels) {
+      if (!qrelsMap.has(qrel.query_id))
+        qrelsMap.set(qrel.query_id, /* @__PURE__ */ new Map());
+      qrelsMap.get(qrel.query_id).set(qrel.doc_id, qrel.score);
+    }
+    const queryMap = new Map(queries.map((q) => [q._id, q]));
+    const results = [];
+    for (const qid of queryIds) {
+      const query = queryMap.get(qid);
+      const relevantDocs = qrelsMap.get(qid);
+      if (!query || !relevantDocs) continue;
+      const queryStart = Date.now();
+      let response;
+      try {
+        response = await searchFn(query.text, mode, limit);
+      } catch (error) {
+        console.error(
+          `[BenchmarkService] Search error for query ${qid}:`,
+          error
+        );
+        results.push({
+          query_id: qid,
+          query_text: query.text,
+          ndcg: 0,
+          precision: 0,
+          recall: 0,
+          mrr: 0,
+          hits: 0,
+          expected: relevantDocs.size,
+          returned: 0,
+          query_time_ms: Date.now() - queryStart
+        });
+        continue;
+      }
+      const queryTime = Date.now() - queryStart;
+      const rankedDocIds = response.results.map(
+        (r) => r.id.startsWith(this.idPrefix) ? r.id.slice(this.idPrefix.length) : r.id
+      );
+      const ndcg = computeNDCG(rankedDocIds, relevantDocs, limit);
+      const precision = computePrecision(rankedDocIds, relevantDocs, limit);
+      const recall = computeRecall(rankedDocIds, relevantDocs);
+      const mrr = computeMRR(rankedDocIds, relevantDocs);
+      results.push({
+        query_id: qid,
+        query_text: query.text,
+        ndcg,
+        precision,
+        recall,
+        mrr,
+        hits: rankedDocIds.filter((id) => relevantDocs.has(id)).length,
+        expected: relevantDocs.size,
+        returned: rankedDocIds.length,
+        query_time_ms: queryTime
+      });
+    }
+    return results;
+  }
+  /**
+   * Get dataset metadata from the compiled-in registry (no KV needed).
+   */
+  getMeta() {
+    return BENCHMARK_DATASETS.find((d) => d.id === this.dataset);
+  }
+  getCorpusSize() {
+    return this.getMeta().corpus_size;
+  }
+  getQueryCount() {
+    return this.getMeta().query_count;
+  }
+  getDatasetId() {
+    return this.dataset;
+  }
+  getIdPrefix() {
+    return this.idPrefix;
+  }
+  getCollectionId() {
+    return this.collectionId;
+  }
+  async getSubsetSize() {
+    const subset = await this.getSubsetCorpus();
+    return subset.length;
+  }
+  /**
+   * Check if benchmark data is currently seeded for this dataset.
+   */
+  async isSeeded() {
+    const result = await this.db.prepare(
+      `SELECT COUNT(*) as count FROM content WHERE id LIKE '${this.idPrefix}%'`
+    ).first();
+    const count = result?.count || 0;
+    return { seeded: count > 0, count };
+  }
+  /**
+   * Check if dataset data exists in KV.
+   */
+  async isDataAvailable() {
+    const queries = await this.kv.get(
+      `benchmark:${this.dataset}:queries`
+    );
+    return queries !== null;
+  }
+  /**
+   * Ensure a benchmark collection exists in the collections table.
+   * Returns the collection ID.
+   */
+  async ensureBenchmarkCollection() {
+    const existing = await this.db.prepare("SELECT id FROM collections WHERE id = ?").bind(this.collectionId).first();
+    if (existing) {
+      return this.collectionId;
+    }
+    const meta = this.getMeta();
+    const schema = JSON.stringify({
+      type: "object",
+      properties: {
+        title: { type: "string", title: "Title", required: true },
+        content: { type: "string", title: "Content", format: "richtext" },
+        excerpt: { type: "string", title: "Excerpt" },
+        tags: { type: "array", title: "Tags", items: { type: "string" } }
+      },
+      required: ["title"]
+    });
+    await this.db.prepare(
+      `INSERT OR IGNORE INTO collections (id, name, display_name, description, schema, is_active, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, 1, unixepoch(), unixepoch())`
+    ).bind(
+      this.collectionId,
+      `benchmark_${this.dataset}`,
+      `${meta.name} Benchmark`,
+      meta.description,
+      schema
+    ).run();
+    return this.collectionId;
+  }
+};
+function computeNDCG(ranked, qrels, k) {
+  let dcg = 0;
+  for (let i = 0; i < Math.min(ranked.length, k); i++) {
+    const rel = qrels.get(ranked[i]) || 0;
+    dcg += rel / Math.log2(i + 2);
+  }
+  const ideal = Array.from(qrels.values()).sort((a, b) => b - a).slice(0, k);
+  let idcg = 0;
+  for (let i = 0; i < ideal.length; i++) {
+    idcg += ideal[i] / Math.log2(i + 2);
+  }
+  return idcg === 0 ? 0 : dcg / idcg;
+}
+function computePrecision(ranked, qrels, k) {
+  const topK = ranked.slice(0, k);
+  const hits = topK.filter((id) => (qrels.get(id) || 0) > 0).length;
+  return hits / k;
+}
+function computeRecall(ranked, qrels) {
+  const totalRelevant = Array.from(qrels.values()).filter(
+    (v) => v > 0
+  ).length;
+  if (totalRelevant === 0) return 0;
+  const hits = ranked.filter((id) => (qrels.get(id) || 0) > 0).length;
+  return hits / totalRelevant;
+}
+function computeMRR(ranked, qrels) {
+  for (let i = 0; i < ranked.length; i++) {
+    if ((qrels.get(ranked[i]) || 0) > 0) return 1 / (i + 1);
+  }
+  return 0;
+}
+
 // src/plugins/core-plugins/ai-search-plugin/components/settings-page.ts
 function renderSettingsPage(data) {
   const settings = data.settings || {
@@ -4422,25 +5494,8 @@ function renderSettingsPage(data) {
                         </label>
                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                           ${collection.description || collection.name || "No description"} \u2022 ${collection.item_count || 0} items
-                          ${status ? ` \u2022 ${status.indexed_items}/${status.total_items} indexed` : ""}
                         </p>
-                        ${status && status.status === "indexing" ? `<div class="mt-2 w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                              <div class="bg-blue-600 h-2 rounded-full" style="width: ${status.indexed_items / status.total_items * 100}%"></div>
-                            </div>` : ""}
                       </div>
-                      ${isChecked ? `
-                        <button
-                          type="button"
-                          onclick="reindexCollection('${collectionId}')"
-                          class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors flex items-center gap-1.5 whitespace-nowrap"
-                          ${status && status.status === "indexing" ? "disabled" : ""}
-                        >
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                          Re-index
-                        </button>
-                      ` : ""}
                     </div>`;
   }).join("")}
             </div>
@@ -4594,6 +5649,92 @@ function renderSettingsPage(data) {
             ` : '<p class="text-sm text-zinc-500 dark:text-zinc-400">No search history yet.</p>'}
       </div>
 
+          <!-- Search Benchmark (BEIR SciFact) -->
+          <div class="rounded-xl bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 p-6">
+            <h2 class="text-xl font-semibold text-zinc-950 dark:text-white mb-2">Search Benchmark</h2>
+            <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
+              BEIR SciFact dataset \u2014 scientific abstracts with 300+ test queries and ground-truth relevance judgments.
+              Seed the data, index it, then evaluate search quality with standard IR metrics (nDCG@10, Precision, Recall, MRR).
+            </p>
+            <div id="benchmark-status" class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Checking benchmark status...</div>
+
+            <!-- Corpus Size + Seed Row -->
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+              <div class="flex items-center gap-2">
+                <label for="bench-corpus-size" class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Corpus:</label>
+                <select id="bench-corpus-size"
+                  class="rounded-lg bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-950 dark:text-white ring-1 ring-inset ring-zinc-300 dark:ring-zinc-600 focus:ring-2 focus:ring-indigo-500">
+                  <option value="subset">Subset (~483 docs)</option>
+                  <option value="full">Full corpus (~5K docs)</option>
+                </select>
+              </div>
+              <button onclick="seedBenchmark()" id="bench-seed-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                Seed Data
+              </button>
+              <button onclick="indexBenchmark()" id="bench-index-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Index (FTS5)
+              </button>
+              <button onclick="indexBenchmarkVectorize()" id="bench-vectorize-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Index (Vectorize)
+              </button>
+              <button onclick="purgeBenchmark()" id="bench-purge-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Purge Data
+              </button>
+            </div>
+
+            <!-- Evaluate Buttons Row -->
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+              <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Evaluate:</span>
+              <div class="flex items-center gap-2">
+                <label for="bench-query-count" class="text-sm text-zinc-600 dark:text-zinc-400">Queries:</label>
+                <select id="bench-query-count"
+                  class="rounded-lg bg-white dark:bg-zinc-800 px-2 py-2 text-sm text-zinc-950 dark:text-white ring-1 ring-inset ring-zinc-300 dark:ring-zinc-600 focus:ring-2 focus:ring-indigo-500">
+                  <option value="15">15</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="0" selected>All (~301)</option>
+                </select>
+              </div>
+              <button onclick="runBenchmark('fts5')" id="bench-fts5-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                FTS5
+              </button>
+              <button onclick="runBenchmark('keyword')" id="bench-keyword-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-zinc-600 hover:bg-zinc-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Keyword
+              </button>
+              <button onclick="runBenchmark('hybrid')" id="bench-hybrid-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Hybrid
+              </button>
+              <button onclick="runBenchmark('ai')" id="bench-ai-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                AI (Vectorize)
+              </button>
+            </div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mb-4">
+              Hybrid and AI modes require Vectorize index binding. If unavailable, they will return an error.
+            </p>
+
+            <div id="benchmark-progress" class="hidden mb-4">
+              <div class="text-sm text-zinc-600 dark:text-zinc-400 mb-1" id="benchmark-progress-text">Running...</div>
+              <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
+                <div id="benchmark-progress-bar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+            </div>
+            <div id="benchmark-results" class="hidden">
+              <div class="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+                <h3 class="text-sm font-semibold text-zinc-950 dark:text-white mb-3" id="benchmark-results-title">Results</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3" id="benchmark-metrics"></div>
+                <div class="text-xs text-zinc-500 dark:text-zinc-400" id="benchmark-details"></div>
+              </div>
+            </div>
+          </div>
+
           <!-- Success Message -->
           <div id="msg" class="hidden fixed bottom-4 right-4 p-4 rounded-lg bg-green-50 text-green-900 border border-green-200 dark:bg-green-900/20 dark:text-green-100 dark:border-green-800 shadow-lg z-50">
             <div class="flex items-center gap-2">
@@ -4685,35 +5826,6 @@ function renderSettingsPage(data) {
         }
       }
 
-      // Re-index collection
-      async function reindexCollection(collectionId) {
-        const res = await fetch('/admin/plugins/ai-search/api/reindex', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ collection_id: collectionId })
-        });
-        if (res.ok) {
-          alert('Re-indexing started. Page will refresh in a moment.');
-          setTimeout(() => location.reload(), 2000);
-        } else {
-          alert('Failed to start re-indexing. Please try again.');
-        }
-      }
-
-      // Poll for index status updates
-      setInterval(async () => {
-        const res = await fetch('/admin/plugins/ai-search/api/status');
-        if (res.ok) {
-          const { data } = await res.json();
-          // Update status indicators if needed
-          // For now, just reload every 30 seconds if indexing is in progress
-          const hasIndexing = Object.values(data).some((s) => s.status === 'indexing');
-          if (hasIndexing) {
-            location.reload();
-          }
-        }
-      }, 30000);
-
       // FTS5 status check on load
       (async function checkFTS5Status() {
         try {
@@ -4736,6 +5848,440 @@ function renderSettingsPage(data) {
           console.error('FTS5 status check failed:', e);
         }
       })();
+
+      // --- Benchmark Functions ---
+
+      // Check benchmark status on page load
+      (async function checkBenchmarkStatus() {
+        try {
+          var res = await fetch('/admin/plugins/ai-search/api/benchmark/status');
+          if (res.ok) {
+            var body = await res.json();
+            var d = body.data;
+            var statusEl = document.getElementById('benchmark-status');
+            var corpusSelect = document.getElementById('bench-corpus-size');
+
+            // Update corpus size options with actual counts
+            if (d.subset_size && d.corpus_size) {
+              corpusSelect.options[0].textContent = 'Subset (~' + d.subset_size + ' docs)';
+              corpusSelect.options[1].textContent = 'Full corpus (' + d.corpus_size + ' docs)';
+            }
+
+            if (d.seeded) {
+              statusEl.textContent = 'Benchmark data seeded: ' + d.seeded_count + ' documents (queries: ' + d.query_count + ', qrels: ' + d.qrel_count + ')';
+              document.getElementById('bench-seed-btn').textContent = 'Re-seed Data';
+              document.getElementById('bench-index-btn').disabled = false;
+              document.getElementById('bench-vectorize-btn').disabled = false;
+              document.getElementById('bench-fts5-btn').disabled = false;
+              document.getElementById('bench-keyword-btn').disabled = false;
+              document.getElementById('bench-hybrid-btn').disabled = false;
+              document.getElementById('bench-ai-btn').disabled = false;
+              document.getElementById('bench-purge-btn').disabled = false;
+            } else {
+              statusEl.textContent = 'Dataset: ' + d.dataset + ' (' + d.corpus_size + ' docs, ' + d.query_count + ' queries, ' + d.qrel_count + ' qrels) \u2014 Not yet seeded';
+            }
+          }
+        } catch (e) {
+          document.getElementById('benchmark-status').textContent = 'Could not check benchmark status';
+        }
+      })();
+
+      async function seedBenchmark() {
+        var btn = document.getElementById('bench-seed-btn');
+        var corpusSize = document.getElementById('bench-corpus-size').value;
+        btn.textContent = 'Seeding (' + corpusSize + ')...';
+        btn.disabled = true;
+        try {
+          var res = await fetch('/admin/plugins/ai-search/api/benchmark/seed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ corpus_size: corpusSize })
+          });
+          var data = await res.json();
+          if (data.success) {
+            document.getElementById('benchmark-status').textContent = data.message;
+            btn.textContent = 'Re-seed Data';
+            document.getElementById('bench-index-btn').disabled = false;
+            document.getElementById('bench-vectorize-btn').disabled = false;
+            document.getElementById('bench-fts5-btn').disabled = false;
+            document.getElementById('bench-keyword-btn').disabled = false;
+            document.getElementById('bench-hybrid-btn').disabled = false;
+            document.getElementById('bench-ai-btn').disabled = false;
+            document.getElementById('bench-purge-btn').disabled = false;
+          } else {
+            alert('Seed failed: ' + (data.error || 'Unknown error'));
+            btn.textContent = 'Seed Data';
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+          btn.textContent = 'Seed Data';
+        }
+        btn.disabled = false;
+      }
+
+      async function indexBenchmark() {
+        var btn = document.getElementById('bench-index-btn');
+        btn.disabled = true;
+        var statusEl = document.getElementById('benchmark-status');
+
+        // Use batch endpoint \u2014 loop until all indexed
+        var totalIndexed = 0;
+        var remaining = 1; // start loop
+        var batchNum = 0;
+
+        while (remaining > 0) {
+          batchNum++;
+          btn.textContent = 'Indexing batch ' + batchNum + '...';
+          try {
+            var res = await fetch('/admin/plugins/ai-search/api/benchmark/index-fts5-batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ batch_size: 200 })
+            });
+            var data = await res.json();
+            if (!data.success) {
+              alert('FTS5 indexing failed: ' + (data.error || 'Unknown error'));
+              break;
+            }
+            totalIndexed += data.indexed;
+            remaining = data.remaining;
+            var done = data.total - remaining;
+            statusEl.textContent = 'FTS5 indexing: ' + done + '/' + data.total + ' docs indexed...';
+            btn.textContent = 'Indexing... (' + done + '/' + data.total + ')';
+          } catch (e) {
+            alert('FTS5 indexing error: ' + e.message);
+            break;
+          }
+        }
+
+        statusEl.textContent = 'FTS5 indexing complete: ' + totalIndexed + ' docs indexed in ' + batchNum + ' batches.';
+        btn.textContent = 'Index (FTS5)';
+        btn.disabled = false;
+      }
+
+      async function indexBenchmarkVectorize() {
+        var btn = document.getElementById('bench-vectorize-btn');
+        btn.disabled = true;
+        var statusEl = document.getElementById('benchmark-status');
+
+        // Reset index meta first
+        try {
+          await fetch('/admin/plugins/ai-search/api/benchmark/index-vectorize', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }
+          });
+        } catch (e) { /* continue anyway */ }
+
+        // Client-driven batch loop \u2014 processes 25 docs per request
+        var offset = 0;
+        var remaining = 1;
+        var batchNum = 0;
+        var totalChunks = 0;
+
+        while (remaining > 0) {
+          batchNum++;
+          btn.textContent = 'Embedding batch ' + batchNum + '...';
+          try {
+            var res = await fetch('/admin/plugins/ai-search/api/benchmark/index-vectorize-batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ batch_size: 25, offset: offset })
+            });
+            var data = await res.json();
+            if (!data.success) {
+              alert('Vectorize indexing failed: ' + (data.error || 'Unknown error'));
+              break;
+            }
+            totalChunks += data.indexed;
+            offset = data.offset;
+            remaining = data.remaining;
+            var done = data.total - remaining;
+            statusEl.textContent = 'Vectorize: ' + done + '/' + data.total + ' docs embedded (' + totalChunks + ' chunks)...';
+            btn.textContent = 'Embedding... (' + done + '/' + data.total + ')';
+          } catch (e) {
+            alert('Vectorize indexing error: ' + e.message);
+            break;
+          }
+        }
+
+        statusEl.textContent = 'Vectorize indexing complete: ' + totalChunks + ' chunks indexed in ' + batchNum + ' batches.';
+        btn.textContent = 'Index (Vectorize)';
+        btn.disabled = false;
+      }
+
+      async function runBenchmark(mode) {
+        var btn = document.getElementById('bench-' + mode + '-btn');
+        var origText = btn.textContent;
+        btn.textContent = 'Running...';
+        btn.disabled = true;
+
+        var progressDiv = document.getElementById('benchmark-progress');
+        var progressText = document.getElementById('benchmark-progress-text');
+        var progressBar = document.getElementById('benchmark-progress-bar');
+        progressDiv.classList.remove('hidden');
+        progressBar.style.width = '2%';
+
+        var maxQueries = parseInt(document.getElementById('bench-query-count').value, 10);
+        var BATCH_SIZE = 15;
+        var startTime = Date.now();
+
+        try {
+          // Step 1: Get evaluable query IDs
+          progressText.textContent = 'Fetching query list...';
+          var idsRes = await fetch('/admin/plugins/ai-search/api/benchmark/query-ids?max_queries=' + maxQueries);
+          var idsData = await idsRes.json();
+          if (!idsData.success) {
+            alert('Failed to get query IDs: ' + (idsData.error || 'Unknown error'));
+            progressDiv.classList.add('hidden');
+            btn.textContent = origText;
+            btn.disabled = false;
+            return;
+          }
+
+          var allQueryIds = idsData.query_ids;
+          var totalQueries = allQueryIds.length;
+          progressText.textContent = 'Evaluating ' + mode + ' mode: 0/' + totalQueries + ' queries...';
+
+          // Step 2: Process in batches
+          var allPerQuery = [];
+          for (var i = 0; i < totalQueries; i += BATCH_SIZE) {
+            var batchIds = allQueryIds.slice(i, i + BATCH_SIZE);
+            var batchRes = await fetch('/admin/plugins/ai-search/api/benchmark/evaluate-batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mode: mode, limit: 10, query_ids: batchIds })
+            });
+            var batchData = await batchRes.json();
+
+            if (!batchData.success) {
+              alert('Batch evaluation failed: ' + (batchData.error || 'Unknown error'));
+              break;
+            }
+
+            allPerQuery = allPerQuery.concat(batchData.per_query);
+            var done = Math.min(i + BATCH_SIZE, totalQueries);
+            var pct = Math.round((done / totalQueries) * 100);
+            progressBar.style.width = pct + '%';
+            progressText.textContent = 'Evaluating ' + mode + ' mode: ' + done + '/' + totalQueries + ' queries...';
+          }
+
+          // Step 3: Compute aggregate metrics client-side
+          var totalTime = Date.now() - startTime;
+          var n = allPerQuery.length;
+          if (n > 0) {
+            var sumNDCG = 0, sumPrec = 0, sumRecall = 0, sumMRR = 0;
+            for (var j = 0; j < n; j++) {
+              sumNDCG += allPerQuery[j].ndcg;
+              sumPrec += allPerQuery[j].precision;
+              sumRecall += allPerQuery[j].recall;
+              sumMRR += allPerQuery[j].mrr;
+            }
+            var data = {
+              success: true,
+              mode: mode,
+              limit: 10,
+              queries_evaluated: n,
+              total_time_ms: totalTime,
+              avg_query_time_ms: Math.round(totalTime / n),
+              metrics: {
+                ndcg_at_k: sumNDCG / n,
+                precision_at_k: sumPrec / n,
+                recall_at_k: sumRecall / n,
+                mrr: sumMRR / n
+              },
+              per_query: allPerQuery
+            };
+            progressBar.style.width = '100%';
+            showBenchmarkResults(data, mode);
+          } else {
+            alert('No queries were evaluated.');
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+
+        progressDiv.classList.add('hidden');
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+
+      // Persist benchmark results in localStorage across page refreshes
+      var BENCH_STORAGE_KEY = 'sonicjs_benchmark_runs';
+
+      function loadBenchmarkRuns() {
+        try {
+          var stored = localStorage.getItem(BENCH_STORAGE_KEY);
+          return stored ? JSON.parse(stored) : [];
+        } catch (e) { return []; }
+      }
+
+      function saveBenchmarkRuns(runs) {
+        try { localStorage.setItem(BENCH_STORAGE_KEY, JSON.stringify(runs)); } catch (e) { /* ignore */ }
+      }
+
+      var benchmarkRuns = loadBenchmarkRuns();
+      var benchmarkHistory = [];
+
+      // Restore and render saved results on page load
+      if (benchmarkRuns.length > 0) {
+        renderAllBenchmarkRuns();
+      }
+
+      function showBenchmarkResults(data, mode) {
+        var resultsDiv = document.getElementById('benchmark-results');
+
+        // Store in current session history
+        benchmarkHistory = benchmarkHistory.filter(function(h) { return h.mode !== mode; });
+        benchmarkHistory.push({ mode: mode, data: data });
+
+        // Also persist to localStorage with corpus label
+        var corpusLabel = document.getElementById('bench-corpus-size').value;
+        var runKey = corpusLabel + '_' + mode;
+        var runEntry = {
+          key: runKey,
+          mode: mode,
+          corpus: corpusLabel,
+          corpus_size: data.corpus_size,
+          metrics: data.metrics,
+          limit: data.limit,
+          queries_evaluated: data.queries_evaluated,
+          total_time_ms: data.total_time_ms,
+          avg_query_time_ms: data.avg_query_time_ms,
+          timestamp: new Date().toISOString()
+        };
+        benchmarkRuns = benchmarkRuns.filter(function(r) { return r.key !== runKey; });
+        benchmarkRuns.push(runEntry);
+        saveBenchmarkRuns(benchmarkRuns);
+
+        renderAllBenchmarkRuns();
+        resultsDiv.classList.remove('hidden');
+      }
+
+      function renderAllBenchmarkRuns() {
+        var resultsDiv = document.getElementById('benchmark-results');
+        var titleEl = document.getElementById('benchmark-results-title');
+        var metricsDiv = document.getElementById('benchmark-metrics');
+        var detailsDiv = document.getElementById('benchmark-details');
+
+        if (benchmarkRuns.length === 0) {
+          resultsDiv.classList.add('hidden');
+          return;
+        }
+
+        titleEl.textContent = 'Benchmark Results (k=10)';
+
+        var modeColors = { fts5: 'indigo', keyword: 'zinc', hybrid: 'purple', ai: 'cyan' };
+        var modeNotes = {
+          keyword: 'LIKE substring',
+          hybrid: 'FTS5 + AI/RRF',
+          ai: 'Semantic/Vectorize'
+        };
+
+        // Group runs by corpus size
+        var byCorpus = {};
+        for (var i = 0; i < benchmarkRuns.length; i++) {
+          var r = benchmarkRuns[i];
+          if (!byCorpus[r.corpus]) byCorpus[r.corpus] = [];
+          byCorpus[r.corpus].push(r);
+        }
+
+        var html = '';
+        var corpusKeys = Object.keys(byCorpus).sort();
+        for (var ci = 0; ci < corpusKeys.length; ci++) {
+          var corpusKey = corpusKeys[ci];
+          var runs = byCorpus[corpusKey];
+          var sizeLabel = runs[0].corpus_size ? runs[0].corpus_size + ' docs' : corpusKey;
+
+          html += '<div class="col-span-2 md:col-span-4 mt-' + (ci > 0 ? '4' : '0') + ' mb-1">' +
+            '<span class="text-sm font-bold text-zinc-800 dark:text-zinc-200">' + corpusKey.toUpperCase() + ' (' + sizeLabel + ')</span>' +
+            '</div>';
+
+          // Sort by mode order: fts5, hybrid, ai, keyword
+          var modeOrder = ['fts5', 'hybrid', 'ai', 'keyword'];
+          runs.sort(function(a, b) { return modeOrder.indexOf(a.mode) - modeOrder.indexOf(b.mode); });
+
+          for (var ri = 0; ri < runs.length; ri++) {
+            var run = runs[ri];
+            var m = run.metrics;
+            var color = modeColors[run.mode] || 'indigo';
+            var note = modeNotes[run.mode] || '';
+
+            html += '<div class="col-span-2 md:col-span-4 text-xs font-semibold text-' + color + '-600 mt-1">' +
+              run.mode.toUpperCase() + (note ? ' <span class="font-normal text-zinc-400">(' + note + ')</span>' : '') +
+              '</div>';
+
+            html +=
+              '<div class="p-3 rounded bg-white dark:bg-zinc-900 text-center">' +
+                '<div class="text-lg font-bold text-' + color + '-600">' + (m.ndcg_at_k * 100).toFixed(1) + '%</div>' +
+                '<div class="text-xs text-zinc-500">nDCG@10</div>' +
+              '</div>' +
+              '<div class="p-3 rounded bg-white dark:bg-zinc-900 text-center">' +
+                '<div class="text-lg font-bold text-' + color + '-600">' + (m.precision_at_k * 100).toFixed(1) + '%</div>' +
+                '<div class="text-xs text-zinc-500">Precision@10</div>' +
+              '</div>' +
+              '<div class="p-3 rounded bg-white dark:bg-zinc-900 text-center">' +
+                '<div class="text-lg font-bold text-' + color + '-600">' + (m.recall_at_k * 100).toFixed(1) + '%</div>' +
+                '<div class="text-xs text-zinc-500">Recall@10</div>' +
+              '</div>' +
+              '<div class="p-3 rounded bg-white dark:bg-zinc-900 text-center">' +
+                '<div class="text-lg font-bold text-' + color + '-600">' + (m.mrr * 100).toFixed(1) + '%</div>' +
+                '<div class="text-xs text-zinc-500">MRR</div>' +
+              '</div>';
+          }
+        }
+
+        // Clear saved results button
+        html += '<div class="col-span-2 md:col-span-4 mt-3 text-right">' +
+          '<button onclick="clearBenchmarkHistory()" class="text-xs text-zinc-400 hover:text-red-500 underline">Clear saved results</button>' +
+          '</div>';
+
+        metricsDiv.innerHTML = html;
+
+        // Show latest run details
+        var latest = benchmarkRuns[benchmarkRuns.length - 1];
+        detailsDiv.textContent = latest.queries_evaluated + ' queries evaluated in ' +
+          (latest.total_time_ms / 1000).toFixed(1) + 's (avg ' + latest.avg_query_time_ms + 'ms/query) \u2014 ' +
+          benchmarkRuns.length + ' total runs saved';
+
+        resultsDiv.classList.remove('hidden');
+      }
+
+      function clearBenchmarkHistory() {
+        if (!confirm('Clear all saved benchmark results?')) return;
+        benchmarkRuns = [];
+        benchmarkHistory = [];
+        saveBenchmarkRuns([]);
+        document.getElementById('benchmark-results').classList.add('hidden');
+      }
+
+      async function purgeBenchmark() {
+        if (!confirm('Remove all benchmark data? This will delete benchmark documents and index entries.')) return;
+        var btn = document.getElementById('bench-purge-btn');
+        btn.textContent = 'Purging...';
+        btn.disabled = true;
+        try {
+          var res = await fetch('/admin/plugins/ai-search/api/benchmark/purge', { method: 'POST' });
+          var data = await res.json();
+          if (data.success) {
+            document.getElementById('benchmark-status').textContent = data.message + '. Benchmark data removed.';
+            document.getElementById('benchmark-results').classList.add('hidden');
+            benchmarkHistory = [];
+            document.getElementById('bench-seed-btn').textContent = 'Seed Data';
+            document.getElementById('bench-index-btn').disabled = true;
+            document.getElementById('bench-vectorize-btn').disabled = true;
+            document.getElementById('bench-fts5-btn').disabled = true;
+            document.getElementById('bench-keyword-btn').disabled = true;
+            document.getElementById('bench-hybrid-btn').disabled = true;
+            document.getElementById('bench-ai-btn').disabled = true;
+            document.getElementById('bench-purge-btn').disabled = true;
+          } else {
+            alert('Purge failed: ' + (data.error || 'Unknown error'));
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+        btn.textContent = 'Purge Data';
+        btn.disabled = false;
+      }
 
       // Reindex all collections for FTS5
       async function reindexFTS5All() {
@@ -4774,6 +6320,10 @@ function renderSettingsPage(data) {
 }
 
 // src/plugins/core-plugins/ai-search-plugin/routes/admin.ts
+var clampWeight2 = (val, fallback) => {
+  const n = Number(val);
+  return isNaN(n) || !isFinite(n) ? fallback : Math.round(Math.min(10, Math.max(0, n)) * 10) / 10;
+};
 var adminRoutes = new Hono();
 adminRoutes.use("*", requireAuth());
 adminRoutes.get("/", async (c) => {
@@ -4785,26 +6335,15 @@ adminRoutes.get("/", async (c) => {
     const service = new AISearchService(db, ai, vectorize);
     const indexer = new IndexManager(db, ai, vectorize);
     const settings = await service.getSettings();
-    console.log("[AI Search Settings Route] Settings loaded:", !!settings);
     const collections2 = await service.getAllCollections();
-    console.log("[AI Search Settings Route] Collections returned:", collections2.length);
     if (collections2.length === 0) {
       const directQuery = await db.prepare("SELECT id, name, display_name FROM collections WHERE is_active = 1").all();
-      console.log("[AI Search Settings Route] Direct DB query found:", directQuery.results?.length || 0, "collections");
       if (directQuery.results && directQuery.results.length > 0) {
-        console.log("[AI Search Settings Route] Sample from DB:", directQuery.results[0]);
+        console.log("[AI Search Settings Route] Direct DB query found:", directQuery.results.length, "collections");
       }
-    } else if (collections2.length > 0 && collections2[0]) {
-      console.log("[AI Search Settings Route] First collection:", {
-        id: collections2[0].id,
-        name: collections2[0].name,
-        display_name: collections2[0].display_name
-      });
     }
     const newCollections = await service.detectNewCollections();
-    console.log("AI Search: New collections:", newCollections.length);
     const indexStatus = await indexer.getAllIndexStatus();
-    console.log("AI Search: Index status:", Object.keys(indexStatus).length);
     const analytics = await service.getSearchAnalytics();
     return c.html(
       renderSettingsPage({
@@ -4846,7 +6385,11 @@ adminRoutes.post("/", async (c) => {
       results_limit: body.results_limit ? Number(body.results_limit) : currentSettings?.results_limit,
       index_media: body.index_media !== void 0 ? Boolean(body.index_media) : currentSettings?.index_media,
       reranking_enabled: body.reranking_enabled !== void 0 ? Boolean(body.reranking_enabled) : currentSettings?.reranking_enabled,
-      query_rewriting_enabled: body.query_rewriting_enabled !== void 0 ? Boolean(body.query_rewriting_enabled) : currentSettings?.query_rewriting_enabled
+      query_rewriting_enabled: body.query_rewriting_enabled !== void 0 ? Boolean(body.query_rewriting_enabled) : currentSettings?.query_rewriting_enabled,
+      fts5_title_boost: body.fts5_title_boost !== void 0 ? clampWeight2(body.fts5_title_boost, currentSettings?.fts5_title_boost ?? 5) : currentSettings?.fts5_title_boost,
+      fts5_slug_boost: body.fts5_slug_boost !== void 0 ? clampWeight2(body.fts5_slug_boost, currentSettings?.fts5_slug_boost ?? 2) : currentSettings?.fts5_slug_boost,
+      fts5_body_boost: body.fts5_body_boost !== void 0 ? clampWeight2(body.fts5_body_boost, currentSettings?.fts5_body_boost ?? 1) : currentSettings?.fts5_body_boost,
+      query_synonyms_enabled: body.query_synonyms_enabled !== void 0 ? Boolean(body.query_synonyms_enabled) : currentSettings?.query_synonyms_enabled
     };
     console.log("[AI Search POST] Updated settings selected_collections:", updatedSettings.selected_collections);
     const collectionsChanged = JSON.stringify(updatedSettings.selected_collections) !== JSON.stringify(currentSettings?.selected_collections || []);
@@ -5005,6 +6548,16 @@ adminRoutes.post("/api/fts5/reindex-all", async (c) => {
         message: "No collections selected for indexing"
       });
     }
+    try {
+      const placeholders = collections2.map(() => "?").join(",");
+      await db.batch([
+        db.prepare(`DELETE FROM content_fts WHERE collection_id NOT IN (${placeholders})`).bind(...collections2),
+        db.prepare(`DELETE FROM content_fts_sync WHERE collection_id NOT IN (${placeholders})`).bind(...collections2)
+      ]);
+      console.log(`[FTS5 Admin] Cleaned up FTS5 entries for unselected collections`);
+    } catch (e) {
+      console.warn("[FTS5 Admin] Cleanup of unselected collections failed (non-fatal):", e);
+    }
     c.executionCtx.waitUntil(
       (async () => {
         console.log(`[FTS5 Admin] Starting reindex-all for ${collections2.length} collections`);
@@ -5030,6 +6583,690 @@ adminRoutes.post("/api/fts5/reindex-all", async (c) => {
   } catch (error) {
     console.error("Error starting FTS5 reindex-all:", error);
     return c.json({ error: "Failed to start FTS5 reindex" }, 500);
+  }
+});
+adminRoutes.post("/api/vectorize/reindex-all", async (c) => {
+  try {
+    const db = c.env.DB;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_INDEX;
+    if (!ai || !vectorize) {
+      return c.json({ error: "Vectorize reindexing requires AI and VECTORIZE_INDEX bindings." }, 400);
+    }
+    const service = new AISearchService(db, ai, vectorize);
+    const settings = await service.getSettings();
+    const collections2 = settings?.selected_collections || [];
+    if (collections2.length === 0) {
+      return c.json({ error: "No collections selected. Configure collections in the Configuration tab first." }, 400);
+    }
+    for (const collectionId of collections2) {
+      try {
+        await db.prepare(
+          "DELETE FROM ai_search_index_meta WHERE collection_id = ?"
+        ).bind(collectionId).run();
+        const countResult = await db.prepare(
+          "SELECT COUNT(*) as cnt FROM content WHERE collection_id = ? AND status != 'deleted'"
+        ).bind(collectionId).first();
+        const colInfo = await db.prepare(
+          "SELECT display_name FROM collections WHERE id = ?"
+        ).bind(collectionId).first();
+        await db.prepare(`
+          INSERT INTO ai_search_index_meta (collection_id, collection_name, total_items, indexed_items, status, last_sync_at)
+          VALUES (?, ?, ?, 0, 'indexing', ?)
+        `).bind(
+          collectionId,
+          colInfo?.display_name || collectionId,
+          countResult?.cnt || 0,
+          Date.now()
+        ).run();
+      } catch (e) {
+      }
+    }
+    try {
+      const benchmarkIds = [];
+      for (const dsId of BENCHMARK_DATASETS.map((d) => d.id)) {
+        for (let i = 0; i < 6e3; i++) {
+          for (let chunk = 0; chunk < 3; chunk++) {
+            benchmarkIds.push(`beir-${dsId}-${i}-chunk-${chunk}`);
+          }
+        }
+      }
+      for (let i = 0; i < benchmarkIds.length; i += 1e3) {
+        await vectorize.deleteByIds(benchmarkIds.slice(i, i + 1e3));
+      }
+      console.log("[Vectorize Reindex] Cleaned orphaned benchmark vectors from main index");
+    } catch (e) {
+      console.warn("[Vectorize Reindex] Orphan cleanup failed (non-fatal):", e);
+    }
+    const indexer = new IndexManager(db, ai, vectorize);
+    c.executionCtx.waitUntil(
+      indexer.syncAll(collections2).then(() => console.log("[Vectorize Reindex] All collections reindexed")).catch((error) => console.error("[Vectorize Reindex] Error:", error))
+    );
+    return c.json({
+      success: true,
+      message: `Vectorize reindexing started for ${collections2.length} collection(s)`,
+      collections: collections2
+    });
+  } catch (error) {
+    console.error("Error starting Vectorize reindex-all:", error);
+    return c.json({ error: "Failed to start Vectorize reindexing" }, 500);
+  }
+});
+adminRoutes.post("/api/relevance/preview", async (c) => {
+  try {
+    const db = c.env.DB;
+    const body = await c.req.json();
+    const query = body.query?.trim();
+    if (!query) return c.json({ error: "query is required" }, 400);
+    const limit = Math.min(body.limit || 10, 20);
+    const service = new AISearchService(db);
+    const settings = await service.getSettings();
+    const titleWeight = clampWeight2(body.title_weight, settings?.fts5_title_boost ?? 5);
+    const slugWeight = clampWeight2(body.slug_weight, settings?.fts5_slug_boost ?? 2);
+    const bodyWeight = clampWeight2(body.body_weight, settings?.fts5_body_boost ?? 1);
+    const previewSettings = {
+      ...settings,
+      fts5_title_boost: titleWeight,
+      fts5_slug_boost: slugWeight,
+      fts5_body_boost: bodyWeight
+    };
+    const fts5Service = new FTS5Service(db);
+    let result = await fts5Service.search(
+      { query, mode: "fts5", limit, offset: 0 },
+      previewSettings,
+      { titleBoost: titleWeight, slugBoost: slugWeight, bodyBoost: bodyWeight }
+    );
+    const pipelineService = new RankingPipelineService(db);
+    let pipelineApplied = false;
+    try {
+      const config = await pipelineService.getConfig();
+      const activeStages = config.filter((s) => s.enabled && s.weight > 0);
+      if (activeStages.length > 0) {
+        result = await pipelineService.apply(result, query);
+        pipelineApplied = true;
+      }
+    } catch (err) {
+      console.warn("[Relevance Preview] Pipeline application failed:", err);
+    }
+    return c.json({
+      success: true,
+      data: {
+        results: result.results,
+        total: result.total,
+        query_time_ms: result.query_time_ms,
+        weights: { title: titleWeight, slug: slugWeight, body: bodyWeight },
+        pipeline_applied: pipelineApplied
+      }
+    });
+  } catch (error) {
+    console.error("Error in relevance preview:", error);
+    return c.json({ error: "Preview search failed: " + (error instanceof Error ? error.message : String(error)) }, 500);
+  }
+});
+adminRoutes.get("/api/relevance/pipeline", async (c) => {
+  try {
+    const pipelineService = new RankingPipelineService(c.env.DB);
+    const config = await pipelineService.getConfig();
+    return c.json({ success: true, data: config });
+  } catch (error) {
+    console.error("Error fetching pipeline config:", error);
+    return c.json({ error: "Failed to fetch pipeline config" }, 500);
+  }
+});
+adminRoutes.post("/api/relevance/pipeline", async (c) => {
+  try {
+    const body = await c.req.json();
+    if (!Array.isArray(body.stages)) {
+      return c.json({ error: "stages must be an array" }, 400);
+    }
+    const pipelineService = new RankingPipelineService(c.env.DB);
+    await pipelineService.saveConfig(body.stages);
+    const saved = await pipelineService.getConfig();
+    return c.json({ success: true, data: saved });
+  } catch (error) {
+    console.error("Error saving pipeline config:", error);
+    return c.json({ error: "Failed to save pipeline config" }, 500);
+  }
+});
+adminRoutes.get("/api/relevance/content-scores", async (c) => {
+  try {
+    const contentId = c.req.query("content_id");
+    const scoreType = c.req.query("score_type") || "popularity";
+    if (!contentId) {
+      return c.json({ error: "content_id query parameter is required" }, 400);
+    }
+    const pipelineService = new RankingPipelineService(c.env.DB);
+    const scores = await pipelineService.getContentScores([contentId], scoreType);
+    return c.json({
+      success: true,
+      data: { content_id: contentId, score_type: scoreType, score: scores.get(contentId) ?? null }
+    });
+  } catch (error) {
+    console.error("Error fetching content scores:", error);
+    return c.json({ error: "Failed to fetch content scores" }, 500);
+  }
+});
+adminRoutes.post("/api/relevance/content-scores", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { content_id: contentId, score_type: scoreType, score } = body;
+    if (!contentId || !scoreType || score == null) {
+      return c.json({ error: "content_id, score_type, and score are required" }, 400);
+    }
+    if (!["popularity", "custom"].includes(scoreType)) {
+      return c.json({ error: 'score_type must be "popularity" or "custom"' }, 400);
+    }
+    const pipelineService = new RankingPipelineService(c.env.DB);
+    await pipelineService.setContentScore(String(contentId), scoreType, Number(score));
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("Error setting content score:", error);
+    return c.json({ error: "Failed to set content score" }, 500);
+  }
+});
+adminRoutes.delete("/api/relevance/content-scores", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { content_id: contentId, score_type: scoreType } = body;
+    if (!contentId || !scoreType) {
+      return c.json({ error: "content_id and score_type are required" }, 400);
+    }
+    const pipelineService = new RankingPipelineService(c.env.DB);
+    await pipelineService.deleteContentScore(String(contentId), scoreType);
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting content score:", error);
+    return c.json({ error: "Failed to delete content score" }, 500);
+  }
+});
+adminRoutes.get("/api/relevance/synonyms", async (c) => {
+  try {
+    const synonymService = new SynonymService(c.env.DB);
+    const groups = await synonymService.getAll();
+    return c.json({ success: true, data: groups });
+  } catch (error) {
+    console.error("Error fetching synonym groups:", error);
+    return c.json({ error: "Failed to fetch synonym groups" }, 500);
+  }
+});
+adminRoutes.post("/api/relevance/synonyms", async (c) => {
+  try {
+    const body = await c.req.json();
+    if (!Array.isArray(body.terms) || body.terms.length < 2) {
+      return c.json({ error: "terms must be an array with at least 2 items" }, 400);
+    }
+    const synonymService = new SynonymService(c.env.DB);
+    const group = await synonymService.create(body.terms, body.enabled !== false);
+    return c.json({ success: true, data: group });
+  } catch (error) {
+    console.error("Error creating synonym group:", error);
+    return c.json({ error: error instanceof Error ? error.message : "Failed to create synonym group" }, 500);
+  }
+});
+adminRoutes.put("/api/relevance/synonyms/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const body = await c.req.json();
+    const synonymService = new SynonymService(c.env.DB);
+    const group = await synonymService.update(id, {
+      terms: body.terms,
+      enabled: body.enabled
+    });
+    if (!group) {
+      return c.json({ error: "Synonym group not found" }, 404);
+    }
+    return c.json({ success: true, data: group });
+  } catch (error) {
+    console.error("Error updating synonym group:", error);
+    return c.json({ error: error instanceof Error ? error.message : "Failed to update synonym group" }, 500);
+  }
+});
+adminRoutes.delete("/api/relevance/synonyms/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const synonymService = new SynonymService(c.env.DB);
+    const deleted = await synonymService.delete(id);
+    if (!deleted) {
+      return c.json({ error: "Synonym group not found" }, 404);
+    }
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting synonym group:", error);
+    return c.json({ error: "Failed to delete synonym group" }, 500);
+  }
+});
+adminRoutes.get("/api/analytics/extended", async (c) => {
+  try {
+    const db = c.env.DB;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_INDEX;
+    const service = new AISearchService(db, ai, vectorize);
+    const data = await service.getAnalyticsExtended();
+    return c.json({ success: true, data });
+  } catch (error) {
+    console.error("Error fetching extended analytics:", error);
+    return c.json({ success: false, error: error instanceof Error ? error.message : String(error) }, 500);
+  }
+});
+adminRoutes.get("/api/benchmark/datasets", async (c) => {
+  return c.json({ success: true, datasets: BENCHMARK_DATASETS });
+});
+adminRoutes.get("/api/benchmark/status", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const dataset = c.req.query("dataset") || "scifact";
+    const benchmarkService = new BenchmarkService(db, kv, void 0, dataset);
+    const { seeded, count } = await benchmarkService.isSeeded();
+    const meta = benchmarkService.getMeta();
+    const dataAvailable = await benchmarkService.isDataAvailable();
+    let subsetSize = 0;
+    let evaluableQueries = 0;
+    if (dataAvailable) {
+      try {
+        const [ss, eqIds] = await Promise.all([
+          benchmarkService.getSubsetSize(),
+          benchmarkService.getEvaluableQueryIds(0)
+        ]);
+        subsetSize = ss;
+        evaluableQueries = eqIds.length;
+      } catch (e) {
+      }
+    }
+    return c.json({
+      success: true,
+      data: {
+        seeded,
+        seeded_count: count,
+        corpus_size: meta.corpus_size,
+        subset_size: subsetSize,
+        query_count: meta.query_count,
+        evaluable_queries: evaluableQueries,
+        dataset: meta.name,
+        dataset_id: dataset,
+        license: meta.license,
+        data_available: dataAvailable
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching benchmark status:", error);
+    return c.json({ error: `Failed to fetch benchmark status: ${error instanceof Error ? error.message : String(error)}` }, 500);
+  }
+});
+adminRoutes.post("/api/benchmark/seed", async (c) => {
+  try {
+    const user = c.get("user");
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const body = await c.req.json().catch(() => ({}));
+    const dataset = body.dataset || "scifact";
+    const useSubset = body.corpus_size !== "full";
+    const benchmarkService = new BenchmarkService(db, kv, void 0, dataset);
+    const collectionId = benchmarkService.getCollectionId();
+    const userId = user.userId || user.id;
+    const result = await benchmarkService.seed(String(userId), useSubset);
+    if (useSubset) {
+      const fts5Service = new FTS5Service(db);
+      c.executionCtx.waitUntil(
+        fts5Service.indexCollection(collectionId).then((r) => console.log(`[Benchmark:${dataset}] FTS5 indexed ${r.indexed_items}/${r.total_items} docs`)).catch((e) => console.error(`[Benchmark:${dataset}] FTS5 indexing error:`, e))
+      );
+    }
+    const meta = benchmarkService.getMeta();
+    const indexNote = useSubset ? "FTS5 indexing started in background." : "Use the Index buttons to index before evaluating.";
+    if (result.skipped) {
+      return c.json({
+        success: true,
+        message: `Benchmark data already exists (${result.seeded} documents). ${indexNote}`,
+        seeded: result.seeded,
+        skipped: true
+      });
+    }
+    return c.json({
+      success: true,
+      message: `Seeded ${result.seeded} ${meta.name} documents. ${indexNote}`,
+      seeded: result.seeded,
+      skipped: false
+    });
+  } catch (error) {
+    console.error("Error seeding benchmark data:", error);
+    return c.json(
+      { error: `Failed to seed benchmark data: ${error instanceof Error ? error.message : String(error)}` },
+      500
+    );
+  }
+});
+adminRoutes.post("/api/benchmark/purge", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const vectorize = c.env.VECTORIZE_BENCHMARK_INDEX || c.env.VECTORIZE_INDEX;
+    const body = await c.req.json().catch(() => ({}));
+    const dataset = body.dataset || "scifact";
+    const benchmarkService = new BenchmarkService(db, kv, vectorize, dataset);
+    const deleted = await benchmarkService.purge();
+    return c.json({
+      success: true,
+      message: `Removed ${deleted} benchmark documents`,
+      deleted
+    });
+  } catch (error) {
+    console.error("Error purging benchmark data:", error);
+    return c.json({ error: "Failed to purge benchmark data" }, 500);
+  }
+});
+adminRoutes.post("/api/benchmark/index-fts5-batch", async (c) => {
+  try {
+    const db = c.env.DB;
+    const fts5Service = new FTS5Service(db);
+    if (!await fts5Service.isAvailable()) {
+      return c.json({ error: "FTS5 tables not available." }, 400);
+    }
+    const body = await c.req.json().catch(() => ({}));
+    const dataset = body.dataset || "scifact";
+    const batchSize = body.batch_size || 200;
+    const collectionId = `benchmark-${dataset}-collection`;
+    const result = await fts5Service.indexCollectionBatch(
+      collectionId,
+      batchSize
+    );
+    return c.json({
+      success: true,
+      indexed: result.indexed,
+      remaining: result.remaining,
+      total: result.total
+    });
+  } catch (error) {
+    console.error("Error in FTS5 batch indexing:", error);
+    return c.json({ error: `FTS5 batch indexing failed: ${error instanceof Error ? error.message : String(error)}` }, 500);
+  }
+});
+adminRoutes.post("/api/benchmark/index-vectorize-batch", async (c) => {
+  try {
+    const db = c.env.DB;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_BENCHMARK_INDEX || c.env.VECTORIZE_INDEX;
+    if (!ai || !vectorize) {
+      return c.json({ error: "Vectorize indexing requires AI and VECTORIZE_BENCHMARK_INDEX bindings." }, 400);
+    }
+    const body = await c.req.json().catch(() => ({}));
+    const dataset = body.dataset || "scifact";
+    const batchSize = body.batch_size || 25;
+    const offset = body.offset || 0;
+    const benchmarkCollectionId = `benchmark-${dataset}-collection`;
+    const datasetInfo = BENCHMARK_DATASETS.find((d) => d.id === dataset);
+    const displayName = datasetInfo ? `${datasetInfo.name} Benchmark` : `BEIR ${dataset} Benchmark`;
+    const embeddingService = new EmbeddingService(ai);
+    const chunkingService = new ChunkingService();
+    const totalResult = await db.prepare("SELECT COUNT(*) as cnt FROM content WHERE collection_id = ? AND status != 'deleted'").bind(benchmarkCollectionId).first();
+    const total = totalResult?.cnt || 0;
+    if (offset >= total) {
+      try {
+        await db.prepare(`
+          INSERT OR REPLACE INTO ai_search_index_meta
+          (collection_id, collection_name, total_items, indexed_items, last_sync_at, status)
+          VALUES (?, ?, ?, ?, ?, 'completed')
+        `).bind(benchmarkCollectionId, displayName, total, total, Date.now()).run();
+      } catch (e) {
+      }
+      return c.json({ success: true, indexed: 0, offset, total, remaining: 0 });
+    }
+    const { results: contentItems } = await db.prepare(`
+        SELECT c.id, c.title, c.data, c.collection_id, c.status,
+               c.created_at, c.author_id
+        FROM content c
+        WHERE c.collection_id = ? AND c.status != 'deleted'
+        ORDER BY c.id
+        LIMIT ? OFFSET ?
+      `).bind(benchmarkCollectionId, batchSize, offset).all();
+    const items = (contentItems || []).map((item) => ({
+      id: item.id,
+      collection_id: item.collection_id,
+      title: item.title || "Untitled",
+      data: typeof item.data === "string" ? JSON.parse(item.data) : item.data,
+      metadata: {
+        status: item.status,
+        created_at: item.created_at,
+        author_id: item.author_id,
+        collection_name: `benchmark_${dataset}`,
+        collection_display_name: displayName
+      }
+    }));
+    const chunks = chunkingService.chunkContentBatch(items);
+    const embeddings = await embeddingService.generateBatch(
+      chunks.map((ch) => `${ch.title}
+
+${ch.text}`)
+    );
+    let indexedChunks = 0;
+    const upsertBatchSize = 100;
+    for (let i = 0; i < chunks.length; i += upsertBatchSize) {
+      const chunkBatch = chunks.slice(i, i + upsertBatchSize);
+      const embBatch = embeddings.slice(i, i + upsertBatchSize);
+      try {
+        await vectorize.upsert(
+          chunkBatch.map((chunk, idx) => ({
+            id: chunk.id,
+            values: embBatch[idx],
+            metadata: {
+              content_id: chunk.content_id,
+              collection_id: chunk.collection_id,
+              title: chunk.title,
+              text: chunk.text.substring(0, 500),
+              chunk_index: chunk.chunk_index,
+              ...chunk.metadata
+            }
+          }))
+        );
+        indexedChunks += chunkBatch.length;
+      } catch (error) {
+        console.error(`[Benchmark:${dataset} Vectorize] Upsert error at batch offset ${i}:`, error);
+      }
+    }
+    const newOffset = offset + (contentItems?.length || 0);
+    const remaining = Math.max(0, total - newOffset);
+    try {
+      await db.prepare(`
+        INSERT OR REPLACE INTO ai_search_index_meta
+        (collection_id, collection_name, total_items, indexed_items, last_sync_at, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(
+        benchmarkCollectionId,
+        displayName,
+        total,
+        newOffset,
+        Date.now(),
+        remaining > 0 ? "indexing" : "completed"
+      ).run();
+    } catch (e) {
+    }
+    return c.json({
+      success: true,
+      indexed: indexedChunks,
+      items_processed: contentItems?.length || 0,
+      offset: newOffset,
+      total,
+      remaining
+    });
+  } catch (error) {
+    console.error("Error in Vectorize batch indexing:", error);
+    return c.json({ error: `Vectorize batch indexing failed: ${error instanceof Error ? error.message : String(error)}` }, 500);
+  }
+});
+adminRoutes.post("/api/benchmark/index-vectorize", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_BENCHMARK_INDEX || c.env.VECTORIZE_INDEX;
+    if (!ai || !vectorize) {
+      return c.json(
+        { error: "Vectorize indexing requires AI and VECTORIZE_BENCHMARK_INDEX bindings. Configure them in wrangler.toml." },
+        400
+      );
+    }
+    const body = await c.req.json().catch(() => ({}));
+    const dataset = body.dataset || "scifact";
+    const benchmarkService = new BenchmarkService(db, kv, void 0, dataset);
+    const { seeded } = await benchmarkService.isSeeded();
+    if (!seeded) {
+      return c.json({ error: "Benchmark data not seeded. Seed first." }, 400);
+    }
+    const collectionId = benchmarkService.getCollectionId();
+    const meta = benchmarkService.getMeta();
+    const displayName = `${meta.name} Benchmark`;
+    try {
+      await db.prepare(`
+        INSERT OR REPLACE INTO ai_search_index_meta
+        (collection_id, collection_name, total_items, indexed_items, last_sync_at, status)
+        VALUES (?, ?, 0, 0, ?, 'indexing')
+      `).bind(collectionId, displayName, Date.now()).run();
+    } catch (e) {
+    }
+    return c.json({
+      success: true,
+      message: "Vectorize index reset. Use batch indexing to process documents."
+    });
+  } catch (error) {
+    console.error("Error starting Vectorize indexing:", error);
+    return c.json({ error: "Failed to start Vectorize indexing" }, 500);
+  }
+});
+adminRoutes.post("/api/benchmark/evaluate", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_BENCHMARK_INDEX || c.env.VECTORIZE_INDEX;
+    const body = await c.req.json();
+    const mode = body.mode || "fts5";
+    const limit = body.limit || 10;
+    const maxQueries = body.max_queries || 0;
+    const dataset = body.dataset || "scifact";
+    const benchmarkService = new BenchmarkService(db, kv, void 0, dataset);
+    const collectionId = benchmarkService.getCollectionId();
+    const { seeded } = await benchmarkService.isSeeded();
+    if (!seeded) {
+      return c.json(
+        { error: "Benchmark data not seeded. Call /api/benchmark/seed first." },
+        400
+      );
+    }
+    if (mode === "fts5" || mode === "hybrid") {
+      const fts5Service = new FTS5Service(db);
+      if (await fts5Service.isAvailable()) {
+        const ftsCount = await db.prepare("SELECT COUNT(*) as cnt FROM content_fts WHERE collection_id = ?").bind(collectionId).first();
+        if (!ftsCount || ftsCount.cnt === 0) {
+          return c.json(
+            { error: 'Benchmark data not yet FTS5-indexed. Click "Seed Data" again or wait for background indexing to complete, then retry.' },
+            400
+          );
+        }
+      }
+    }
+    if ((mode === "ai" || mode === "hybrid") && !vectorize) {
+      return c.json(
+        { error: `${mode.toUpperCase()} mode requires a Vectorize index binding. Configure it in wrangler.toml.` },
+        400
+      );
+    }
+    if (mode === "ai" || mode === "hybrid") {
+      try {
+        const indexMeta = await db.prepare("SELECT status, indexed_items FROM ai_search_index_meta WHERE collection_id = ?").bind(collectionId).first();
+        if (!indexMeta || indexMeta.indexed_items === 0) {
+          return c.json(
+            { error: 'Benchmark data not yet Vectorize-indexed. Click "Index (Vectorize)" first and wait for it to complete.' },
+            400
+          );
+        }
+        if (indexMeta.status === "indexing") {
+          return c.json(
+            { error: "Vectorize indexing is still in progress. Wait for it to complete, then retry." },
+            400
+          );
+        }
+      } catch (e) {
+        return c.json(
+          { error: 'Benchmark data not yet Vectorize-indexed. Click "Index (Vectorize)" first.' },
+          400
+        );
+      }
+    }
+    const aiSearchService = new AISearchService(db, ai, vectorize);
+    const searchFn = async (query, searchMode, searchLimit) => {
+      const response = await aiSearchService.search({
+        query,
+        mode: searchMode,
+        limit: searchLimit,
+        filters: { collections: [collectionId] }
+      });
+      return { results: response.results.map((r) => ({ id: r.id })) };
+    };
+    const results = await benchmarkService.evaluate(
+      searchFn,
+      mode,
+      limit,
+      maxQueries
+    );
+    return c.json({ success: true, ...results });
+  } catch (error) {
+    console.error("Error running benchmark evaluation:", error);
+    return c.json(
+      { error: `Benchmark evaluation failed: ${error instanceof Error ? error.message : String(error)}` },
+      500
+    );
+  }
+});
+adminRoutes.get("/api/benchmark/query-ids", async (c) => {
+  try {
+    const maxQueries = parseInt(c.req.query("max_queries") || "0", 10);
+    const dataset = c.req.query("dataset") || "scifact";
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const benchmarkService = new BenchmarkService(db, kv, void 0, dataset);
+    const ids = await benchmarkService.getEvaluableQueryIds(maxQueries);
+    return c.json({ success: true, query_ids: ids, total: ids.length });
+  } catch (error) {
+    return c.json({ error: String(error) }, 500);
+  }
+});
+adminRoutes.post("/api/benchmark/evaluate-batch", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_BENCHMARK_INDEX || c.env.VECTORIZE_INDEX;
+    const body = await c.req.json();
+    const mode = body.mode || "fts5";
+    const limit = body.limit || 10;
+    const queryIds = body.query_ids || [];
+    const dataset = body.dataset || "scifact";
+    if (queryIds.length === 0) {
+      return c.json({ error: "No query_ids provided" }, 400);
+    }
+    if ((mode === "ai" || mode === "hybrid") && !vectorize) {
+      return c.json({ error: `${mode.toUpperCase()} mode requires Vectorize binding.` }, 400);
+    }
+    const benchmarkService = new BenchmarkService(db, kv, void 0, dataset);
+    const collectionId = benchmarkService.getCollectionId();
+    const aiSearchService = new AISearchService(db, ai, vectorize);
+    const searchFn = async (query, searchMode, searchLimit) => {
+      const response = await aiSearchService.search({
+        query,
+        mode: searchMode,
+        limit: searchLimit,
+        filters: { collections: [collectionId] }
+      });
+      return { results: response.results.map((r) => ({ id: r.id })) };
+    };
+    const perQuery = await benchmarkService.evaluateBatch(searchFn, mode, limit, queryIds);
+    return c.json({
+      success: true,
+      per_query: perQuery,
+      evaluated: perQuery.length
+    });
+  } catch (error) {
+    console.error("Error in batch evaluation:", error);
+    return c.json({ error: String(error) }, 500);
   }
 });
 var admin_default = adminRoutes;
@@ -5122,6 +7359,550 @@ apiRoutes.get("/analytics", async (c) => {
   }
 });
 var api_default2 = apiRoutes;
+
+// src/plugins/core-plugins/ai-search-plugin/services/instantsearch-adapter.ts
+var InstantSearchAdapter = class {
+  constructor(db) {
+    this.db = db;
+  }
+  collectionCache = /* @__PURE__ */ new Map();
+  /**
+   * Convert an InstantSearch request to a SonicJS SearchQuery
+   */
+  async toSonicQuery(request, settings) {
+    const params = request.params || {};
+    const page = params.page ?? 0;
+    const hitsPerPage = Math.min(params.hitsPerPage ?? 20, 200);
+    const collections2 = await this.resolveCollections(request.indexName);
+    const mode = this.determineSearchMode(settings);
+    return {
+      query: params.query || "",
+      mode,
+      limit: hitsPerPage,
+      offset: page * hitsPerPage,
+      filters: {
+        collections: collections2.length > 0 ? collections2 : void 0,
+        status: this.parseStatusFilter(params.filters)
+      }
+    };
+  }
+  /**
+   * Convert a SonicJS SearchResponse to an InstantSearch result
+   */
+  toInstantSearchResult(response, request, queryTime) {
+    const params = request.params || {};
+    const page = params.page ?? 0;
+    const hitsPerPage = Math.min(params.hitsPerPage ?? 20, 200);
+    const hits = response.results.map((r) => this.toHit(r, params));
+    const nbPages = hitsPerPage > 0 ? Math.ceil(response.total / hitsPerPage) : 0;
+    const facets = this.computeFacets(response.results, params.facets);
+    return {
+      hits,
+      nbHits: response.total,
+      page,
+      nbPages,
+      hitsPerPage,
+      processingTimeMS: queryTime,
+      query: params.query || "",
+      params: this.buildParamsString(params),
+      exhaustiveNbHits: true,
+      ...Object.keys(facets).length > 0 ? { facets } : {},
+      index: request.indexName
+    };
+  }
+  // --------------------------------------------------
+  // Private helpers
+  // --------------------------------------------------
+  toHit(result, params) {
+    const pre = params.highlightPreTag || "<em>";
+    const post = params.highlightPostTag || "</em>";
+    const hit = {
+      objectID: result.id,
+      title: result.title,
+      slug: result.slug,
+      collection_id: result.collection_id,
+      collection_name: result.collection_name,
+      status: result.status,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
+      ...result.author_name ? { author_name: result.author_name } : {},
+      ...result.url ? { url: result.url } : {},
+      ...result.relevance_score != null ? { relevance_score: result.relevance_score } : {}
+    };
+    if (result.highlights) {
+      const hr = {};
+      if (result.highlights.title) {
+        hr.title = {
+          value: this.convertTags(result.highlights.title, pre, post),
+          matchLevel: this.matchLevel(result.highlights.title)
+        };
+      }
+      if (result.highlights.body) {
+        hr.body = {
+          value: this.convertTags(result.highlights.body, pre, post),
+          matchLevel: this.matchLevel(result.highlights.body)
+        };
+      }
+      if (Object.keys(hr).length > 0) {
+        hit._highlightResult = hr;
+      }
+    }
+    if (result.snippet) {
+      hit._snippetResult = {
+        body: {
+          value: this.convertTags(result.snippet, pre, post),
+          matchLevel: this.matchLevel(result.snippet)
+        }
+      };
+    }
+    return hit;
+  }
+  /**
+   * Resolve collection name(s) to IDs.
+   * "*" / "all" / "" → empty array (search all indexed collections).
+   */
+  async resolveCollections(indexName) {
+    if (!indexName || indexName === "*" || indexName === "all") {
+      return [];
+    }
+    const cached = this.collectionCache.get(indexName);
+    if (cached) return cached;
+    try {
+      const row = await this.db.prepare("SELECT id FROM collections WHERE name = ? AND is_active = 1 LIMIT 1").bind(indexName).first();
+      const ids = row?.id ? [String(row.id)] : [];
+      this.collectionCache.set(indexName, ids);
+      return ids;
+    } catch {
+      return [];
+    }
+  }
+  determineSearchMode(settings) {
+    if (settings.ai_mode_enabled) return "hybrid";
+    return "fts5";
+  }
+  /**
+   * Minimal Algolia filter parser. MVP supports:
+   *   status:published   status:'draft'   status:"archived"
+   */
+  parseStatusFilter(filters) {
+    if (!filters) return void 0;
+    const m = filters.match(/status\s*:\s*['"]?(\w+)['"]?/i);
+    return m?.[1] ? [m[1]] : void 0;
+  }
+  /**
+   * Compute facet counts from the current result page.
+   * MVP: collection_name and status only.
+   */
+  computeFacets(results, requested) {
+    if (!requested || requested.length === 0) return {};
+    const facets = {};
+    for (const name of requested) {
+      if (name === "collection_name") {
+        const counts = {};
+        for (const r of results) {
+          counts[r.collection_name] = (counts[r.collection_name] || 0) + 1;
+        }
+        facets.collection_name = counts;
+      } else if (name === "status") {
+        const counts = {};
+        for (const r of results) {
+          counts[r.status] = (counts[r.status] || 0) + 1;
+        }
+        facets.status = counts;
+      }
+    }
+    return facets;
+  }
+  /** Replace <mark>...</mark> with the requested highlight tags. */
+  convertTags(text, open, close) {
+    return text.replace(/<mark>/g, open).replace(/<\/mark>/g, close);
+  }
+  /** Detect Algolia match level from presence of <mark> tags in the source text. */
+  matchLevel(text) {
+    if (!text.includes("<mark>")) return "none";
+    const plain = text.replace(/<\/?mark>/g, "");
+    const highlighted = (text.match(/<mark>([\s\S]*?)<\/mark>/g) || []).map((m) => m.replace(/<\/?mark>/g, "")).join("");
+    return highlighted.length / Math.max(plain.length, 1) > 0.5 ? "full" : "partial";
+  }
+  buildParamsString(params) {
+    const parts = [];
+    if (params.query != null) parts.push(`query=${encodeURIComponent(params.query)}`);
+    if (params.page != null) parts.push(`page=${params.page}`);
+    if (params.hitsPerPage != null) parts.push(`hitsPerPage=${params.hitsPerPage}`);
+    if (params.facets) parts.push(`facets=${encodeURIComponent(JSON.stringify(params.facets))}`);
+    if (params.filters) parts.push(`filters=${encodeURIComponent(params.filters)}`);
+    return parts.join("&");
+  }
+};
+
+// src/plugins/core-plugins/ai-search-plugin/routes/instantsearch-api.ts
+var instantSearchRoutes = new Hono();
+instantSearchRoutes.post("/", async (c) => {
+  try {
+    const db = c.env.DB;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_INDEX;
+    const searchService = new AISearchService(db, ai, vectorize);
+    const adapter = new InstantSearchAdapter(db);
+    const body = await c.req.json();
+    if (!body.requests || !Array.isArray(body.requests)) {
+      return c.json(
+        { message: "Invalid request format. Expected { requests: [...] }", status: 400 },
+        400
+      );
+    }
+    const settings = await searchService.getSettings();
+    if (!settings?.enabled) {
+      return c.json({
+        results: body.requests.map((req) => emptyResult(req))
+      });
+    }
+    const results = await Promise.all(
+      body.requests.map(async (request) => {
+        const requestStart = Date.now();
+        try {
+          const sonicQuery = await adapter.toSonicQuery(request, settings);
+          const sonicResponse = await searchService.search(sonicQuery);
+          return adapter.toInstantSearchResult(
+            sonicResponse,
+            request,
+            Date.now() - requestStart
+          );
+        } catch (error) {
+          console.error("[InstantSearch] Request error:", error);
+          return emptyResult(request, Date.now() - requestStart);
+        }
+      })
+    );
+    return c.json({ results });
+  } catch (error) {
+    console.error("[InstantSearch] Error:", error);
+    return c.json(
+      { message: "Search request failed", status: 500 },
+      500
+    );
+  }
+});
+function emptyResult(request, processingTimeMS = 0) {
+  const params = request.params || {};
+  return {
+    hits: [],
+    nbHits: 0,
+    page: params.page ?? 0,
+    nbPages: 0,
+    hitsPerPage: params.hitsPerPage ?? 20,
+    processingTimeMS,
+    query: params.query || "",
+    params: "",
+    exhaustiveNbHits: true,
+    index: request.indexName
+  };
+}
+var instantsearch_api_default = instantSearchRoutes;
+var instantSearchTestRoutes = new Hono();
+instantSearchTestRoutes.get("/instantsearch", async (c) => {
+  let collectionOptions = '<option value="*">* (All Collections)</option>';
+  try {
+    const { results } = await c.env.DB.prepare("SELECT name, display_name FROM collections WHERE is_active = 1 ORDER BY display_name").all();
+    for (const col of results || []) {
+      collectionOptions += `<option value="${col.name}">${col.display_name} (${col.name})</option>`;
+    }
+  } catch {
+  }
+  return c.html(html`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>InstantSearch.js Test - SonicJS</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@8/themes/satellite-min.css">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+          }
+          .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+          }
+          h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+          .subtitle { color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem; }
+          .subtitle a { color: #6366f1; text-decoration: none; }
+          .subtitle a:hover { text-decoration: underline; }
+
+          /* Config bar */
+          .config-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+          }
+          .config-bar .field { display: flex; flex-direction: column; gap: 4px; }
+          .config-bar label { font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.025em; }
+          .config-bar select, .config-bar input[type="number"] {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: white;
+          }
+          .config-bar button {
+            padding: 0.45rem 1rem;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+          }
+          .config-bar button:hover { background: #4f46e5; }
+
+          /* Hits styling */
+          .ais-SearchBox { margin-bottom: 1rem; }
+          .ais-Hits-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
+          }
+          .hit-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.3rem; line-height: 1.3; }
+          .hit-title em, .hit-snippet em {
+            background: #fef08a;
+            font-style: normal;
+            padding: 1px 3px;
+            border-radius: 2px;
+          }
+          .hit-snippet { color: #475569; font-size: 0.88rem; line-height: 1.55; }
+          .hit-meta { margin-top: 0.5rem; font-size: 0.78rem; color: #94a3b8; display: flex; gap: 1rem; flex-wrap: wrap; }
+          .badge {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+          }
+          .badge-published { background: #dcfce7; color: #166534; }
+          .badge-draft { background: #fef9c3; color: #854d0e; }
+          .badge-archived { background: #f1f5f9; color: #475569; }
+
+          .ais-Stats { color: #64748b; font-size: 0.85rem; margin-bottom: 1rem; }
+          .ais-Pagination { margin-top: 1.5rem; }
+
+          /* Code snippet */
+          .code-panel {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-top: 2rem;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            overflow-x: auto;
+          }
+          .code-panel summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 0.75rem;
+          }
+          .code-panel code { white-space: pre; }
+          .code-panel .key { color: #7dd3fc; }
+          .code-panel .str { color: #86efac; }
+          .code-panel .cmt { color: #64748b; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>InstantSearch.js Test</h1>
+          <p class="subtitle">
+            Algolia-compatible search powered by SonicJS &mdash;
+            <a href="/admin/plugins/ai-search/integration#instantsearch" target="_blank">Integration Guide</a> |
+            <a href="/admin/search" target="_blank">Admin</a>
+          </p>
+
+          <div class="config-bar">
+            <div class="field">
+              <label for="idx">Index (Collection)</label>
+              <select id="idx">${collectionOptions}</select>
+            </div>
+            <div class="field">
+              <label for="hpp">Hits / Page</label>
+              <select id="hpp">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+              </select>
+            </div>
+            <button onclick="restart()">Apply</button>
+          </div>
+
+          <div id="searchbox"></div>
+          <div id="stats"></div>
+          <div id="hits"></div>
+          <div id="pagination"></div>
+
+          <details class="code-panel">
+            <summary>Show searchClient code (copy this into your project)</summary>
+            <code><span class="cmt">// 1. Create the search client (5 lines)</span>
+<span class="key">const</span> searchClient = {
+  search(requests) {
+    <span class="key">return</span> fetch(<span class="str">'${"{"}window.location.origin${"}"}/api/instantsearch'</span>, {
+      method: <span class="str">'POST'</span>,
+      headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+      body: JSON.stringify({ requests }),
+    }).then(r => r.json());
+  },
+};
+
+<span class="cmt">// 2. Use with InstantSearch.js</span>
+<span class="key">import</span> instantsearch <span class="key">from</span> <span class="str">'instantsearch.js'</span>;
+<span class="key">const</span> search = instantsearch({
+  indexName: <span class="str">'blog_posts'</span>,  <span class="cmt">// your collection name, or "*" for all</span>
+  searchClient,
+});
+search.addWidgets([ <span class="cmt">/* searchBox, hits, pagination ... */</span> ]);
+search.start();</code>
+          </details>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+        <script>
+          var API = window.location.origin;
+          var currentSearch = null;
+
+          function makeClient() {
+            return {
+              search: function(requests) {
+                return fetch(API + '/api/instantsearch', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ requests }),
+                }).then(function(r) { return r.json(); });
+              }
+            };
+          }
+
+          function badgeClass(status) {
+            if (status === 'published') return 'badge badge-published';
+            if (status === 'draft') return 'badge badge-draft';
+            return 'badge badge-archived';
+          }
+
+          function esc(s) {
+            if (!s) return '';
+            var d = document.createElement('div');
+            d.appendChild(document.createTextNode(s));
+            return d.innerHTML;
+          }
+
+          function restart() {
+            var idx = document.getElementById('idx').value;
+            var hpp = parseInt(document.getElementById('hpp').value, 10);
+
+            if (currentSearch) {
+              currentSearch.dispose();
+              ['searchbox','stats','hits','pagination'].forEach(function(id) {
+                document.getElementById(id).innerHTML = '';
+              });
+            }
+
+            currentSearch = instantsearch({
+              indexName: idx,
+              searchClient: makeClient(),
+              searchFunction: function(helper) {
+                if (helper.state.query) {
+                  helper.search();
+                } else {
+                  document.getElementById('hits').innerHTML =
+                    '<p style="color:#94a3b8;text-align:center;padding:3rem 1rem;">Type a query above to search your content...</p>';
+                  document.getElementById('stats').innerHTML = '';
+                }
+              },
+            });
+
+            currentSearch.addWidgets([
+              instantsearch.widgets.searchBox({
+                container: '#searchbox',
+                placeholder: 'Search your content...',
+                autofocus: true,
+              }),
+
+              instantsearch.widgets.stats({
+                container: '#stats',
+                templates: {
+                  text: function(data) {
+                    return data.nbHits + ' results in ' + data.processingTimeMS + 'ms';
+                  },
+                },
+              }),
+
+              instantsearch.widgets.hits({
+                container: '#hits',
+                templates: {
+                  item: function(hit) {
+                    var title = (hit._highlightResult && hit._highlightResult.title)
+                      ? hit._highlightResult.title.value
+                      : esc(hit.title);
+                    var body = (hit._snippetResult && hit._snippetResult.body)
+                      ? hit._snippetResult.body.value
+                      : '';
+                    var date = hit.created_at
+                      ? new Date(hit.created_at * 1000).toLocaleDateString()
+                      : '';
+                    var score = hit.relevance_score
+                      ? (hit.relevance_score * 100).toFixed(1) + '%'
+                      : '';
+
+                    return '<div>' +
+                      '<div class="hit-title">' + title + '</div>' +
+                      (body ? '<div class="hit-snippet">' + body + '</div>' : '') +
+                      '<div class="hit-meta">' +
+                        '<span>' + esc(hit.collection_name) + '</span>' +
+                        '<span class="' + badgeClass(hit.status) + '">' + esc(hit.status) + '</span>' +
+                        (date ? '<span>' + date + '</span>' : '') +
+                        (score ? '<span>Score: ' + score + '</span>' : '') +
+                        '<span>ID: ' + esc(hit.objectID).substring(0, 8) + '&hellip;</span>' +
+                      '</div>' +
+                    '</div>';
+                  },
+                  empty: function(data) {
+                    return '<p style="text-align:center;color:#94a3b8;padding:3rem 1rem;">No results for &ldquo;' + esc(data.query) + '&rdquo;</p>';
+                  },
+                },
+              }),
+
+              instantsearch.widgets.pagination({
+                container: '#pagination',
+              }),
+
+              instantsearch.widgets.configure({
+                hitsPerPage: hpp,
+              }),
+            ]);
+
+            currentSearch.start();
+          }
+
+          restart();
+        </script>
+      </body>
+    </html>
+  `);
+});
+var instantsearch_test_page_default = instantSearchTestRoutes;
 var integrationGuideRoutes = new Hono();
 integrationGuideRoutes.get("/integration", async (c) => {
   return c.html(html`
@@ -5330,6 +8111,7 @@ integrationGuideRoutes.get("/integration", async (c) => {
                 <button class="tab" onclick="showTab('react')">React</button>
                 <button class="tab" onclick="showTab('vue')">Vue</button>
                 <button class="tab" onclick="showTab('astro')">Astro</button>
+                <button class="tab" onclick="showTab('instantsearch')">InstantSearch.js</button>
               </div>
 
               <!-- Vanilla JS Tab -->
@@ -5842,6 +8624,110 @@ input { width: 100%; padding: 1rem; font-size: 1rem; border: 2px solid #ddd; bor
 .result { padding: 1rem; background: #f8f9fa; border-left: 4px solid #667eea; margin: 1rem 0; border-radius: 8px; }
 &lt;/style&gt;</code></pre>
               </div>
+
+              <!-- InstantSearch.js Tab -->
+              <div id="instantsearch" class="tab-content">
+                <h3>InstantSearch.js &mdash; Drop-in Algolia Replacement</h3>
+                <p>Use the official <a href="https://www.algolia.com/doc/guides/building-search-ui/what-is-instantsearch/js/" target="_blank">InstantSearch.js</a> library (React, Vue, or vanilla JS) with SonicJS as the backend. Zero UI changes needed if you&rsquo;re migrating from Algolia.</p>
+
+                <div class="info-box">
+                  <strong>How it works:</strong> SonicJS exposes a <code>POST /api/instantsearch</code> endpoint that speaks the Algolia multi-search protocol. You connect it with a 5-line <code>searchClient</code> shim &mdash; no npm adapter package required.
+                </div>
+
+                <h3>1. Install InstantSearch.js</h3>
+                <pre><code>npm install instantsearch.js
+# Or for React:
+npm install react-instantsearch
+# Or for Vue:
+npm install vue-instantsearch</code></pre>
+
+                <h3>2. Create the Search Client (5 lines)</h3>
+                <button class="copy-btn" onclick="copyCode('is-client')">Copy Code</button>
+                <pre id="is-client"><code>// searchClient.js
+const API_URL = 'https://your-sonicjs-site.com'; // Update this!
+
+export const searchClient = {
+  search(requests) {
+    return fetch(\`\${API_URL}/api/instantsearch\`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests }),
+    }).then(res =&gt; res.json());
+  },
+};</code></pre>
+
+                <h3>3a. Vanilla InstantSearch.js</h3>
+                <button class="copy-btn" onclick="copyCode('is-vanilla')">Copy Code</button>
+                <pre id="is-vanilla"><code>import instantsearch from 'instantsearch.js';
+import { searchBox, hits, pagination } from 'instantsearch.js/es/widgets';
+import { searchClient } from './searchClient';
+
+const search = instantsearch({
+  indexName: 'posts',   // Your collection name, or "*" for all
+  searchClient,
+});
+
+search.addWidgets([
+  searchBox({ container: '#searchbox' }),
+  hits({
+    container: '#hits',
+    templates: {
+      item(hit, { html, components }) {
+        return html\`
+          &lt;div&gt;
+            &lt;h3&gt;\${components.Highlight({ hit, attribute: 'title' })}&lt;/h3&gt;
+            &lt;p&gt;\${components.Snippet({ hit, attribute: 'body' })}&lt;/p&gt;
+          &lt;/div&gt;
+        \`;
+      },
+    },
+  }),
+  pagination({ container: '#pagination' }),
+]);
+
+search.start();</code></pre>
+
+                <h3>3b. React InstantSearch</h3>
+                <button class="copy-btn" onclick="copyCode('is-react')">Copy Code</button>
+                <pre id="is-react"><code>import {
+  InstantSearch, SearchBox, Hits, Pagination, Highlight, Snippet,
+} from 'react-instantsearch';
+import { searchClient } from './searchClient';
+
+function Hit({ hit }) {
+  return (
+    &lt;div&gt;
+      &lt;h3&gt;&lt;Highlight attribute="title" hit={hit} /&gt;&lt;/h3&gt;
+      &lt;p&gt;&lt;Snippet attribute="body" hit={hit} /&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default function SearchPage() {
+  return (
+    &lt;InstantSearch searchClient={searchClient} indexName="posts"&gt;
+      &lt;SearchBox /&gt;
+      &lt;Hits hitComponent={Hit} /&gt;
+      &lt;Pagination /&gt;
+    &lt;/InstantSearch&gt;
+  );
+}</code></pre>
+
+                <h3>Index Name Mapping</h3>
+                <div class="info-box">
+                  <strong>Collection names:</strong> Use your SonicJS collection name as the <code>indexName</code> (e.g. <code>"posts"</code>, <code>"products"</code>).<br>
+                  <strong>Search all:</strong> Use <code>indexName: "*"</code> or <code>"all"</code> to search across every indexed collection.
+                </div>
+
+                <h3>Supported Features</h3>
+                <ul>
+                  <li><strong>Search:</strong> Full-text (FTS5), semantic (AI), and hybrid search</li>
+                  <li><strong>Highlighting:</strong> Automatic highlight &amp; snippet results</li>
+                  <li><strong>Pagination:</strong> Page-based navigation via <code>page</code> / <code>hitsPerPage</code></li>
+                  <li><strong>Facets (MVP):</strong> <code>collection_name</code> and <code>status</code> facets</li>
+                  <li><strong>Custom highlight tags:</strong> Configurable via <code>highlightPreTag</code> / <code>highlightPostTag</code></li>
+                </ul>
+              </div>
             </div>
 
             <!-- API Reference Section -->
@@ -5858,6 +8744,11 @@ input { width: 100%; padding: 1rem; font-size: 1rem; border: 2px solid #ddd; bor
                   <h4>Autocomplete</h4>
                   <p><strong>GET</strong> <code>/api/search/suggest?q=query</code></p>
                   <p>Get instant suggestions (&lt;50ms)</p>
+                </div>
+                <div class="card">
+                  <h4>InstantSearch API</h4>
+                  <p><strong>POST</strong> <code>/api/instantsearch</code></p>
+                  <p>Algolia-compatible multi-search endpoint</p>
                 </div>
               </div>
 
@@ -6402,11 +9293,22 @@ testPageRoutes.get("/test", async (c) => {
             return div.innerHTML;
           }
 
-          function stripHtml(str) {
+          function sanitizeHighlight(str) {
             if (!str) return '';
+            // Preserve <mark> and </mark> tags, strip all other HTML, escape text
+            // 1. Replace <mark> with placeholder
+            var s = str.replace(/<mark>/gi, '\\x01MARK_OPEN\\x01').replace(/<\\/mark>/gi, '\\x01MARK_CLOSE\\x01');
+            // 2. Strip all remaining HTML tags
             var tmp = document.createElement('div');
-            tmp.innerHTML = str;
-            return tmp.textContent || tmp.innerText || '';
+            tmp.innerHTML = s;
+            var text = tmp.textContent || tmp.innerText || '';
+            // 3. Escape the text
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            var escaped = div.innerHTML;
+            // 4. Restore <mark> tags
+            escaped = escaped.replace(/\\x01MARK_OPEN\\x01/g, '<mark>').replace(/\\x01MARK_CLOSE\\x01/g, '</mark>');
+            return escaped;
           }
 
           function renderResultItem(result) {
@@ -6417,9 +9319,9 @@ testPageRoutes.get("/test", async (c) => {
             var scoreStr = score ? score.toFixed(3) : 'N/A';
             var scoreLabel = result.rerank_score ? 'Rerank' : result.rrf_score ? 'RRF' : result.bm25_score ? 'BM25' : 'Score';
 
-            // Strip HTML tags then escape to prevent XSS
-            var safeTitle = escapeHtml(stripHtml(rawTitle));
-            var safeSnippet = escapeHtml(stripHtml(rawSnippet));
+            // Sanitize: allow <mark> highlighting, strip all other HTML
+            var safeTitle = sanitizeHighlight(rawTitle);
+            var safeSnippet = sanitizeHighlight(rawSnippet);
 
             var titleHtml = safeTitle;
             if (result.id) {
@@ -6484,7 +9386,7 @@ var aiSearchPlugin = new PluginBuilder({
 }).metadata({
   description: manifest_default.description,
   author: { name: manifest_default.author }
-}).addService("aiSearch", AISearchService).addService("indexManager", IndexManager).addRoute("/admin/plugins/ai-search", admin_default).addRoute("/api/search", api_default2).addRoute("/admin/plugins/ai-search", test_page_default).addRoute("/admin/plugins/ai-search", integration_guide_default).build();
+}).addService("aiSearch", AISearchService).addService("indexManager", IndexManager).addRoute("/admin/plugins/ai-search", admin_default).addRoute("/api/search", api_default2).addRoute("/api/instantsearch", instantsearch_api_default).addRoute("/admin/plugins/ai-search", test_page_default).addRoute("/admin/plugins/ai-search", instantsearch_test_page_default).addRoute("/admin/plugins/ai-search", integration_guide_default).build();
 var magicLinkRequestSchema = z.object({
   email: z.string().email("Valid email is required")
 });
