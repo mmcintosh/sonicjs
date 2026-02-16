@@ -32,11 +32,18 @@ apiRoutes.use('*', async (c, next) => {
 })
 
 // Add CORS middleware
-apiRoutes.use('*', cors({
-  origin: '*',
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization']
-}))
+// ALLOWED_ORIGINS env var: comma-separated list of allowed origins (e.g. "https://example.com,https://app.example.com")
+// Defaults to '*' for local dev when not configured
+apiRoutes.use('*', async (c, next) => {
+  const allowedOrigins = (c.env as any).ALLOWED_ORIGINS
+  const origin = allowedOrigins ? allowedOrigins.split(',').map((o: string) => o.trim()) : '*'
+  const middleware = cors({
+    origin,
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
+  })
+  return middleware(c, next)
+})
 
 // Helper function to add timing metadata
 function addTimingMeta(c: any, meta: any = {}, executionStartTime?: number) {

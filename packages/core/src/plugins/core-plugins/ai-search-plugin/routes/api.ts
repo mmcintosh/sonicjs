@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import type { Bindings } from '../../../../app'
+import { requireAuth } from '../../../../middleware'
 import { AISearchService } from '../services/ai-search'
 import type { SearchQuery } from '../types'
 
@@ -99,10 +100,10 @@ apiRoutes.get('/suggest', async (c) => {
 })
 
 /**
- * GET /admin/api/search/analytics
- * Get search analytics
+ * GET /api/search/analytics
+ * Get search analytics (requires authentication)
  */
-apiRoutes.get('/analytics', async (c) => {
+apiRoutes.get('/analytics', requireAuth(), async (c) => {
   try {
     const db = c.env.DB
     const ai = (c.env as any).AI
