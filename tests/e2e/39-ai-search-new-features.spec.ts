@@ -347,12 +347,12 @@ test.describe('AI Search - New Features', () => {
       await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
-      // Links are on the Overview tab (default)
-      const testButton = page.locator('a[href="/admin/plugins/ai-search/test"]')
+      // Links are on the Overview tab (default) — use .first() to avoid strict mode violation
+      const testButton = page.locator('a[href="/admin/plugins/ai-search/test"]').first()
       await expect(testButton).toBeVisible()
       expect(await testButton.textContent()).toContain('Test Search')
 
-      const guideButton = page.locator('a[href="/admin/plugins/ai-search/integration"]')
+      const guideButton = page.locator('a[href="/admin/plugins/ai-search/integration"]').first()
       await expect(guideButton).toBeVisible()
       const guideText = await guideButton.textContent()
       expect(guideText).toMatch(/Integration Guide|Headless Guide/)
@@ -362,12 +362,12 @@ test.describe('AI Search - New Features', () => {
       await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
-      // Links are on the Overview tab (default)
-      const testButton = page.locator('a[href="/admin/plugins/ai-search/test"]')
+      // Links are on the Overview tab (default) — use .first() to avoid strict mode violation
+      const testButton = page.locator('a[href="/admin/plugins/ai-search/test"]').first()
       const testTarget = await testButton.getAttribute('target')
       expect(testTarget).toBe('_blank')
 
-      const guideButton = page.locator('a[href="/admin/plugins/ai-search/integration"]')
+      const guideButton = page.locator('a[href="/admin/plugins/ai-search/integration"]').first()
       const guideTarget = await guideButton.getAttribute('target')
       expect(guideTarget).toBe('_blank')
     })

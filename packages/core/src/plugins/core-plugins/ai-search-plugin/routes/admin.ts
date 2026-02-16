@@ -52,11 +52,24 @@ adminRoutes.get('/', async (c) => {
     const indexer = new IndexManager(db, ai, vectorize)
     const fts5Service = new FTS5Service(db)
 
-    const settings = await service.getSettings()
-    const collections = await service.getAllCollections()
-    const newCollections = await service.detectNewCollections()
-    const indexStatus = await indexer.getAllIndexStatus()
-    const analytics = await service.getSearchAnalytics()
+    // Wrap each call individually so a single failure doesn't break the whole dashboard
+    let settings: AISearchSettings | null = null
+    try { settings = await service.getSettings() } catch { /* use defaults */ }
+
+    let collections: any[] = []
+    try { collections = await service.getAllCollections() || [] } catch { /* empty */ }
+
+    let newCollections: any[] = []
+    try {
+      const detected = await service.detectNewCollections()
+      newCollections = (detected || []).map(n => ({ id: String(n.collection.id), name: n.collection.name }))
+    } catch { /* empty */ }
+
+    let indexStatus: any = {}
+    try { indexStatus = await indexer.getAllIndexStatus() || {} } catch { /* empty */ }
+
+    let analytics: any = null
+    try { analytics = await service.getSearchAnalytics() } catch { /* null */ }
 
     let fts5Status = null
     try {
@@ -73,7 +86,7 @@ adminRoutes.get('/', async (c) => {
       renderSearchDashboard({
         settings,
         collections: collections || [],
-        newCollections: (newCollections || []).map(n => ({ id: String(n.collection.id), name: n.collection.name })),
+        newCollections: newCollections,
         indexStatus: indexStatus || {},
         analytics,
         fts5Status,
