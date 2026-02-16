@@ -1,10 +1,10 @@
 'use strict';
 
-var chunkTITCBEKE_cjs = require('./chunk-TITCBEKE.cjs');
+var chunkC34AYJON_cjs = require('./chunk-C34AYJON.cjs');
 var chunkVNLR35GO_cjs = require('./chunk-VNLR35GO.cjs');
-var chunkMD7YM7UZ_cjs = require('./chunk-MD7YM7UZ.cjs');
+var chunkL2JDZ7NG_cjs = require('./chunk-L2JDZ7NG.cjs');
 var chunkMPT5PA6U_cjs = require('./chunk-MPT5PA6U.cjs');
-var chunkELVG5YJC_cjs = require('./chunk-ELVG5YJC.cjs');
+var chunkXVXSMOB3_cjs = require('./chunk-XVXSMOB3.cjs');
 var chunk6WA4KFYZ_cjs = require('./chunk-6WA4KFYZ.cjs');
 var chunkGMUS5V42_cjs = require('./chunk-GMUS5V42.cjs');
 var chunkMNFY6DWY_cjs = require('./chunk-MNFY6DWY.cjs');
@@ -559,7 +559,7 @@ function formatCellValue(value) {
 // src/plugins/core-plugins/database-tools-plugin/admin-routes.ts
 function createDatabaseToolsAdminRoutes() {
   const router3 = new hono.Hono();
-  router3.use("*", chunkMD7YM7UZ_cjs.requireAuth());
+  router3.use("*", chunkL2JDZ7NG_cjs.requireAuth());
   router3.get("/api/stats", async (c) => {
     try {
       const user = c.get("user");
@@ -833,84 +833,6 @@ var SeedDataService = class {
     "Container Orchestration with Kubernetes",
     "Edge Computing and the Modern Web",
     "Accessibility in Web Development"
-  ];
-  newsTitles = [
-    "Tech Giants Report Record Quarterly Earnings Amid AI Boom",
-    "Global Climate Summit Reaches Landmark Agreement on Emissions",
-    "Breakthrough in Quantum Computing Achieves New Milestone",
-    "Federal Reserve Holds Interest Rates Steady for Third Quarter",
-    "Major Cybersecurity Breach Exposes Millions of Consumer Records",
-    "New Study Reveals Surprising Benefits of Remote Work Policies",
-    "Autonomous Vehicle Testing Expands to 20 Additional Cities",
-    "World Health Organization Approves New Vaccine for Tropical Disease",
-    "Space Agency Announces Plans for Lunar Base Construction",
-    "Renewable Energy Surpasses Fossil Fuels in Power Generation",
-    "Startup Raises $500M to Build Next-Generation Chip Technology",
-    "International Trade Deal Opens New Markets for Digital Services",
-    "Scientists Discover New Species in Deep Ocean Expedition",
-    "Major Sports League Announces Expansion to Three New Cities",
-    "Education Reform Bill Passes With Bipartisan Support",
-    "Artificial Intelligence Regulation Framework Gains Global Traction",
-    "Record-Breaking Heatwave Impacts Agricultural Output Across Region",
-    "Streaming Platform Launches Revolutionary Interactive Content Format",
-    "Central Bank Introduces Digital Currency Pilot Program",
-    "Archaeological Discovery Rewrites Understanding of Ancient Civilization"
-  ];
-  newsParagraphs = [
-    "The announcement came after months of negotiations between key stakeholders, marking a significant shift in policy direction that analysts say could reshape the industry for years to come. Market observers noted that the timing was particularly significant given recent geopolitical developments.",
-    "Industry experts expressed cautious optimism about the development, noting that while the immediate impact may be limited, the long-term implications could be transformative. Several major firms have already begun adjusting their strategies in anticipation of the changes ahead.",
-    "Critics of the initiative argue that the proposed measures do not go far enough to address the underlying structural issues. Consumer advocacy groups have called for more aggressive action, while business leaders warn that excessive regulation could stifle innovation and economic growth.",
-    "The development comes at a critical juncture for the global economy, with inflation concerns, supply chain disruptions, and labor market shifts creating a complex landscape for policymakers. Central banks around the world are closely monitoring the situation for signs of broader systemic risk.",
-    "According to data released by the research team, the findings represent a statistically significant improvement over previous results. The peer-reviewed study, published in a leading scientific journal, has already generated considerable interest from both the academic community and the private sector.",
-    "Government officials emphasized that the decision was made after extensive consultation with affected communities, industry representatives, and subject-matter experts. A public comment period will be held before the final rules are implemented, scheduled for the first quarter of next year.",
-    "Financial markets reacted positively to the news, with major indices posting gains in afternoon trading. Technology stocks led the advance, while energy and financial sectors showed more modest improvements. Bond yields remained relatively stable as investors assessed the implications.",
-    `The company said in a statement that the investment reflects its long-term commitment to innovation and growth. "We are positioning ourselves for the next decade of opportunity," said the CEO during a press conference at the firm's Silicon Valley headquarters.`,
-    "Environmental groups praised the agreement as a historic step forward, though some activists expressed disappointment that certain provisions were weakened during the final round of talks. Implementation will require coordinated action across multiple government agencies and international bodies.",
-    "Health officials urged the public to remain vigilant and follow recommended guidelines. The rollout is expected to begin within six weeks, prioritizing high-risk populations and frontline workers before expanding to the general public in subsequent phases.",
-    "The investigation, which spanned 18 months and involved cooperation between multiple law enforcement agencies, uncovered a sophisticated network operating across several jurisdictions. Authorities expect additional arrests in the coming weeks as the case continues to unfold.",
-    "Educators and parents have expressed mixed reactions to the proposed changes, with supporters citing improved outcomes in pilot programs and opponents raising concerns about implementation costs and teacher preparedness. School districts will have flexibility in how they adopt the new standards.",
-    "The technology, which has been in development for over five years, represents a fundamental advance in computational capability. Researchers caution that practical commercial applications are still several years away, but the proof of concept has exceeded all initial performance benchmarks.",
-    "Diplomatic sources familiar with the negotiations described the talks as productive but noted that significant disagreements remain on key issues including intellectual property protections, data privacy standards, and market access provisions for developing nations.",
-    "Analysts at leading investment banks have revised their forecasts upward following the announcement, with several raising their price targets for companies in the sector. The consensus view is that the trend will accelerate through the remainder of the fiscal year.",
-    "Local residents expressed a range of reactions, from enthusiasm about potential economic benefits to concern about the impact on community character and infrastructure. City officials have pledged to hold town hall meetings to address public questions and gather feedback."
-  ];
-  newsExcerpts = [
-    "A major development that could reshape the industry landscape for years to come.",
-    "Experts weigh in on the implications of today's announcement for consumers and businesses.",
-    "The latest findings add to a growing body of evidence supporting the new approach.",
-    "Markets react as stakeholders assess the potential impact on the global economy.",
-    "Officials detail the next steps as the initiative moves from planning to implementation.",
-    "Analysis: What today's decision means for the future of the sector.",
-    "Breaking down the key takeaways from a landmark agreement.",
-    "Investors and analysts respond to news that exceeded market expectations.",
-    "The development raises important questions about regulation, privacy, and innovation.",
-    "A closer look at the data behind the headlines and what it reveals.",
-    "Community leaders react to changes that could affect millions of residents.",
-    "The announcement caps months of speculation and behind-the-scenes negotiations."
-  ];
-  newsCategories = ["technology", "business", "science", "politics", "health", "entertainment", "sports", "world"];
-  newsSources = ["Staff Reporter", "Associated Press", "Reuters", "Staff", "Special Correspondent", "Wire Services", "Editorial Board"];
-  newsTags = [
-    "breaking",
-    "analysis",
-    "opinion",
-    "economy",
-    "technology",
-    "climate",
-    "health",
-    "politics",
-    "science",
-    "business",
-    "sports",
-    "entertainment",
-    "world-news",
-    "ai",
-    "cybersecurity",
-    "energy",
-    "finance",
-    "education",
-    "space",
-    "trade"
   ];
   pageTitles = [
     "About Us",
@@ -1435,49 +1357,6 @@ var SeedDataService = class {
       author: `${this.pickRandom(this.firstNames)} ${this.pickRandom(this.lastNames)}`
     };
   }
-  generateRichNewsData(title, richness) {
-    const category = this.pickRandom(this.newsCategories);
-    const source = this.pickRandom(this.newsSources);
-    if (richness === "minimal") {
-      return {
-        body: this.pickRandom(this.newsParagraphs),
-        summary: "A developing story with significant implications for the industry and the public.",
-        category,
-        source,
-        breaking: Math.random() > 0.85,
-        tags: this.pickRandomTags(this.newsTags, 2)
-      };
-    }
-    const paragraphCount = Math.floor(Math.random() * 3) + 3;
-    return {
-      body: this.assembleNewsParagraphs(title, paragraphCount),
-      summary: this.pickRandom(this.newsExcerpts),
-      category,
-      source,
-      breaking: Math.random() > 0.85,
-      tags: this.pickRandomTags(this.newsTags),
-      author: `${this.pickRandom(this.firstNames)} ${this.pickRandom(this.lastNames)}`
-    };
-  }
-  assembleNewsParagraphs(headline, paragraphCount) {
-    const selected = [];
-    const shuffled = [...this.newsParagraphs].sort(() => 0.5 - Math.random());
-    for (let i = 0; i < paragraphCount && i < shuffled.length; i++) {
-      selected.push(shuffled[i]);
-    }
-    let html4 = `<h1>${headline}</h1>
-`;
-    for (const p of selected) {
-      html4 += `<p>${p}</p>
-`;
-    }
-    return html4;
-  }
-  pickRandomTags(pool, count) {
-    const numTags = count || Math.floor(Math.random() * 4) + 2;
-    const shuffled = [...pool].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, numTags);
-  }
   generateRichPageData(title, richness) {
     if (richness === "minimal") {
       return {
@@ -1611,17 +1490,15 @@ var SeedDataService = class {
     }
     return count;
   }
-  async createContent(contentCount = 200, richness = "full", collectionName) {
+  async createContent(contentCount = 200, richness = "full") {
     const { results: allUsers } = await this.db.prepare("SELECT * FROM users").all();
     const { results: allCollections } = await this.db.prepare("SELECT * FROM collections").all();
     if (!allUsers || allUsers.length === 0) throw new Error("No users found. Please create users first.");
     if (!allCollections || allCollections.length === 0) throw new Error("No collections found. Please create collections first.");
-    const targetCollections = collectionName ? allCollections.filter((c) => (c.name || "").toLowerCase() === collectionName.toLowerCase()) : allCollections;
-    if (targetCollections.length === 0) throw new Error(`Collection "${collectionName}" not found.`);
     const statuses = ["draft", "published", "published", "published", "archived"];
     let count = 0;
     for (let i = 0; i < contentCount; i++) {
-      const collection = this.pickRandom(targetCollections);
+      const collection = this.pickRandom(allCollections);
       const author = this.pickRandom(allUsers);
       const status = this.pickRandom(statuses);
       const name = (collection.name || "").toLowerCase();
@@ -1630,9 +1507,6 @@ var SeedDataService = class {
       if (name === "blog_posts" || name.includes("blog")) {
         title = this.pickRandom(this.blogTitles);
         contentData = this.generateRichBlogData(title, richness);
-      } else if (name === "news" || name.includes("news")) {
-        title = this.pickRandom(this.newsTitles);
-        contentData = this.generateRichNewsData(title, richness);
       } else if (name === "pages" || name.includes("page")) {
         title = this.pickRandom(this.pageTitles);
         contentData = this.generateRichPageData(title, richness);
@@ -2149,10 +2023,9 @@ function createSeedDataAdminRoutes() {
       const body = await c.req.json();
       const contentCount = Math.min(Math.max(parseNumberOrDefault(body.contentCount, 0), 0), 1e3);
       const richness = body.richness === "minimal" ? "minimal" : "full";
-      const collectionName = body.collection || void 0;
       if (contentCount === 0) return c.json({ success: true, count: 0 });
       const seedService = new SeedDataService(db);
-      const count = await seedService.createContent(contentCount, richness, collectionName);
+      const count = await seedService.createContent(contentCount, richness);
       return c.json({ success: true, count });
     } catch (error) {
       console.error("[Seed Data] Content error:", error);
@@ -2848,7 +2721,7 @@ function createOTPLoginPlugin() {
           error: "Account is deactivated"
         }, 403);
       }
-      const token = await chunkMD7YM7UZ_cjs.AuthManager.generateToken(user.id, user.email, user.role);
+      const token = await chunkL2JDZ7NG_cjs.AuthManager.generateToken(user.id, user.email, user.role);
       cookie.setCookie(c, "auth_token", token, {
         httpOnly: true,
         secure: true,
@@ -3310,7 +3183,7 @@ var RecommendationService = class {
           if (!rec.action_payload?.terms || rec.action_payload.terms.length < 2) {
             return { success: false, message: "Invalid synonym payload" };
           }
-          const synonymService = new chunkTITCBEKE_cjs.SynonymService(this.db);
+          const synonymService = new chunkC34AYJON_cjs.SynonymService(this.db);
           await synonymService.create(rec.action_payload.terms);
           await this.updateStatus(id, "applied");
           return { success: true, message: `Created synonym group: ${rec.action_payload.terms.join(", ")}` };
@@ -3319,7 +3192,7 @@ var RecommendationService = class {
           if (!rec.action_payload?.match_pattern || !rec.action_payload?.substitute_query) {
             return { success: false, message: "Invalid query rule payload" };
           }
-          const rulesService = new chunkTITCBEKE_cjs.QueryRulesService(this.db);
+          const rulesService = new chunkC34AYJON_cjs.QueryRulesService(this.db);
           await rulesService.create({
             match_pattern: rec.action_payload.match_pattern,
             match_type: rec.action_payload.match_type || "exact",
@@ -3876,17 +3749,61 @@ var clampWeight = (val, fallback) => {
   return isNaN(n) || !isFinite(n) ? fallback : Math.round(Math.min(10, Math.max(0, n)) * 10) / 10;
 };
 var adminRoutes = new hono.Hono();
-adminRoutes.use("*", chunkMD7YM7UZ_cjs.requireAuth());
+adminRoutes.use("*", chunkL2JDZ7NG_cjs.requireAuth());
 adminRoutes.get("/", async (c) => {
-  return c.redirect("/admin/search");
+  try {
+    const user = c.get("user");
+    const db = c.env.DB;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_INDEX;
+    const kv = c.env.CACHE_KV;
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize, kv);
+    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
+    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
+    const settings = await service.getSettings();
+    const collections2 = await service.getAllCollections();
+    const newCollections = await service.detectNewCollections();
+    const indexStatus = await indexer.getAllIndexStatus();
+    const analytics = await service.getSearchAnalytics();
+    let fts5Status = null;
+    try {
+      const available = await fts5Service.isAvailable();
+      if (available) {
+        const stats = await fts5Service.getStats();
+        fts5Status = { available: true, total_indexed: stats.total_indexed, by_collection: stats.by_collection };
+      } else {
+        fts5Status = { available: false, total_indexed: 0, by_collection: {} };
+      }
+    } catch {
+    }
+    return c.html(
+      chunkC34AYJON_cjs.renderSearchDashboard({
+        settings,
+        collections: collections2 || [],
+        newCollections: newCollections || [],
+        indexStatus: indexStatus || {},
+        analytics,
+        fts5Status,
+        benchmarkStatus: null,
+        user: {
+          name: user.email,
+          email: user.email,
+          role: user.role
+        }
+      })
+    );
+  } catch (error) {
+    console.error("Error rendering search dashboard:", error);
+    return c.html(`<p>Error loading dashboard: ${error instanceof Error ? error.message : String(error)}</p>`, 500);
+  }
 });
 adminRoutes.post("/", async (c) => {
   try {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
-    const indexer = new chunkTITCBEKE_cjs.IndexManager(db, ai, vectorize);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
     const body = await c.req.json();
     console.log("[AI Search POST] Received body:", JSON.stringify(body, null, 2));
     const currentSettings = await service.getSettings();
@@ -3931,7 +3848,7 @@ adminRoutes.get("/api/settings", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
     const settings = await service.getSettings();
     return c.json({ success: true, data: settings });
   } catch (error) {
@@ -3944,7 +3861,7 @@ adminRoutes.get("/api/new-collections", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
     const notifications = await service.detectNewCollections();
     return c.json({ success: true, data: notifications });
   } catch (error) {
@@ -3957,7 +3874,7 @@ adminRoutes.get("/api/status", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const indexer = new chunkTITCBEKE_cjs.IndexManager(db, ai, vectorize);
+    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
     const status = await indexer.getAllIndexStatus();
     return c.json({ success: true, data: status });
   } catch (error) {
@@ -3970,7 +3887,7 @@ adminRoutes.post("/api/reindex", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const indexer = new chunkTITCBEKE_cjs.IndexManager(db, ai, vectorize);
+    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
     const body = await c.req.json();
     const collectionIdRaw = body.collection_id;
     const collectionId = collectionIdRaw ? String(collectionIdRaw) : "";
@@ -3989,7 +3906,7 @@ adminRoutes.post("/api/reindex", async (c) => {
 adminRoutes.get("/api/fts5/status", async (c) => {
   try {
     const db = c.env.DB;
-    const fts5Service = new chunkTITCBEKE_cjs.FTS5Service(db);
+    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
     const isAvailable = await fts5Service.isAvailable();
     if (!isAvailable) {
       return c.json({
@@ -4017,7 +3934,7 @@ adminRoutes.get("/api/fts5/status", async (c) => {
 adminRoutes.post("/api/fts5/index-collection", async (c) => {
   try {
     const db = c.env.DB;
-    const fts5Service = new chunkTITCBEKE_cjs.FTS5Service(db);
+    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
     const isAvailable = await fts5Service.isAvailable();
     if (!isAvailable) {
       return c.json({
@@ -4051,8 +3968,8 @@ adminRoutes.post("/api/fts5/reindex-all", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
-    const fts5Service = new chunkTITCBEKE_cjs.FTS5Service(db);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
     const isAvailable = await fts5Service.isAvailable();
     if (!isAvailable) {
       return c.json({
@@ -4112,7 +4029,7 @@ adminRoutes.post("/api/vectorize/reindex-all", async (c) => {
     if (!ai || !vectorize) {
       return c.json({ error: "Vectorize reindexing requires AI and VECTORIZE_INDEX bindings." }, 400);
     }
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
     const settings = await service.getSettings();
     const collections2 = settings?.selected_collections || [];
     if (collections2.length === 0) {
@@ -4143,7 +4060,7 @@ adminRoutes.post("/api/vectorize/reindex-all", async (c) => {
     }
     try {
       const benchmarkIds = [];
-      for (const dsId of chunkTITCBEKE_cjs.BENCHMARK_DATASETS.map((d) => d.id)) {
+      for (const dsId of chunkC34AYJON_cjs.BENCHMARK_DATASETS.map((d) => d.id)) {
         for (let i = 0; i < 6e3; i++) {
           for (let chunk = 0; chunk < 3; chunk++) {
             benchmarkIds.push(`beir-${dsId}-${i}-chunk-${chunk}`);
@@ -4157,7 +4074,7 @@ adminRoutes.post("/api/vectorize/reindex-all", async (c) => {
     } catch (e) {
       console.warn("[Vectorize Reindex] Orphan cleanup failed (non-fatal):", e);
     }
-    const indexer = new chunkTITCBEKE_cjs.IndexManager(db, ai, vectorize);
+    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
     c.executionCtx.waitUntil(
       indexer.syncAll(collections2).then(() => console.log("[Vectorize Reindex] All collections reindexed")).catch((error) => console.error("[Vectorize Reindex] Error:", error))
     );
@@ -4178,7 +4095,7 @@ adminRoutes.post("/api/relevance/preview", async (c) => {
     const query = body.query?.trim();
     if (!query) return c.json({ error: "query is required" }, 400);
     const limit = Math.min(body.limit || 10, 20);
-    const service = new chunkTITCBEKE_cjs.AISearchService(db);
+    const service = new chunkC34AYJON_cjs.AISearchService(db);
     const settings = await service.getSettings();
     const titleWeight = clampWeight(body.title_weight, settings?.fts5_title_boost ?? 5);
     const slugWeight = clampWeight(body.slug_weight, settings?.fts5_slug_boost ?? 2);
@@ -4189,13 +4106,13 @@ adminRoutes.post("/api/relevance/preview", async (c) => {
       fts5_slug_boost: slugWeight,
       fts5_body_boost: bodyWeight
     };
-    const fts5Service = new chunkTITCBEKE_cjs.FTS5Service(db);
+    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
     let result = await fts5Service.search(
       { query, mode: "fts5", limit, offset: 0 },
       previewSettings,
       { titleBoost: titleWeight, slugBoost: slugWeight, bodyBoost: bodyWeight }
     );
-    const pipelineService = new chunkTITCBEKE_cjs.RankingPipelineService(db);
+    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(db);
     let pipelineApplied = false;
     try {
       const config = await pipelineService.getConfig();
@@ -4224,7 +4141,7 @@ adminRoutes.post("/api/relevance/preview", async (c) => {
 });
 adminRoutes.get("/api/relevance/pipeline", async (c) => {
   try {
-    const pipelineService = new chunkTITCBEKE_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
     const config = await pipelineService.getConfig();
     return c.json({ success: true, data: config });
   } catch (error) {
@@ -4238,7 +4155,7 @@ adminRoutes.post("/api/relevance/pipeline", async (c) => {
     if (!Array.isArray(body.stages)) {
       return c.json({ error: "stages must be an array" }, 400);
     }
-    const pipelineService = new chunkTITCBEKE_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
     await pipelineService.saveConfig(body.stages);
     const saved = await pipelineService.getConfig();
     return c.json({ success: true, data: saved });
@@ -4254,7 +4171,7 @@ adminRoutes.get("/api/relevance/content-scores", async (c) => {
     if (!contentId) {
       return c.json({ error: "content_id query parameter is required" }, 400);
     }
-    const pipelineService = new chunkTITCBEKE_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
     const scores = await pipelineService.getContentScores([contentId], scoreType);
     return c.json({
       success: true,
@@ -4275,7 +4192,7 @@ adminRoutes.post("/api/relevance/content-scores", async (c) => {
     if (!["popularity", "custom"].includes(scoreType)) {
       return c.json({ error: 'score_type must be "popularity" or "custom"' }, 400);
     }
-    const pipelineService = new chunkTITCBEKE_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
     await pipelineService.setContentScore(String(contentId), scoreType, Number(score));
     return c.json({ success: true });
   } catch (error) {
@@ -4290,7 +4207,7 @@ adminRoutes.delete("/api/relevance/content-scores", async (c) => {
     if (!contentId || !scoreType) {
       return c.json({ error: "content_id and score_type are required" }, 400);
     }
-    const pipelineService = new chunkTITCBEKE_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
     await pipelineService.deleteContentScore(String(contentId), scoreType);
     return c.json({ success: true });
   } catch (error) {
@@ -4300,7 +4217,7 @@ adminRoutes.delete("/api/relevance/content-scores", async (c) => {
 });
 adminRoutes.get("/api/relevance/synonyms", async (c) => {
   try {
-    const synonymService = new chunkTITCBEKE_cjs.SynonymService(c.env.DB);
+    const synonymService = new chunkC34AYJON_cjs.SynonymService(c.env.DB);
     const groups = await synonymService.getAll();
     return c.json({ success: true, data: groups });
   } catch (error) {
@@ -4314,7 +4231,7 @@ adminRoutes.post("/api/relevance/synonyms", async (c) => {
     if (!Array.isArray(body.terms) || body.terms.length < 2) {
       return c.json({ error: "terms must be an array with at least 2 items" }, 400);
     }
-    const synonymService = new chunkTITCBEKE_cjs.SynonymService(c.env.DB);
+    const synonymService = new chunkC34AYJON_cjs.SynonymService(c.env.DB);
     const group = await synonymService.create(body.terms, body.enabled !== false);
     return c.json({ success: true, data: group });
   } catch (error) {
@@ -4326,7 +4243,7 @@ adminRoutes.put("/api/relevance/synonyms/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const body = await c.req.json();
-    const synonymService = new chunkTITCBEKE_cjs.SynonymService(c.env.DB);
+    const synonymService = new chunkC34AYJON_cjs.SynonymService(c.env.DB);
     const group = await synonymService.update(id, {
       terms: body.terms,
       enabled: body.enabled
@@ -4343,7 +4260,7 @@ adminRoutes.put("/api/relevance/synonyms/:id", async (c) => {
 adminRoutes.delete("/api/relevance/synonyms/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const synonymService = new chunkTITCBEKE_cjs.SynonymService(c.env.DB);
+    const synonymService = new chunkC34AYJON_cjs.SynonymService(c.env.DB);
     const deleted = await synonymService.delete(id);
     if (!deleted) {
       return c.json({ error: "Synonym group not found" }, 404);
@@ -4356,7 +4273,7 @@ adminRoutes.delete("/api/relevance/synonyms/:id", async (c) => {
 });
 adminRoutes.get("/api/relevance/rules", async (c) => {
   try {
-    const rulesService = new chunkTITCBEKE_cjs.QueryRulesService(c.env.DB);
+    const rulesService = new chunkC34AYJON_cjs.QueryRulesService(c.env.DB);
     const rules = await rulesService.getAll();
     return c.json({ success: true, data: rules });
   } catch (error) {
@@ -4370,7 +4287,7 @@ adminRoutes.post("/api/relevance/rules", async (c) => {
     if (!body.match_pattern || !body.substitute_query) {
       return c.json({ error: "match_pattern and substitute_query are required" }, 400);
     }
-    const rulesService = new chunkTITCBEKE_cjs.QueryRulesService(c.env.DB);
+    const rulesService = new chunkC34AYJON_cjs.QueryRulesService(c.env.DB);
     const rule = await rulesService.create({
       match_pattern: body.match_pattern,
       match_type: body.match_type,
@@ -4388,7 +4305,7 @@ adminRoutes.put("/api/relevance/rules/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const body = await c.req.json();
-    const rulesService = new chunkTITCBEKE_cjs.QueryRulesService(c.env.DB);
+    const rulesService = new chunkC34AYJON_cjs.QueryRulesService(c.env.DB);
     const rule = await rulesService.update(id, {
       match_pattern: body.match_pattern,
       match_type: body.match_type,
@@ -4408,7 +4325,7 @@ adminRoutes.put("/api/relevance/rules/:id", async (c) => {
 adminRoutes.delete("/api/relevance/rules/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const rulesService = new chunkTITCBEKE_cjs.QueryRulesService(c.env.DB);
+    const rulesService = new chunkC34AYJON_cjs.QueryRulesService(c.env.DB);
     const deleted = await rulesService.delete(id);
     if (!deleted) {
       return c.json({ error: "Query rule not found" }, 404);
@@ -4421,7 +4338,7 @@ adminRoutes.delete("/api/relevance/rules/:id", async (c) => {
 });
 adminRoutes.get("/api/related-searches", async (c) => {
   try {
-    const service = new chunkTITCBEKE_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const sourceQuery = c.req.query("source_query");
     const source = c.req.query("source");
     const enabled = c.req.query("enabled");
@@ -4446,7 +4363,7 @@ adminRoutes.post("/api/related-searches", async (c) => {
     if (!relatedQuery || typeof relatedQuery !== "string" || !relatedQuery.trim()) {
       return c.json({ success: false, error: "related_query is required" }, 400);
     }
-    const service = new chunkTITCBEKE_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const result = await service.create(sourceQuery, relatedQuery, {
       source: "manual",
       position: typeof position === "number" ? position : 0,
@@ -4465,7 +4382,7 @@ adminRoutes.put("/api/related-searches/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const body = await c.req.json();
-    const service = new chunkTITCBEKE_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const updated = await service.update(id, {
       related_query: body.related_query,
       position: body.position,
@@ -4483,7 +4400,7 @@ adminRoutes.put("/api/related-searches/:id", async (c) => {
 adminRoutes.delete("/api/related-searches/cache", async (c) => {
   try {
     const query = c.req.query("query");
-    const service = new chunkTITCBEKE_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     await service.invalidateCache(query || void 0);
     return c.json({ success: true, message: query ? `Cache cleared for "${query}"` : "All auto-generation cache cleared" });
   } catch (error) {
@@ -4494,7 +4411,7 @@ adminRoutes.delete("/api/related-searches/cache", async (c) => {
 adminRoutes.delete("/api/related-searches/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const service = new chunkTITCBEKE_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const deleted = await service.delete(id);
     if (!deleted) {
       return c.json({ error: "Related search not found" }, 404);
@@ -4512,7 +4429,7 @@ adminRoutes.post("/api/related-searches/bulk", async (c) => {
     if (!Array.isArray(entries) || entries.length === 0) {
       return c.json({ success: false, error: "entries array is required and must not be empty" }, 400);
     }
-    const service = new chunkTITCBEKE_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const count = await service.bulkCreate(entries);
     return c.json({ success: true, data: { created: count, total: entries.length } });
   } catch (error) {
@@ -4522,7 +4439,7 @@ adminRoutes.post("/api/related-searches/bulk", async (c) => {
 });
 adminRoutes.get("/api/facets/discover", async (c) => {
   try {
-    const facetService = new chunkTITCBEKE_cjs.FacetService(c.env.DB);
+    const facetService = new chunkC34AYJON_cjs.FacetService(c.env.DB);
     const discovered = await facetService.discoverFields();
     return c.json({ success: true, data: discovered });
   } catch (error) {
@@ -4536,7 +4453,7 @@ function stripShadowFacets(config) {
 }
 adminRoutes.get("/api/facets/config", async (c) => {
   try {
-    const service = new chunkTITCBEKE_cjs.AISearchService(c.env.DB);
+    const service = new chunkC34AYJON_cjs.AISearchService(c.env.DB);
     const settings = await service.getSettings();
     const config = stripShadowFacets(settings?.facet_config ?? []);
     return c.json({
@@ -4555,7 +4472,7 @@ adminRoutes.get("/api/facets/config", async (c) => {
 adminRoutes.post("/api/facets/config", async (c) => {
   try {
     const body = await c.req.json();
-    const service = new chunkTITCBEKE_cjs.AISearchService(c.env.DB);
+    const service = new chunkC34AYJON_cjs.AISearchService(c.env.DB);
     const updates = {};
     if (body.enabled !== void 0) updates.facets_enabled = Boolean(body.enabled);
     if (Array.isArray(body.config)) updates.facet_config = stripShadowFacets(body.config);
@@ -4576,10 +4493,10 @@ adminRoutes.post("/api/facets/config", async (c) => {
 });
 adminRoutes.post("/api/facets/auto-generate", async (c) => {
   try {
-    const facetService = new chunkTITCBEKE_cjs.FacetService(c.env.DB);
+    const facetService = new chunkC34AYJON_cjs.FacetService(c.env.DB);
     const discovered = await facetService.discoverFields();
     const config = facetService.autoGenerateConfig(discovered);
-    const service = new chunkTITCBEKE_cjs.AISearchService(c.env.DB);
+    const service = new chunkC34AYJON_cjs.AISearchService(c.env.DB);
     const saved = await service.updateSettings({
       facets_enabled: true,
       facet_config: config
@@ -4695,7 +4612,7 @@ adminRoutes.get("/api/analytics/extended", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
     const data = await service.getAnalyticsExtended();
     return c.json({ success: true, data });
   } catch (error) {
@@ -4704,14 +4621,14 @@ adminRoutes.get("/api/analytics/extended", async (c) => {
   }
 });
 adminRoutes.get("/api/benchmark/datasets", async (c) => {
-  return c.json({ success: true, datasets: chunkTITCBEKE_cjs.BENCHMARK_DATASETS });
+  return c.json({ success: true, datasets: chunkC34AYJON_cjs.BENCHMARK_DATASETS });
 });
 adminRoutes.get("/api/benchmark/status", async (c) => {
   try {
     const db = c.env.DB;
     const kv = c.env.CACHE_KV;
     const dataset = c.req.query("dataset") || "scifact";
-    const benchmarkService = new chunkTITCBEKE_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
     const { seeded, count } = await benchmarkService.isSeeded();
     const meta = benchmarkService.getMeta();
     const dataAvailable = await benchmarkService.isDataAvailable();
@@ -4756,12 +4673,12 @@ adminRoutes.post("/api/benchmark/seed", async (c) => {
     const body = await c.req.json().catch(() => ({}));
     const dataset = body.dataset || "scifact";
     const useSubset = body.corpus_size !== "full";
-    const benchmarkService = new chunkTITCBEKE_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
     const collectionId = benchmarkService.getCollectionId();
     const userId = user.userId || user.id;
     const result = await benchmarkService.seed(String(userId), useSubset);
     if (useSubset) {
-      const fts5Service = new chunkTITCBEKE_cjs.FTS5Service(db);
+      const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
       c.executionCtx.waitUntil(
         fts5Service.indexCollection(collectionId).then((r) => console.log(`[Benchmark:${dataset}] FTS5 indexed ${r.indexed_items}/${r.total_items} docs`)).catch((e) => console.error(`[Benchmark:${dataset}] FTS5 indexing error:`, e))
       );
@@ -4797,7 +4714,7 @@ adminRoutes.post("/api/benchmark/purge", async (c) => {
     const vectorize = c.env.VECTORIZE_BENCHMARK_INDEX || c.env.VECTORIZE_INDEX;
     const body = await c.req.json().catch(() => ({}));
     const dataset = body.dataset || "scifact";
-    const benchmarkService = new chunkTITCBEKE_cjs.BenchmarkService(db, kv, vectorize, dataset);
+    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, vectorize, dataset);
     const deleted = await benchmarkService.purge();
     return c.json({
       success: true,
@@ -4812,7 +4729,7 @@ adminRoutes.post("/api/benchmark/purge", async (c) => {
 adminRoutes.post("/api/benchmark/index-fts5-batch", async (c) => {
   try {
     const db = c.env.DB;
-    const fts5Service = new chunkTITCBEKE_cjs.FTS5Service(db);
+    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
     if (!await fts5Service.isAvailable()) {
       return c.json({ error: "FTS5 tables not available." }, 400);
     }
@@ -4848,10 +4765,10 @@ adminRoutes.post("/api/benchmark/index-vectorize-batch", async (c) => {
     const batchSize = body.batch_size || 25;
     const offset = body.offset || 0;
     const benchmarkCollectionId = `benchmark-${dataset}-collection`;
-    const datasetInfo = chunkTITCBEKE_cjs.BENCHMARK_DATASETS.find((d) => d.id === dataset);
+    const datasetInfo = chunkC34AYJON_cjs.BENCHMARK_DATASETS.find((d) => d.id === dataset);
     const displayName = datasetInfo ? `${datasetInfo.name} Benchmark` : `BEIR ${dataset} Benchmark`;
-    const embeddingService = new chunkTITCBEKE_cjs.EmbeddingService(ai);
-    const chunkingService = new chunkTITCBEKE_cjs.ChunkingService();
+    const embeddingService = new chunkC34AYJON_cjs.EmbeddingService(ai);
+    const chunkingService = new chunkC34AYJON_cjs.ChunkingService();
     const totalResult = await db.prepare("SELECT COUNT(*) as cnt FROM content WHERE collection_id = ? AND status != 'deleted'").bind(benchmarkCollectionId).first();
     const total = totalResult?.cnt || 0;
     if (offset >= total) {
@@ -4961,7 +4878,7 @@ adminRoutes.post("/api/benchmark/index-vectorize", async (c) => {
     }
     const body = await c.req.json().catch(() => ({}));
     const dataset = body.dataset || "scifact";
-    const benchmarkService = new chunkTITCBEKE_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
     const { seeded } = await benchmarkService.isSeeded();
     if (!seeded) {
       return c.json({ error: "Benchmark data not seeded. Seed first." }, 400);
@@ -4997,7 +4914,7 @@ adminRoutes.post("/api/benchmark/evaluate", async (c) => {
     const limit = body.limit || 10;
     const maxQueries = body.max_queries || 0;
     const dataset = body.dataset || "scifact";
-    const benchmarkService = new chunkTITCBEKE_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
     const collectionId = benchmarkService.getCollectionId();
     const { seeded } = await benchmarkService.isSeeded();
     if (!seeded) {
@@ -5007,7 +4924,7 @@ adminRoutes.post("/api/benchmark/evaluate", async (c) => {
       );
     }
     if (mode === "fts5" || mode === "hybrid") {
-      const fts5Service = new chunkTITCBEKE_cjs.FTS5Service(db);
+      const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
       if (await fts5Service.isAvailable()) {
         const ftsCount = await db.prepare("SELECT COUNT(*) as cnt FROM content_fts WHERE collection_id = ?").bind(collectionId).first();
         if (!ftsCount || ftsCount.cnt === 0) {
@@ -5046,7 +4963,7 @@ adminRoutes.post("/api/benchmark/evaluate", async (c) => {
         );
       }
     }
-    const aiSearchService = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
+    const aiSearchService = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
     const searchFn = async (query, searchMode, searchLimit) => {
       const response = await aiSearchService.search({
         query,
@@ -5077,7 +4994,7 @@ adminRoutes.get("/api/benchmark/query-ids", async (c) => {
     const dataset = c.req.query("dataset") || "scifact";
     const db = c.env.DB;
     const kv = c.env.CACHE_KV;
-    const benchmarkService = new chunkTITCBEKE_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
     const ids = await benchmarkService.getEvaluableQueryIds(maxQueries);
     return c.json({ success: true, query_ids: ids, total: ids.length });
   } catch (error) {
@@ -5101,9 +5018,9 @@ adminRoutes.post("/api/benchmark/evaluate-batch", async (c) => {
     if ((mode === "ai" || mode === "hybrid") && !vectorize) {
       return c.json({ error: `${mode.toUpperCase()} mode requires Vectorize binding.` }, 400);
     }
-    const benchmarkService = new chunkTITCBEKE_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
     const collectionId = benchmarkService.getCollectionId();
-    const aiSearchService = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
+    const aiSearchService = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
     const searchFn = async (query, searchMode, searchLimit) => {
       const response = await aiSearchService.search({
         query,
@@ -5427,7 +5344,7 @@ apiRoutes.post("/", async (c) => {
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
     const kv = c.env.CACHE_KV;
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize, kv);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize, kv);
     const body = await c.req.json();
     const query = {
       query: body.query || "",
@@ -5548,7 +5465,7 @@ apiRoutes.get("/suggest", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
     const query = c.req.query("q") || "";
     const suggestions = await service.getSearchSuggestions(query);
     return c.json({
@@ -5654,7 +5571,7 @@ apiRoutes.get("/analytics", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
     const analytics = await service.getSearchAnalytics();
     return c.json({
       success: true,
@@ -5669,6 +5586,45 @@ apiRoutes.get("/analytics", async (c) => {
       },
       500
     );
+  }
+});
+apiRoutes.get("/related", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const q = c.req.query("q") || "";
+    const limit = Math.min(Math.max(Number(c.req.query("limit")) || 5, 1), 20);
+    const service = new chunkC34AYJON_cjs.RelatedSearchService(db, kv);
+    const related = await service.getRelatedSearches(q, limit);
+    return c.json({
+      success: true,
+      data: {
+        query: q,
+        related
+      }
+    });
+  } catch (error) {
+    console.error("Related searches error:", error);
+    return c.json({ success: false, error: "Failed to get related searches" }, 500);
+  }
+});
+apiRoutes.get("/trending", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const limit = Math.min(Math.max(Number(c.req.query("limit")) || 5, 1), 20);
+    const period = Math.min(Math.max(Number(c.req.query("period")) || 7, 1), 30);
+    const service = new chunkC34AYJON_cjs.TrendingSearchService(db, kv);
+    const result = await service.getTrending(limit, period);
+    return c.json({
+      trending: result.items,
+      period_days: period,
+      generated_at: (/* @__PURE__ */ new Date()).toISOString(),
+      cached: result.cached
+    });
+  } catch (error) {
+    console.error("Trending searches error:", error);
+    return c.json({ success: false, error: "Failed to get trending searches" }, 500);
   }
 });
 var api_default2 = apiRoutes;
@@ -5792,7 +5748,8 @@ var InstantSearchAdapter = class {
       return [];
     }
   }
-  determineSearchMode(_settings) {
+  determineSearchMode(settings) {
+    if (settings.ai_mode_enabled) return "hybrid";
     return "fts5";
   }
   /**
@@ -5907,7 +5864,7 @@ instantSearchRoutes.post("/", async (c) => {
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
     const kv = c.env.CACHE_KV;
-    const searchService = new chunkTITCBEKE_cjs.AISearchService(db, ai, vectorize, kv);
+    const searchService = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize, kv);
     const adapter = new InstantSearchAdapter(db);
     const body = await c.req.json();
     if (!body.requests || !Array.isArray(body.requests)) {
@@ -6044,8 +6001,6 @@ instantSearchTestRoutes.get("/instantsearch", async (c) => {
             border: 1px solid #f1f5f9;
           }
           .hit-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.3rem; line-height: 1.3; }
-          .hit-title a { color: inherit; text-decoration: none; }
-          .hit-title a:hover { color: #6366f1; }
           .hit-title em, .hit-snippet em {
             background: #fef08a;
             font-style: normal;
@@ -6145,7 +6100,7 @@ search.start();</code>
           </details>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.56.11/dist/instantsearch.production.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
         <script>
           var API = window.location.origin;
           var currentSearch = null;
@@ -6157,13 +6112,7 @@ search.start();</code>
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ requests }),
-                }).then(function(r) {
-                  if (!r.ok) throw new Error('Search failed: ' + r.status);
-                  return r.json();
-                }).catch(function(err) {
-                  console.error('[InstantSearch] fetch error:', err);
-                  return { results: requests.map(function() { return { hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage: 10, processingTimeMS: 0, query: '', params: '', exhaustiveNbHits: true }; }) };
-                });
+                }).then(function(r) { return r.json(); });
               }
             };
           }
@@ -6233,23 +6182,26 @@ search.start();</code>
                       ? hit._snippetResult.body.value
                       : '';
                     var date = hit.created_at
-                      ? new Date(typeof hit.created_at === 'number' && hit.created_at > 1e12 ? hit.created_at : hit.created_at * 1000).toLocaleDateString()
+                      ? new Date(hit.created_at * 1000).toLocaleDateString()
                       : '';
-                    var pageUrl = hit.slug ? '/blog/' + encodeURIComponent(hit.slug) : '';
+                    var score = hit.relevance_score
+                      ? (hit.relevance_score * 100).toFixed(1) + '%'
+                      : '';
 
                     return '<div>' +
-                      '<div class="hit-title">' + (pageUrl ? '<a href="' + pageUrl + '" target="_blank">' + title + '</a>' : title) + '</div>' +
+                      '<div class="hit-title">' + title + '</div>' +
                       (body ? '<div class="hit-snippet">' + body + '</div>' : '') +
                       '<div class="hit-meta">' +
                         '<span>' + esc(hit.collection_name) + '</span>' +
                         '<span class="' + badgeClass(hit.status) + '">' + esc(hit.status) + '</span>' +
                         (date ? '<span>' + date + '</span>' : '') +
+                        (score ? '<span>Score: ' + score + '</span>' : '') +
+                        '<span>ID: ' + esc(hit.objectID).substring(0, 8) + '&hellip;</span>' +
                       '</div>' +
                     '</div>';
                   },
                   empty: function(data) {
-                    var q = (data && data.query) ? data.query : '';
-                    return '<p style="text-align:center;color:#94a3b8;padding:3rem 1rem;">No results' + (q ? ' for &ldquo;' + esc(q) + '&rdquo;' : '') + '</p>';
+                    return '<p style="text-align:center;color:#94a3b8;padding:3rem 1rem;">No results for &ldquo;' + esc(data.query) + '&rdquo;</p>';
                   },
                 },
               }),
@@ -7879,7 +7831,7 @@ var aiSearchPlugin = new chunk6FHNRRJ3_cjs.PluginBuilder({
 }).metadata({
   description: manifest_default.description,
   author: { name: manifest_default.author }
-}).addService("aiSearch", chunkTITCBEKE_cjs.AISearchService).addService("indexManager", chunkTITCBEKE_cjs.IndexManager).addRoute("/admin/plugins/ai-search", admin_default).addRoute("/api/search", api_default2).addRoute("/api/instantsearch", instantsearch_api_default).addRoute("/admin/plugins/ai-search", test_page_default).addRoute("/admin/plugins/ai-search", instantsearch_test_page_default).addRoute("/admin/plugins/ai-search", integration_guide_default).build();
+}).addService("aiSearch", chunkC34AYJON_cjs.AISearchService).addService("indexManager", chunkC34AYJON_cjs.IndexManager).addRoute("/admin/plugins/ai-search", admin_default).addRoute("/api/search", api_default2).addRoute("/api/instantsearch", instantsearch_api_default).addRoute("/admin/plugins/ai-search", test_page_default).addRoute("/admin/plugins/ai-search", instantsearch_test_page_default).addRoute("/admin/plugins/ai-search", integration_guide_default).build();
 var magicLinkRequestSchema = zod.z.object({
   email: zod.z.string().email("Valid email is required")
 });
@@ -8026,12 +7978,12 @@ function createMagicLinkAuthPlugin() {
         SET used = 1, used_at = ?
         WHERE id = ?
       `).bind(Date.now(), magicLink.id).run();
-      const jwtToken = await chunkMD7YM7UZ_cjs.AuthManager.generateToken(
+      const jwtToken = await chunkL2JDZ7NG_cjs.AuthManager.generateToken(
         user.id,
         user.email,
         user.role
       );
-      chunkMD7YM7UZ_cjs.AuthManager.setAuthCookie(c, jwtToken);
+      chunkL2JDZ7NG_cjs.AuthManager.setAuthCookie(c, jwtToken);
       await db.prepare(`
         UPDATE users SET last_login_at = ? WHERE id = ?
       `).bind(Date.now(), user.id).run();
@@ -9317,7 +9269,7 @@ function renderCacheDashboard(data) {
     </script>
 
     <!-- Confirmation Dialogs -->
-    ${chunkTITCBEKE_cjs.renderConfirmationDialog({
+    ${chunkC34AYJON_cjs.renderConfirmationDialog({
     id: "clear-all-cache-confirm",
     title: "Clear All Cache",
     message: "Are you sure you want to clear all cache entries? This cannot be undone.",
@@ -9328,7 +9280,7 @@ function renderCacheDashboard(data) {
     onConfirm: "performClearAllCaches()"
   })}
 
-    ${chunkTITCBEKE_cjs.renderConfirmationDialog({
+    ${chunkC34AYJON_cjs.renderConfirmationDialog({
     id: "clear-namespace-cache-confirm",
     title: "Clear Namespace Cache",
     message: "Clear cache for this namespace?",
@@ -9339,7 +9291,7 @@ function renderCacheDashboard(data) {
     onConfirm: "performClearNamespaceCache()"
   })}
 
-    ${chunkTITCBEKE_cjs.getConfirmationDialogScript()}
+    ${chunkC34AYJON_cjs.getConfirmationDialogScript()}
   `;
   const layoutData = {
     title: "Cache System",
@@ -10067,8 +10019,8 @@ function createSonicJSApp(config = {}) {
     c.set("appVersion", appVersion);
     await next();
   });
-  app2.use("*", chunkMD7YM7UZ_cjs.metricsMiddleware());
-  app2.use("*", chunkMD7YM7UZ_cjs.bootstrapMiddleware(config));
+  app2.use("*", chunkL2JDZ7NG_cjs.metricsMiddleware());
+  app2.use("*", chunkL2JDZ7NG_cjs.bootstrapMiddleware(config));
   if (config.middleware?.beforeAuth) {
     for (const middleware of config.middleware.beforeAuth) {
       app2.use("*", middleware);
@@ -10085,22 +10037,22 @@ function createSonicJSApp(config = {}) {
       app2.use("*", middleware);
     }
   }
-  app2.route("/api", chunkTITCBEKE_cjs.api_default);
-  app2.route("/api/media", chunkTITCBEKE_cjs.api_media_default);
-  app2.route("/api/system", chunkTITCBEKE_cjs.api_system_default);
-  app2.route("/admin/api", chunkTITCBEKE_cjs.admin_api_default);
-  app2.route("/admin/dashboard", chunkTITCBEKE_cjs.router);
-  app2.route("/admin/collections", chunkTITCBEKE_cjs.adminCollectionsRoutes);
-  app2.route("/admin/forms", chunkTITCBEKE_cjs.adminFormsRoutes);
-  app2.route("/admin/settings", chunkTITCBEKE_cjs.adminSettingsRoutes);
-  app2.route("/forms", chunkTITCBEKE_cjs.public_forms_default);
-  app2.route("/api/forms", chunkTITCBEKE_cjs.public_forms_default);
-  app2.route("/admin/api-reference", chunkTITCBEKE_cjs.router2);
+  app2.route("/api", chunkC34AYJON_cjs.api_default);
+  app2.route("/api/media", chunkC34AYJON_cjs.api_media_default);
+  app2.route("/api/system", chunkC34AYJON_cjs.api_system_default);
+  app2.route("/admin/api", chunkC34AYJON_cjs.admin_api_default);
+  app2.route("/admin/dashboard", chunkC34AYJON_cjs.router);
+  app2.route("/admin/collections", chunkC34AYJON_cjs.adminCollectionsRoutes);
+  app2.route("/admin/forms", chunkC34AYJON_cjs.adminFormsRoutes);
+  app2.route("/admin/settings", chunkC34AYJON_cjs.adminSettingsRoutes);
+  app2.route("/forms", chunkC34AYJON_cjs.public_forms_default);
+  app2.route("/api/forms", chunkC34AYJON_cjs.public_forms_default);
+  app2.route("/admin/api-reference", chunkC34AYJON_cjs.router2);
   app2.route("/admin/database-tools", createDatabaseToolsAdminRoutes());
   app2.route("/admin/seed-data", createSeedDataAdminRoutes());
-  app2.route("/admin/content", chunkTITCBEKE_cjs.admin_content_default);
-  app2.route("/admin/media", chunkTITCBEKE_cjs.adminMediaRoutes);
-  app2.route("/admin/search", chunkTITCBEKE_cjs.adminSearchRoutes);
+  app2.route("/admin/content", chunkC34AYJON_cjs.admin_content_default);
+  app2.route("/admin/media", chunkC34AYJON_cjs.adminMediaRoutes);
+  app2.route("/admin/search", chunkC34AYJON_cjs.adminSearchRoutes);
   if (aiSearchPlugin.routes && aiSearchPlugin.routes.length > 0) {
     for (const route of aiSearchPlugin.routes) {
       app2.route(route.path, route.handler);
@@ -10112,11 +10064,11 @@ function createSonicJSApp(config = {}) {
       app2.route(route.path, route.handler);
     }
   }
-  app2.route("/admin/plugins", chunkTITCBEKE_cjs.adminPluginRoutes);
-  app2.route("/admin/logs", chunkTITCBEKE_cjs.adminLogsRoutes);
-  app2.route("/admin", chunkTITCBEKE_cjs.userRoutes);
-  app2.route("/auth", chunkTITCBEKE_cjs.auth_default);
-  app2.route("/", chunkTITCBEKE_cjs.test_cleanup_default);
+  app2.route("/admin/plugins", chunkC34AYJON_cjs.adminPluginRoutes);
+  app2.route("/admin/logs", chunkC34AYJON_cjs.adminLogsRoutes);
+  app2.route("/admin", chunkC34AYJON_cjs.userRoutes);
+  app2.route("/auth", chunkC34AYJON_cjs.auth_default);
+  app2.route("/", chunkC34AYJON_cjs.test_cleanup_default);
   if (emailPlugin.routes && emailPlugin.routes.length > 0) {
     for (const route of emailPlugin.routes) {
       app2.route(route.path, route.handler);
@@ -10208,79 +10160,79 @@ var VERSION = chunkUOEIMC67_cjs.package_default.version;
 
 Object.defineProperty(exports, "ROUTES_INFO", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.ROUTES_INFO; }
+  get: function () { return chunkC34AYJON_cjs.ROUTES_INFO; }
 });
 Object.defineProperty(exports, "adminApiRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.admin_api_default; }
+  get: function () { return chunkC34AYJON_cjs.admin_api_default; }
 });
 Object.defineProperty(exports, "adminCheckboxRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.adminCheckboxRoutes; }
+  get: function () { return chunkC34AYJON_cjs.adminCheckboxRoutes; }
 });
 Object.defineProperty(exports, "adminCodeExamplesRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.admin_code_examples_default; }
+  get: function () { return chunkC34AYJON_cjs.admin_code_examples_default; }
 });
 Object.defineProperty(exports, "adminCollectionsRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.adminCollectionsRoutes; }
+  get: function () { return chunkC34AYJON_cjs.adminCollectionsRoutes; }
 });
 Object.defineProperty(exports, "adminContentRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.admin_content_default; }
+  get: function () { return chunkC34AYJON_cjs.admin_content_default; }
 });
 Object.defineProperty(exports, "adminDashboardRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.router; }
+  get: function () { return chunkC34AYJON_cjs.router; }
 });
 Object.defineProperty(exports, "adminDesignRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.adminDesignRoutes; }
+  get: function () { return chunkC34AYJON_cjs.adminDesignRoutes; }
 });
 Object.defineProperty(exports, "adminLogsRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.adminLogsRoutes; }
+  get: function () { return chunkC34AYJON_cjs.adminLogsRoutes; }
 });
 Object.defineProperty(exports, "adminMediaRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.adminMediaRoutes; }
+  get: function () { return chunkC34AYJON_cjs.adminMediaRoutes; }
 });
 Object.defineProperty(exports, "adminPluginRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.adminPluginRoutes; }
+  get: function () { return chunkC34AYJON_cjs.adminPluginRoutes; }
 });
 Object.defineProperty(exports, "adminSettingsRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.adminSettingsRoutes; }
+  get: function () { return chunkC34AYJON_cjs.adminSettingsRoutes; }
 });
 Object.defineProperty(exports, "adminTestimonialsRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.admin_testimonials_default; }
+  get: function () { return chunkC34AYJON_cjs.admin_testimonials_default; }
 });
 Object.defineProperty(exports, "adminUsersRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.userRoutes; }
+  get: function () { return chunkC34AYJON_cjs.userRoutes; }
 });
 Object.defineProperty(exports, "apiContentCrudRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.api_content_crud_default; }
+  get: function () { return chunkC34AYJON_cjs.api_content_crud_default; }
 });
 Object.defineProperty(exports, "apiMediaRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.api_media_default; }
+  get: function () { return chunkC34AYJON_cjs.api_media_default; }
 });
 Object.defineProperty(exports, "apiRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.api_default; }
+  get: function () { return chunkC34AYJON_cjs.api_default; }
 });
 Object.defineProperty(exports, "apiSystemRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.api_system_default; }
+  get: function () { return chunkC34AYJON_cjs.api_system_default; }
 });
 Object.defineProperty(exports, "authRoutes", {
   enumerable: true,
-  get: function () { return chunkTITCBEKE_cjs.auth_default; }
+  get: function () { return chunkC34AYJON_cjs.auth_default; }
 });
 Object.defineProperty(exports, "Logger", {
   enumerable: true,
@@ -10448,83 +10400,83 @@ Object.defineProperty(exports, "workflowHistory", {
 });
 Object.defineProperty(exports, "AuthManager", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.AuthManager; }
+  get: function () { return chunkL2JDZ7NG_cjs.AuthManager; }
 });
 Object.defineProperty(exports, "PermissionManager", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.PermissionManager; }
+  get: function () { return chunkL2JDZ7NG_cjs.PermissionManager; }
 });
 Object.defineProperty(exports, "bootstrapMiddleware", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.bootstrapMiddleware; }
+  get: function () { return chunkL2JDZ7NG_cjs.bootstrapMiddleware; }
 });
 Object.defineProperty(exports, "cacheHeaders", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.cacheHeaders; }
+  get: function () { return chunkL2JDZ7NG_cjs.cacheHeaders; }
 });
 Object.defineProperty(exports, "compressionMiddleware", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.compressionMiddleware; }
+  get: function () { return chunkL2JDZ7NG_cjs.compressionMiddleware; }
 });
 Object.defineProperty(exports, "detailedLoggingMiddleware", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.detailedLoggingMiddleware; }
+  get: function () { return chunkL2JDZ7NG_cjs.detailedLoggingMiddleware; }
 });
 Object.defineProperty(exports, "getActivePlugins", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.getActivePlugins; }
+  get: function () { return chunkL2JDZ7NG_cjs.getActivePlugins; }
 });
 Object.defineProperty(exports, "isPluginActive", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.isPluginActive; }
+  get: function () { return chunkL2JDZ7NG_cjs.isPluginActive; }
 });
 Object.defineProperty(exports, "logActivity", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.logActivity; }
+  get: function () { return chunkL2JDZ7NG_cjs.logActivity; }
 });
 Object.defineProperty(exports, "loggingMiddleware", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.loggingMiddleware; }
+  get: function () { return chunkL2JDZ7NG_cjs.loggingMiddleware; }
 });
 Object.defineProperty(exports, "optionalAuth", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.optionalAuth; }
+  get: function () { return chunkL2JDZ7NG_cjs.optionalAuth; }
 });
 Object.defineProperty(exports, "performanceLoggingMiddleware", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.performanceLoggingMiddleware; }
+  get: function () { return chunkL2JDZ7NG_cjs.performanceLoggingMiddleware; }
 });
 Object.defineProperty(exports, "requireActivePlugin", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.requireActivePlugin; }
+  get: function () { return chunkL2JDZ7NG_cjs.requireActivePlugin; }
 });
 Object.defineProperty(exports, "requireActivePlugins", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.requireActivePlugins; }
+  get: function () { return chunkL2JDZ7NG_cjs.requireActivePlugins; }
 });
 Object.defineProperty(exports, "requireAnyPermission", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.requireAnyPermission; }
+  get: function () { return chunkL2JDZ7NG_cjs.requireAnyPermission; }
 });
 Object.defineProperty(exports, "requireAuth", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.requireAuth; }
+  get: function () { return chunkL2JDZ7NG_cjs.requireAuth; }
 });
 Object.defineProperty(exports, "requirePermission", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.requirePermission; }
+  get: function () { return chunkL2JDZ7NG_cjs.requirePermission; }
 });
 Object.defineProperty(exports, "requireRole", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.requireRole; }
+  get: function () { return chunkL2JDZ7NG_cjs.requireRole; }
 });
 Object.defineProperty(exports, "securityHeaders", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.securityHeaders; }
+  get: function () { return chunkL2JDZ7NG_cjs.securityHeaders; }
 });
 Object.defineProperty(exports, "securityLoggingMiddleware", {
   enumerable: true,
-  get: function () { return chunkMD7YM7UZ_cjs.securityLoggingMiddleware; }
+  get: function () { return chunkL2JDZ7NG_cjs.securityLoggingMiddleware; }
 });
 Object.defineProperty(exports, "PluginBootstrapService", {
   enumerable: true,
@@ -10580,7 +10532,7 @@ Object.defineProperty(exports, "validateCollectionConfig", {
 });
 Object.defineProperty(exports, "MigrationService", {
   enumerable: true,
-  get: function () { return chunkELVG5YJC_cjs.MigrationService; }
+  get: function () { return chunkXVXSMOB3_cjs.MigrationService; }
 });
 Object.defineProperty(exports, "renderFilterBar", {
   enumerable: true,

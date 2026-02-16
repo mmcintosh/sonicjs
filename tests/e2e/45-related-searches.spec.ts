@@ -438,7 +438,7 @@ test.describe('Related Searches', () => {
 
   test.describe('Relevance Tab UI', () => {
     test('Relevance tab has Related Searches section', async ({ page }) => {
-      await page.goto('/admin/search#relevance')
+      await page.goto('/admin/plugins/ai-search#relevance')
       await page.waitForLoadState('networkidle')
 
       // Click the relevance tab
@@ -450,7 +450,7 @@ test.describe('Related Searches', () => {
     })
 
     test('Related Searches section has Add button', async ({ page }) => {
-      await page.goto('/admin/search#relevance')
+      await page.goto('/admin/plugins/ai-search#relevance')
       await page.waitForLoadState('networkidle')
       await page.click('#tab-btn-relevance')
 
@@ -466,7 +466,7 @@ test.describe('Related Searches', () => {
 
   test.describe('Agent Tab Integration', () => {
     test('Agent tab category filter includes related_search', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForLoadState('networkidle')
 
       // Verify the Agent tab's filter dropdown contains 'related_search' option in the DOM

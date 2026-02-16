@@ -3,6 +3,8 @@ import { getCookie, setCookie } from 'hono/cookie'
 import type { Bindings } from '../../../../app'
 import { AISearchService } from '../services/ai-search'
 import { ExperimentService } from '../services/experiment.service'
+import { RelatedSearchService } from '../services/related-search.service'
+import { TrendingSearchService } from '../services/trending-search.service'
 import { teamDraftInterleave } from '../services/interleave.service'
 import type { SearchQuery } from '../types'
 
@@ -342,6 +344,59 @@ apiRoutes.get('/analytics', async (c) => {
       },
       500
     )
+  }
+})
+
+/**
+ * GET /api/search/related
+ * Get related searches for a query
+ */
+apiRoutes.get('/related', async (c) => {
+  try {
+    const db = c.env.DB
+    const kv = c.env.CACHE_KV
+    const q = c.req.query('q') || ''
+    const limit = Math.min(Math.max(Number(c.req.query('limit')) || 5, 1), 20)
+
+    const service = new RelatedSearchService(db, kv)
+    const related = await service.getRelatedSearches(q, limit)
+
+    return c.json({
+      success: true,
+      data: {
+        query: q,
+        related,
+      },
+    })
+  } catch (error) {
+    console.error('Related searches error:', error)
+    return c.json({ success: false, error: 'Failed to get related searches' }, 500)
+  }
+})
+
+/**
+ * GET /api/search/trending
+ * Get trending search queries
+ */
+apiRoutes.get('/trending', async (c) => {
+  try {
+    const db = c.env.DB
+    const kv = c.env.CACHE_KV
+    const limit = Math.min(Math.max(Number(c.req.query('limit')) || 5, 1), 20)
+    const period = Math.min(Math.max(Number(c.req.query('period')) || 7, 1), 30)
+
+    const service = new TrendingSearchService(db, kv)
+    const result = await service.getTrending(limit, period)
+
+    return c.json({
+      trending: result.items,
+      period_days: period,
+      generated_at: new Date().toISOString(),
+      cached: result.cached,
+    })
+  } catch (error) {
+    console.error('Trending searches error:', error)
+    return c.json({ success: false, error: 'Failed to get trending searches' }, 500)
   }
 })
 

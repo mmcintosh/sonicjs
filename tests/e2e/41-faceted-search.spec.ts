@@ -381,7 +381,7 @@ test.describe('Faceted Search', () => {
 
   test.describe('Admin Dashboard — Facet Config', () => {
     test('Configuration tab has Faceted Search section', async ({ page }) => {
-      await page.goto('/admin/search#configuration')
+      await page.goto('/admin/plugins/ai-search#configuration')
       await page.waitForLoadState('networkidle', { timeout: 15000 })
 
       // Click the Configuration tab
@@ -401,7 +401,7 @@ test.describe('Faceted Search', () => {
     })
 
     test('enabling facets toggle shows config section', async ({ page }) => {
-      await page.goto('/admin/search#configuration')
+      await page.goto('/admin/plugins/ai-search#configuration')
       await page.waitForLoadState('networkidle', { timeout: 15000 })
 
       const configTab = page.locator('#tab-btn-configuration')
@@ -427,7 +427,7 @@ test.describe('Faceted Search', () => {
     })
 
     test('Re-discover Fields button is present', async ({ page }) => {
-      await page.goto('/admin/search#configuration')
+      await page.goto('/admin/plugins/ai-search#configuration')
       await page.waitForLoadState('networkidle', { timeout: 15000 })
 
       const configTab = page.locator('#tab-btn-configuration')

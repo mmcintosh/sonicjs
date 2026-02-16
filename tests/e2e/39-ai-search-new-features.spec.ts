@@ -344,7 +344,7 @@ test.describe('AI Search - New Features', () => {
 
   test.describe('Settings Page Integration', () => {
     test('should have buttons for new pages', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Links are on the Overview tab (default)
@@ -359,7 +359,7 @@ test.describe('AI Search - New Features', () => {
     })
 
     test('should open pages in new tabs', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Links are on the Overview tab (default)

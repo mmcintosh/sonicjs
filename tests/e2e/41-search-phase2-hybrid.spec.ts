@@ -246,7 +246,7 @@ test.describe('AI Search - Phase 2: Hybrid Search', () => {
 
   test.describe('Settings Page', () => {
     test('should show Hybrid Queries in analytics', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Switch to Analytics tab
@@ -258,7 +258,7 @@ test.describe('AI Search - Phase 2: Hybrid Search', () => {
     })
 
     test('should show AI/Semantic Search settings section', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Switch to Configuration tab
@@ -270,7 +270,7 @@ test.describe('AI Search - Phase 2: Hybrid Search', () => {
     })
 
     test('should show AI Reranking toggle', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Switch to Configuration tab
@@ -282,7 +282,7 @@ test.describe('AI Search - Phase 2: Hybrid Search', () => {
     })
 
     test('should show Query Rewriting toggle', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Switch to Configuration tab

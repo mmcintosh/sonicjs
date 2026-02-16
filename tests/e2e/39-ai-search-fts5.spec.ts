@@ -229,7 +229,7 @@ test.describe('AI Search - FTS5 Full-Text Search', () => {
 
   test.describe('FTS5 Settings Page UI', () => {
     test('should show FTS5 section on settings page', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Switch to Configuration tab where FTS5 settings live
@@ -256,7 +256,7 @@ test.describe('AI Search - FTS5 Full-Text Search', () => {
     })
 
     test('should show FTS5 reindex button on settings page', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Switch to Configuration tab
@@ -268,7 +268,7 @@ test.describe('AI Search - FTS5 Full-Text Search', () => {
     })
 
     test('should show FTS5 queries in analytics', async ({ page }) => {
-      await page.goto('/admin/search')
+      await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
       // Switch to Analytics tab where query stats live
