@@ -1,11 +1,11 @@
-import { AISearchService, IndexManager, FTS5Service, BENCHMARK_DATASETS, RankingPipelineService, SynonymService, QueryRulesService, RelatedSearchService, FacetService, BenchmarkService, EmbeddingService, ChunkingService, renderConfirmationDialog, getConfirmationDialogScript, api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminFormsRoutes, adminSettingsRoutes, public_forms_default, router2, admin_content_default, adminMediaRoutes, adminSearchRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-YDT4CD2S.js';
-export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-YDT4CD2S.js';
+import { AISearchService, IndexManager, FTS5Service, renderSearchDashboard, BENCHMARK_DATASETS, RankingPipelineService, SynonymService, QueryRulesService, RelatedSearchService, FacetService, BenchmarkService, EmbeddingService, ChunkingService, TrendingSearchService, renderConfirmationDialog, getConfirmationDialogScript, api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminFormsRoutes, adminSettingsRoutes, public_forms_default, router2, admin_content_default, adminMediaRoutes, adminSearchRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-H2Z2CYLQ.js';
+export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-H2Z2CYLQ.js';
 import { SettingsService, schema_exports } from './chunk-G44QUVNM.js';
 export { Logger, apiTokens, collections, content, contentVersions, getLogger, initLogger, insertCollectionSchema, insertContentSchema, insertLogConfigSchema, insertMediaSchema, insertPluginActivityLogSchema, insertPluginAssetSchema, insertPluginHookSchema, insertPluginRouteSchema, insertPluginSchema, insertSystemLogSchema, insertUserSchema, insertWorkflowHistorySchema, logConfig, media, pluginActivityLog, pluginAssets, pluginHooks, pluginRoutes, plugins, selectCollectionSchema, selectContentSchema, selectLogConfigSchema, selectMediaSchema, selectPluginActivityLogSchema, selectPluginAssetSchema, selectPluginHookSchema, selectPluginRouteSchema, selectPluginSchema, selectSystemLogSchema, selectUserSchema, selectWorkflowHistorySchema, systemLogs, users, workflowHistory } from './chunk-G44QUVNM.js';
-import { requireAuth, AuthManager, metricsMiddleware, bootstrapMiddleware } from './chunk-VTWAL2UC.js';
-export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware } from './chunk-VTWAL2UC.js';
+import { requireAuth, AuthManager, metricsMiddleware, bootstrapMiddleware } from './chunk-DLFLL2JW.js';
+export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware } from './chunk-DLFLL2JW.js';
 export { PluginBootstrapService, PluginService as PluginServiceClass, cleanupRemovedCollections, fullCollectionSync, getAvailableCollectionNames, getManagedCollections, isCollectionManaged, loadCollectionConfig, loadCollectionConfigs, registerCollections, syncCollection, syncCollections, validateCollectionConfig } from './chunk-YFJJU26H.js';
-export { MigrationService } from './chunk-7WGJYP6G.js';
+export { MigrationService } from './chunk-3NEKMAPN.js';
 export { renderFilterBar } from './chunk-M3QJL5ZT.js';
 import { init_admin_layout_catalyst_template, renderAdminLayoutCatalyst, renderAdminLayout } from './chunk-AAU4BTDE.js';
 export { getConfirmationDialogScript, renderAlert, renderConfirmationDialog, renderForm, renderFormField, renderPagination, renderTable } from './chunk-AAU4BTDE.js';
@@ -838,84 +838,6 @@ var SeedDataService = class {
     "Edge Computing and the Modern Web",
     "Accessibility in Web Development"
   ];
-  newsTitles = [
-    "Tech Giants Report Record Quarterly Earnings Amid AI Boom",
-    "Global Climate Summit Reaches Landmark Agreement on Emissions",
-    "Breakthrough in Quantum Computing Achieves New Milestone",
-    "Federal Reserve Holds Interest Rates Steady for Third Quarter",
-    "Major Cybersecurity Breach Exposes Millions of Consumer Records",
-    "New Study Reveals Surprising Benefits of Remote Work Policies",
-    "Autonomous Vehicle Testing Expands to 20 Additional Cities",
-    "World Health Organization Approves New Vaccine for Tropical Disease",
-    "Space Agency Announces Plans for Lunar Base Construction",
-    "Renewable Energy Surpasses Fossil Fuels in Power Generation",
-    "Startup Raises $500M to Build Next-Generation Chip Technology",
-    "International Trade Deal Opens New Markets for Digital Services",
-    "Scientists Discover New Species in Deep Ocean Expedition",
-    "Major Sports League Announces Expansion to Three New Cities",
-    "Education Reform Bill Passes With Bipartisan Support",
-    "Artificial Intelligence Regulation Framework Gains Global Traction",
-    "Record-Breaking Heatwave Impacts Agricultural Output Across Region",
-    "Streaming Platform Launches Revolutionary Interactive Content Format",
-    "Central Bank Introduces Digital Currency Pilot Program",
-    "Archaeological Discovery Rewrites Understanding of Ancient Civilization"
-  ];
-  newsParagraphs = [
-    "The announcement came after months of negotiations between key stakeholders, marking a significant shift in policy direction that analysts say could reshape the industry for years to come. Market observers noted that the timing was particularly significant given recent geopolitical developments.",
-    "Industry experts expressed cautious optimism about the development, noting that while the immediate impact may be limited, the long-term implications could be transformative. Several major firms have already begun adjusting their strategies in anticipation of the changes ahead.",
-    "Critics of the initiative argue that the proposed measures do not go far enough to address the underlying structural issues. Consumer advocacy groups have called for more aggressive action, while business leaders warn that excessive regulation could stifle innovation and economic growth.",
-    "The development comes at a critical juncture for the global economy, with inflation concerns, supply chain disruptions, and labor market shifts creating a complex landscape for policymakers. Central banks around the world are closely monitoring the situation for signs of broader systemic risk.",
-    "According to data released by the research team, the findings represent a statistically significant improvement over previous results. The peer-reviewed study, published in a leading scientific journal, has already generated considerable interest from both the academic community and the private sector.",
-    "Government officials emphasized that the decision was made after extensive consultation with affected communities, industry representatives, and subject-matter experts. A public comment period will be held before the final rules are implemented, scheduled for the first quarter of next year.",
-    "Financial markets reacted positively to the news, with major indices posting gains in afternoon trading. Technology stocks led the advance, while energy and financial sectors showed more modest improvements. Bond yields remained relatively stable as investors assessed the implications.",
-    `The company said in a statement that the investment reflects its long-term commitment to innovation and growth. "We are positioning ourselves for the next decade of opportunity," said the CEO during a press conference at the firm's Silicon Valley headquarters.`,
-    "Environmental groups praised the agreement as a historic step forward, though some activists expressed disappointment that certain provisions were weakened during the final round of talks. Implementation will require coordinated action across multiple government agencies and international bodies.",
-    "Health officials urged the public to remain vigilant and follow recommended guidelines. The rollout is expected to begin within six weeks, prioritizing high-risk populations and frontline workers before expanding to the general public in subsequent phases.",
-    "The investigation, which spanned 18 months and involved cooperation between multiple law enforcement agencies, uncovered a sophisticated network operating across several jurisdictions. Authorities expect additional arrests in the coming weeks as the case continues to unfold.",
-    "Educators and parents have expressed mixed reactions to the proposed changes, with supporters citing improved outcomes in pilot programs and opponents raising concerns about implementation costs and teacher preparedness. School districts will have flexibility in how they adopt the new standards.",
-    "The technology, which has been in development for over five years, represents a fundamental advance in computational capability. Researchers caution that practical commercial applications are still several years away, but the proof of concept has exceeded all initial performance benchmarks.",
-    "Diplomatic sources familiar with the negotiations described the talks as productive but noted that significant disagreements remain on key issues including intellectual property protections, data privacy standards, and market access provisions for developing nations.",
-    "Analysts at leading investment banks have revised their forecasts upward following the announcement, with several raising their price targets for companies in the sector. The consensus view is that the trend will accelerate through the remainder of the fiscal year.",
-    "Local residents expressed a range of reactions, from enthusiasm about potential economic benefits to concern about the impact on community character and infrastructure. City officials have pledged to hold town hall meetings to address public questions and gather feedback."
-  ];
-  newsExcerpts = [
-    "A major development that could reshape the industry landscape for years to come.",
-    "Experts weigh in on the implications of today's announcement for consumers and businesses.",
-    "The latest findings add to a growing body of evidence supporting the new approach.",
-    "Markets react as stakeholders assess the potential impact on the global economy.",
-    "Officials detail the next steps as the initiative moves from planning to implementation.",
-    "Analysis: What today's decision means for the future of the sector.",
-    "Breaking down the key takeaways from a landmark agreement.",
-    "Investors and analysts respond to news that exceeded market expectations.",
-    "The development raises important questions about regulation, privacy, and innovation.",
-    "A closer look at the data behind the headlines and what it reveals.",
-    "Community leaders react to changes that could affect millions of residents.",
-    "The announcement caps months of speculation and behind-the-scenes negotiations."
-  ];
-  newsCategories = ["technology", "business", "science", "politics", "health", "entertainment", "sports", "world"];
-  newsSources = ["Staff Reporter", "Associated Press", "Reuters", "Staff", "Special Correspondent", "Wire Services", "Editorial Board"];
-  newsTags = [
-    "breaking",
-    "analysis",
-    "opinion",
-    "economy",
-    "technology",
-    "climate",
-    "health",
-    "politics",
-    "science",
-    "business",
-    "sports",
-    "entertainment",
-    "world-news",
-    "ai",
-    "cybersecurity",
-    "energy",
-    "finance",
-    "education",
-    "space",
-    "trade"
-  ];
   pageTitles = [
     "About Us",
     "Contact",
@@ -1439,49 +1361,6 @@ var SeedDataService = class {
       author: `${this.pickRandom(this.firstNames)} ${this.pickRandom(this.lastNames)}`
     };
   }
-  generateRichNewsData(title, richness) {
-    const category = this.pickRandom(this.newsCategories);
-    const source = this.pickRandom(this.newsSources);
-    if (richness === "minimal") {
-      return {
-        body: this.pickRandom(this.newsParagraphs),
-        summary: "A developing story with significant implications for the industry and the public.",
-        category,
-        source,
-        breaking: Math.random() > 0.85,
-        tags: this.pickRandomTags(this.newsTags, 2)
-      };
-    }
-    const paragraphCount = Math.floor(Math.random() * 3) + 3;
-    return {
-      body: this.assembleNewsParagraphs(title, paragraphCount),
-      summary: this.pickRandom(this.newsExcerpts),
-      category,
-      source,
-      breaking: Math.random() > 0.85,
-      tags: this.pickRandomTags(this.newsTags),
-      author: `${this.pickRandom(this.firstNames)} ${this.pickRandom(this.lastNames)}`
-    };
-  }
-  assembleNewsParagraphs(headline, paragraphCount) {
-    const selected = [];
-    const shuffled = [...this.newsParagraphs].sort(() => 0.5 - Math.random());
-    for (let i = 0; i < paragraphCount && i < shuffled.length; i++) {
-      selected.push(shuffled[i]);
-    }
-    let html4 = `<h1>${headline}</h1>
-`;
-    for (const p of selected) {
-      html4 += `<p>${p}</p>
-`;
-    }
-    return html4;
-  }
-  pickRandomTags(pool, count) {
-    const numTags = count || Math.floor(Math.random() * 4) + 2;
-    const shuffled = [...pool].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, numTags);
-  }
   generateRichPageData(title, richness) {
     if (richness === "minimal") {
       return {
@@ -1615,17 +1494,15 @@ var SeedDataService = class {
     }
     return count;
   }
-  async createContent(contentCount = 200, richness = "full", collectionName) {
+  async createContent(contentCount = 200, richness = "full") {
     const { results: allUsers } = await this.db.prepare("SELECT * FROM users").all();
     const { results: allCollections } = await this.db.prepare("SELECT * FROM collections").all();
     if (!allUsers || allUsers.length === 0) throw new Error("No users found. Please create users first.");
     if (!allCollections || allCollections.length === 0) throw new Error("No collections found. Please create collections first.");
-    const targetCollections = collectionName ? allCollections.filter((c) => (c.name || "").toLowerCase() === collectionName.toLowerCase()) : allCollections;
-    if (targetCollections.length === 0) throw new Error(`Collection "${collectionName}" not found.`);
     const statuses = ["draft", "published", "published", "published", "archived"];
     let count = 0;
     for (let i = 0; i < contentCount; i++) {
-      const collection = this.pickRandom(targetCollections);
+      const collection = this.pickRandom(allCollections);
       const author = this.pickRandom(allUsers);
       const status = this.pickRandom(statuses);
       const name = (collection.name || "").toLowerCase();
@@ -1634,9 +1511,6 @@ var SeedDataService = class {
       if (name === "blog_posts" || name.includes("blog")) {
         title = this.pickRandom(this.blogTitles);
         contentData = this.generateRichBlogData(title, richness);
-      } else if (name === "news" || name.includes("news")) {
-        title = this.pickRandom(this.newsTitles);
-        contentData = this.generateRichNewsData(title, richness);
       } else if (name === "pages" || name.includes("page")) {
         title = this.pickRandom(this.pageTitles);
         contentData = this.generateRichPageData(title, richness);
@@ -2153,10 +2027,9 @@ function createSeedDataAdminRoutes() {
       const body = await c.req.json();
       const contentCount = Math.min(Math.max(parseNumberOrDefault(body.contentCount, 0), 0), 1e3);
       const richness = body.richness === "minimal" ? "minimal" : "full";
-      const collectionName = body.collection || void 0;
       if (contentCount === 0) return c.json({ success: true, count: 0 });
       const seedService = new SeedDataService(db);
-      const count = await seedService.createContent(contentCount, richness, collectionName);
+      const count = await seedService.createContent(contentCount, richness);
       return c.json({ success: true, count });
     } catch (error) {
       console.error("[Seed Data] Content error:", error);
@@ -3882,7 +3755,51 @@ var clampWeight = (val, fallback) => {
 var adminRoutes = new Hono();
 adminRoutes.use("*", requireAuth());
 adminRoutes.get("/", async (c) => {
-  return c.redirect("/admin/search");
+  try {
+    const user = c.get("user");
+    const db = c.env.DB;
+    const ai = c.env.AI;
+    const vectorize = c.env.VECTORIZE_INDEX;
+    const kv = c.env.CACHE_KV;
+    const service = new AISearchService(db, ai, vectorize, kv);
+    const indexer = new IndexManager(db, ai, vectorize);
+    const fts5Service = new FTS5Service(db);
+    const settings = await service.getSettings();
+    const collections2 = await service.getAllCollections();
+    const newCollections = await service.detectNewCollections();
+    const indexStatus = await indexer.getAllIndexStatus();
+    const analytics = await service.getSearchAnalytics();
+    let fts5Status = null;
+    try {
+      const available = await fts5Service.isAvailable();
+      if (available) {
+        const stats = await fts5Service.getStats();
+        fts5Status = { available: true, total_indexed: stats.total_indexed, by_collection: stats.by_collection };
+      } else {
+        fts5Status = { available: false, total_indexed: 0, by_collection: {} };
+      }
+    } catch {
+    }
+    return c.html(
+      renderSearchDashboard({
+        settings,
+        collections: collections2 || [],
+        newCollections: newCollections || [],
+        indexStatus: indexStatus || {},
+        analytics,
+        fts5Status,
+        benchmarkStatus: null,
+        user: {
+          name: user.email,
+          email: user.email,
+          role: user.role
+        }
+      })
+    );
+  } catch (error) {
+    console.error("Error rendering search dashboard:", error);
+    return c.html(`<p>Error loading dashboard: ${error instanceof Error ? error.message : String(error)}</p>`, 500);
+  }
 });
 adminRoutes.post("/", async (c) => {
   try {
@@ -5675,6 +5592,45 @@ apiRoutes.get("/analytics", async (c) => {
     );
   }
 });
+apiRoutes.get("/related", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const q = c.req.query("q") || "";
+    const limit = Math.min(Math.max(Number(c.req.query("limit")) || 5, 1), 20);
+    const service = new RelatedSearchService(db, kv);
+    const related = await service.getRelatedSearches(q, limit);
+    return c.json({
+      success: true,
+      data: {
+        query: q,
+        related
+      }
+    });
+  } catch (error) {
+    console.error("Related searches error:", error);
+    return c.json({ success: false, error: "Failed to get related searches" }, 500);
+  }
+});
+apiRoutes.get("/trending", async (c) => {
+  try {
+    const db = c.env.DB;
+    const kv = c.env.CACHE_KV;
+    const limit = Math.min(Math.max(Number(c.req.query("limit")) || 5, 1), 20);
+    const period = Math.min(Math.max(Number(c.req.query("period")) || 7, 1), 30);
+    const service = new TrendingSearchService(db, kv);
+    const result = await service.getTrending(limit, period);
+    return c.json({
+      trending: result.items,
+      period_days: period,
+      generated_at: (/* @__PURE__ */ new Date()).toISOString(),
+      cached: result.cached
+    });
+  } catch (error) {
+    console.error("Trending searches error:", error);
+    return c.json({ success: false, error: "Failed to get trending searches" }, 500);
+  }
+});
 var api_default2 = apiRoutes;
 
 // src/plugins/core-plugins/ai-search-plugin/services/instantsearch-adapter.ts
@@ -5796,7 +5752,8 @@ var InstantSearchAdapter = class {
       return [];
     }
   }
-  determineSearchMode(_settings) {
+  determineSearchMode(settings) {
+    if (settings.ai_mode_enabled) return "hybrid";
     return "fts5";
   }
   /**
@@ -6048,8 +6005,6 @@ instantSearchTestRoutes.get("/instantsearch", async (c) => {
             border: 1px solid #f1f5f9;
           }
           .hit-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.3rem; line-height: 1.3; }
-          .hit-title a { color: inherit; text-decoration: none; }
-          .hit-title a:hover { color: #6366f1; }
           .hit-title em, .hit-snippet em {
             background: #fef08a;
             font-style: normal;
@@ -6149,7 +6104,7 @@ search.start();</code>
           </details>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.56.11/dist/instantsearch.production.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
         <script>
           var API = window.location.origin;
           var currentSearch = null;
@@ -6161,13 +6116,7 @@ search.start();</code>
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ requests }),
-                }).then(function(r) {
-                  if (!r.ok) throw new Error('Search failed: ' + r.status);
-                  return r.json();
-                }).catch(function(err) {
-                  console.error('[InstantSearch] fetch error:', err);
-                  return { results: requests.map(function() { return { hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage: 10, processingTimeMS: 0, query: '', params: '', exhaustiveNbHits: true }; }) };
-                });
+                }).then(function(r) { return r.json(); });
               }
             };
           }
@@ -6237,23 +6186,26 @@ search.start();</code>
                       ? hit._snippetResult.body.value
                       : '';
                     var date = hit.created_at
-                      ? new Date(typeof hit.created_at === 'number' && hit.created_at > 1e12 ? hit.created_at : hit.created_at * 1000).toLocaleDateString()
+                      ? new Date(hit.created_at * 1000).toLocaleDateString()
                       : '';
-                    var pageUrl = hit.slug ? '/blog/' + encodeURIComponent(hit.slug) : '';
+                    var score = hit.relevance_score
+                      ? (hit.relevance_score * 100).toFixed(1) + '%'
+                      : '';
 
                     return '<div>' +
-                      '<div class="hit-title">' + (pageUrl ? '<a href="' + pageUrl + '" target="_blank">' + title + '</a>' : title) + '</div>' +
+                      '<div class="hit-title">' + title + '</div>' +
                       (body ? '<div class="hit-snippet">' + body + '</div>' : '') +
                       '<div class="hit-meta">' +
                         '<span>' + esc(hit.collection_name) + '</span>' +
                         '<span class="' + badgeClass(hit.status) + '">' + esc(hit.status) + '</span>' +
                         (date ? '<span>' + date + '</span>' : '') +
+                        (score ? '<span>Score: ' + score + '</span>' : '') +
+                        '<span>ID: ' + esc(hit.objectID).substring(0, 8) + '&hellip;</span>' +
                       '</div>' +
                     '</div>';
                   },
                   empty: function(data) {
-                    var q = (data && data.query) ? data.query : '';
-                    return '<p style="text-align:center;color:#94a3b8;padding:3rem 1rem;">No results' + (q ? ' for &ldquo;' + esc(q) + '&rdquo;' : '') + '</p>';
+                    return '<p style="text-align:center;color:#94a3b8;padding:3rem 1rem;">No results for &ldquo;' + esc(data.query) + '&rdquo;</p>';
                   },
                 },
               }),

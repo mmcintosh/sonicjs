@@ -1,3 +1,5 @@
+'use strict';
+
 // src/db/migrations-bundle.ts
 var bundledMigrations = [
   {
@@ -1788,7 +1790,7 @@ CREATE INDEX IF NOT EXISTS idx_query_rules_priority ON ai_search_query_rules(pri
     name: "Ai Recommendations",
     filename: "041_ai_recommendations.sql",
     description: "Migration 041: Ai Recommendations",
-    sql: "CREATE TABLE IF NOT EXISTS ai_search_recommendations (\n  id TEXT PRIMARY KEY,\n  category TEXT NOT NULL CHECK (category IN ('synonym', 'query_rule', 'low_ctr', 'unused_facet', 'content_gap', 'related_search')),\n  title TEXT NOT NULL,\n  description TEXT NOT NULL,\n  supporting_data TEXT NOT NULL,\n  action_payload TEXT,\n  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'applied', 'dismissed')),\n  fingerprint TEXT NOT NULL,\n  run_id TEXT NOT NULL,\n  applied_at INTEGER,\n  created_at INTEGER NOT NULL DEFAULT (unixepoch()),\n  updated_at INTEGER NOT NULL DEFAULT (unixepoch())\n);\n\nCREATE INDEX IF NOT EXISTS idx_recommendations_status ON ai_search_recommendations(status);\nCREATE INDEX IF NOT EXISTS idx_recommendations_category ON ai_search_recommendations(category);\nCREATE INDEX IF NOT EXISTS idx_recommendations_fingerprint ON ai_search_recommendations(fingerprint);\nCREATE INDEX IF NOT EXISTS idx_recommendations_created ON ai_search_recommendations(created_at DESC);\n\nCREATE TABLE IF NOT EXISTS ai_search_agent_runs (\n  id TEXT PRIMARY KEY,\n  status TEXT NOT NULL DEFAULT 'running' CHECK (status IN ('running', 'completed', 'failed')),\n  recommendations_count INTEGER DEFAULT 0,\n  duration_ms INTEGER,\n  error_message TEXT,\n  created_at INTEGER NOT NULL DEFAULT (unixepoch()),\n  completed_at INTEGER\n);\n"
+    sql: "CREATE TABLE IF NOT EXISTS ai_search_recommendations (\n  id TEXT PRIMARY KEY,\n  category TEXT NOT NULL CHECK (category IN ('synonym', 'query_rule', 'low_ctr', 'unused_facet', 'content_gap')),\n  title TEXT NOT NULL,\n  description TEXT NOT NULL,\n  supporting_data TEXT NOT NULL,\n  action_payload TEXT,\n  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'applied', 'dismissed')),\n  fingerprint TEXT NOT NULL,\n  run_id TEXT NOT NULL,\n  applied_at INTEGER,\n  created_at INTEGER NOT NULL DEFAULT (unixepoch()),\n  updated_at INTEGER NOT NULL DEFAULT (unixepoch())\n);\n\nCREATE INDEX IF NOT EXISTS idx_recommendations_status ON ai_search_recommendations(status);\nCREATE INDEX IF NOT EXISTS idx_recommendations_category ON ai_search_recommendations(category);\nCREATE INDEX IF NOT EXISTS idx_recommendations_fingerprint ON ai_search_recommendations(fingerprint);\nCREATE INDEX IF NOT EXISTS idx_recommendations_created ON ai_search_recommendations(created_at DESC);\n\nCREATE TABLE IF NOT EXISTS ai_search_agent_runs (\n  id TEXT PRIMARY KEY,\n  status TEXT NOT NULL DEFAULT 'running' CHECK (status IN ('running', 'completed', 'failed')),\n  recommendations_count INTEGER DEFAULT 0,\n  duration_ms INTEGER,\n  error_message TEXT,\n  created_at INTEGER NOT NULL DEFAULT (unixepoch()),\n  completed_at INTEGER\n);\n"
   },
   {
     id: "042",
@@ -2210,6 +2212,6 @@ var MigrationService = class {
   }
 };
 
-export { MigrationService };
-//# sourceMappingURL=chunk-7WGJYP6G.js.map
-//# sourceMappingURL=chunk-7WGJYP6G.js.map
+exports.MigrationService = MigrationService;
+//# sourceMappingURL=chunk-XVXSMOB3.cjs.map
+//# sourceMappingURL=chunk-XVXSMOB3.cjs.map

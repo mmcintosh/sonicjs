@@ -15,6 +15,7 @@ import { ChunkingService } from '../services/chunking.service'
 import { RecommendationService } from '../services/recommendation.service'
 import { RelatedSearchService } from '../services/related-search.service'
 import { ExperimentService } from '../services/experiment.service'
+import { renderSearchDashboard } from '../../../../templates/pages/admin-search.template'
 import type { AISearchSettings, ExperimentMode, FacetDefinition, SearchQuery } from '../types'
 
 type Variables = {
@@ -37,10 +38,57 @@ adminRoutes.use('*', requireAuth())
 
 /**
  * GET /admin/plugins/ai-search
- * Redirect to the dedicated Search admin page
+ * Render search dashboard
  */
 adminRoutes.get('/', async (c) => {
-  return c.redirect('/admin/search')
+  try {
+    const user = c.get('user')
+    const db = c.env.DB
+    const ai = (c.env as any).AI
+    const vectorize = (c.env as any).VECTORIZE_INDEX
+    const kv = c.env.CACHE_KV
+
+    const service = new AISearchService(db, ai, vectorize, kv)
+    const indexer = new IndexManager(db, ai, vectorize)
+    const fts5Service = new FTS5Service(db)
+
+    const settings = await service.getSettings()
+    const collections = await service.getAllCollections()
+    const newCollections = await service.detectNewCollections()
+    const indexStatus = await indexer.getAllIndexStatus()
+    const analytics = await service.getSearchAnalytics()
+
+    let fts5Status = null
+    try {
+      const available = await fts5Service.isAvailable()
+      if (available) {
+        const stats = await fts5Service.getStats()
+        fts5Status = { available: true, total_indexed: stats.total_indexed, by_collection: stats.by_collection }
+      } else {
+        fts5Status = { available: false, total_indexed: 0, by_collection: {} }
+      }
+    } catch { /* ignore */ }
+
+    return c.html(
+      renderSearchDashboard({
+        settings,
+        collections: collections || [],
+        newCollections: newCollections || [],
+        indexStatus: indexStatus || {},
+        analytics,
+        fts5Status,
+        benchmarkStatus: null,
+        user: {
+          name: user.email,
+          email: user.email,
+          role: user.role,
+        },
+      })
+    )
+  } catch (error) {
+    console.error('Error rendering search dashboard:', error)
+    return c.html(`<p>Error loading dashboard: ${error instanceof Error ? error.message : String(error)}</p>`, 500)
+  }
 })
 
 /**

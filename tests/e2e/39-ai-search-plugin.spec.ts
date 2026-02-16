@@ -24,7 +24,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should access AI Search settings page', async ({ page }) => {
-    await page.goto('/admin/search')
+    await page.goto('/admin/plugins/ai-search')
 
     // Check page loaded - use h1 only to avoid strict mode violation
     await expect(page.locator('h1')).toContainText(/AI Search/i, { timeout: 10000 })
@@ -37,7 +37,7 @@ test.describe('AI Search Plugin', () => {
   })
 
   test('should show available collections for indexing', async ({ page }) => {
-    await page.goto('/admin/search')
+    await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
 
     // Switch to Configuration tab where collections live
