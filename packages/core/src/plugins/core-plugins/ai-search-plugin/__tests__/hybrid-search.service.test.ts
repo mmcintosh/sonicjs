@@ -125,8 +125,8 @@ describe('HybridSearchService', () => {
 
       // 'shared' should rank first because it gets two RRF contributions
       expect(result.results[0].id).toBe('shared')
-      expect(result.results[0].relevance_score).toBeGreaterThan(
-        result.results[1].relevance_score!
+      expect(result.results[0].rrf_score).toBeGreaterThan(
+        result.results[1].rrf_score!
       )
     })
 
@@ -142,7 +142,7 @@ describe('HybridSearchService', () => {
 
       // Both items at rank 1 in their respective systems: 1/(60+1) ≈ 0.01639
       const expectedScore = 1 / (60 + 1)
-      expect(result.results[0].relevance_score).toBeCloseTo(expectedScore, 5)
+      expect(result.results[0].rrf_score).toBeCloseTo(expectedScore, 5)
     })
 
     it('should calculate correct RRF score for item in both systems', async () => {
@@ -159,7 +159,7 @@ describe('HybridSearchService', () => {
       const sharedResult = result.results.find(r => r.id === 'shared')
       // RRF = 1/(60+1) [FTS5 rank 1] + 1/(60+2) [AI rank 2]
       const expected = 1 / 61 + 1 / 62
-      expect(sharedResult!.relevance_score).toBeCloseTo(expected, 5)
+      expect(sharedResult!.rrf_score).toBeCloseTo(expected, 5)
     })
 
     it('should merge highlights from FTS5 when item exists in both systems', async () => {
@@ -203,10 +203,10 @@ describe('HybridSearchService', () => {
       // 'a' appears in both (rank 1 in each): highest RRF
       expect(result.results[0].id).toBe('a')
 
-      // Verify descending order
+      // Verify descending order by rrf_score
       for (let i = 1; i < result.results.length; i++) {
-        expect(result.results[i - 1].relevance_score).toBeGreaterThanOrEqual(
-          result.results[i].relevance_score!
+        expect(result.results[i - 1].rrf_score).toBeGreaterThanOrEqual(
+          result.results[i].rrf_score!
         )
       }
     })
@@ -288,23 +288,25 @@ describe('HybridSearchService', () => {
     })
   })
 
-  // === Candidate pool expansion ===
+  // === Query passthrough ===
 
-  describe('candidate pool expansion', () => {
-    it('should request 3x the final limit from each sub-search', async () => {
+  describe('query passthrough', () => {
+    it('should pass query parameters through to sub-searches', async () => {
       mockFts5.search.mockResolvedValue(mockResponse([]))
       mockRag.search.mockResolvedValue(mockResponse([]))
 
       const service = new HybridSearchService(mockFts5, mockRag)
       await service.search({ ...defaultQuery, limit: 10 }, defaultSettings)
 
-      // FTS5 should be called with limit: 30 (3x10)
+      // FTS5 should be called with the same query
       const fts5Call = mockFts5.search.mock.calls[0]
-      expect(fts5Call[0].limit).toBe(30)
+      expect(fts5Call[0].limit).toBe(10)
+      expect(fts5Call[0].query).toBe('test')
 
-      // RAG should also be called with limit: 30
+      // RAG should also be called with the same query
       const ragCall = mockRag.search.mock.calls[0]
-      expect(ragCall[0].limit).toBe(30)
+      expect(ragCall[0].limit).toBe(10)
+      expect(ragCall[0].query).toBe('test')
     })
   })
 })

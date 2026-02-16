@@ -5,6 +5,14 @@ import { FTS5Service } from '../services/fts5.service'
  * Tests for FTS5Service query sanitization logic.
  * Only tests pure functions (sanitizeFTS5Query, extractSearchableText).
  * Database-dependent methods (search, indexContent, etc.) are covered by E2E tests.
+ *
+ * Current sanitizer behavior:
+ * - Single term → "term"* (quoted prefix for autocomplete)
+ * - Multiple terms → "t1" "t2" "t3" (each quoted, space-joined = implicit AND)
+ * - Strips: quotes, brackets, FTS5 operators (AND/OR/NOT/NEAR), wildcards, colons, carets
+ * - Converts hyphens to spaces
+ * - Does NOT lowercase (FTS5 unicode61 tokenizer handles case-folding)
+ * - Does NOT filter stop words (FTS5 handles this internally)
  */
 describe('FTS5Service — sanitizeFTS5Query', () => {
   // Create a service with a mock DB (not used for sanitization tests)
@@ -15,81 +23,59 @@ describe('FTS5Service — sanitizeFTS5Query', () => {
 
   // === Basic sanitization ===
 
-  it('should return prefix query for single valid term', () => {
-    expect(sanitize('laptop')).toBe('laptop*')
+  it('should return quoted prefix query for single valid term', () => {
+    expect(sanitize('laptop')).toBe('"laptop"*')
   })
 
-  it('should join multiple terms with OR for BM25 ranking', () => {
-    expect(sanitize('best laptop deals')).toBe('best OR laptop OR deals')
+  it('should join multiple terms with implicit AND (each quoted)', () => {
+    expect(sanitize('best laptop deals')).toBe('"best" "laptop" "deals"')
   })
 
-  it('should lowercase all terms', () => {
-    expect(sanitize('Laptop')).toBe('laptop*')
-    expect(sanitize('Best LAPTOP Deals')).toBe('best OR laptop OR deals')
+  it('should preserve case (FTS5 tokenizer handles case-folding)', () => {
+    expect(sanitize('Laptop')).toBe('"Laptop"*')
+    expect(sanitize('Best LAPTOP Deals')).toBe('"Best" "LAPTOP" "Deals"')
   })
 
   // === FTS5 operator stripping ===
 
-  it('should strip asterisks', () => {
-    expect(sanitize('test*')).toBe('test*') // single term gets prefix added anyway
-    expect(sanitize('te*st')).toBe('test*')
+  it('should strip asterisks and add prefix for single term', () => {
+    expect(sanitize('test*')).toBe('"test"*')
+    expect(sanitize('te*st')).toBe('"test"*')
   })
 
   it('should strip double quotes', () => {
-    expect(sanitize('"exact phrase"')).toBe('exact OR phrase')
+    expect(sanitize('"exact phrase"')).toBe('"exact" "phrase"')
   })
 
   it('should strip parentheses', () => {
-    expect(sanitize('(grouped terms)')).toBe('grouped OR terms')
+    expect(sanitize('(grouped terms)')).toBe('"grouped" "terms"')
   })
 
   it('should strip colons (FTS5 column filter syntax)', () => {
-    expect(sanitize('title:search')).toBe('titlesearch*')
+    expect(sanitize('title:search')).toBe('"titlesearch"*')
   })
 
   it('should strip carets', () => {
-    expect(sanitize('term^2')).toBe('term2*')
+    expect(sanitize('term^2')).toBe('"term2"*')
   })
 
-  // === Stop word filtering ===
+  // === FTS5 operator keyword stripping ===
 
-  it('should filter out stop words', () => {
-    // 'to' and 'for' are stop words; 'how' is not in the stop list
-    expect(sanitize('how to search for items')).toBe('how OR search OR items')
-  })
-
-  it('should filter out FTS5 operator keywords (AND, OR, NOT, NEAR)', () => {
-    expect(sanitize('cats AND dogs')).toBe('cats OR dogs')
-    expect(sanitize('cats OR dogs')).toBe('cats OR dogs')
-    expect(sanitize('cats NOT dogs')).toBe('cats OR dogs')
-    expect(sanitize('cats NEAR dogs')).toBe('cats OR dogs')
-  })
-
-  it('should filter out single-character terms', () => {
-    expect(sanitize('a b c real')).toBe('real*')
+  it('should strip FTS5 operator keywords (AND, OR, NOT, NEAR)', () => {
+    expect(sanitize('cats AND dogs')).toBe('"cats" "dogs"')
+    expect(sanitize('cats OR dogs')).toBe('"cats" "dogs"')
+    expect(sanitize('cats NOT dogs')).toBe('"cats" "dogs"')
+    expect(sanitize('cats NEAR dogs')).toBe('"cats" "dogs"')
   })
 
   // === Hyphens ===
 
   it('should convert hyphens to spaces', () => {
-    expect(sanitize('e-commerce')).toBe('commerce*')
-    // 'e' is a single char and gets filtered
+    expect(sanitize('e-commerce')).toBe('"e" "commerce"')
   })
 
   it('should handle multiple hyphens', () => {
-    expect(sanitize('state-of-the-art design')).toBe('state OR art OR design')
-  })
-
-  // === Special characters ===
-
-  it('should strip all punctuation and special characters', () => {
-    expect(sanitize('hello! @world #test $100')).toBe('hello OR world OR test OR 100')
-  })
-
-  it('should handle unicode characters', () => {
-    // Non-ASCII letters are stripped by the [^a-zA-Z0-9\s] regex
-    const result = sanitize('café')
-    expect(result).toBe('caf*')
+    expect(sanitize('state-of-the-art design')).toBe('"state" "of" "the" "art" "design"')
   })
 
   // === Edge cases ===
@@ -103,37 +89,25 @@ describe('FTS5Service — sanitizeFTS5Query', () => {
     expect(sanitize(undefined as any)).toBe('""')
   })
 
-  it('should return empty quotes for all-stop-words query', () => {
-    expect(sanitize('the a an is')).toBe('""')
-  })
-
-  it('should return empty quotes for all-special-character query', () => {
-    expect(sanitize('!@#$%^&*()')).toBe('""')
-  })
-
   it('should return empty quotes for whitespace-only input', () => {
     expect(sanitize('   ')).toBe('""')
   })
 
-  it('should return empty quotes for single character input', () => {
-    expect(sanitize('a')).toBe('""')
-  })
-
   it('should collapse multiple spaces', () => {
-    expect(sanitize('search    query    terms')).toBe('search OR query OR terms')
+    expect(sanitize('search    query    terms')).toBe('"search" "query" "terms"')
   })
 
   it('should handle already-clean queries without changes', () => {
-    expect(sanitize('laptop')).toBe('laptop*')
-    expect(sanitize('search query')).toBe('search OR query')
+    expect(sanitize('laptop')).toBe('"laptop"*')
+    expect(sanitize('search query')).toBe('"search" "query"')
   })
 
   it('should handle numeric-only queries', () => {
-    expect(sanitize('12345')).toBe('12345*')
+    expect(sanitize('12345')).toBe('"12345"*')
   })
 
   it('should handle mixed alphanumeric terms', () => {
-    expect(sanitize('iphone 15 pro max')).toBe('iphone OR 15 OR pro OR max')
+    expect(sanitize('iphone 15 pro max')).toBe('"iphone" "15" "pro" "max"')
   })
 })
 
