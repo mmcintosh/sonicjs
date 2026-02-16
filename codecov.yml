@@ -1,0 +1,27 @@
+# codecov.yml — Coverage configuration for mmcintosh/sonicjs fork
+# Validates: curl -X POST --data-binary @codecov.yml https://codecov.io/validate
+
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  precision: 2
+  round: down
+  range: 40..90
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true    # non-blocking while ramping up coverage
+    patch:
+      default:
+        target: 80%
+        informational: true    # non-blocking while ramping up coverage
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
