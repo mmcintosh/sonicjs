@@ -21,8 +21,9 @@ test.describe('Reference Fields', () => {
     await expect(page.locator('h1')).toContainText('Edit Collection')
 
     // Open add field modal
-    await page.locator('button:has-text("Add Field")').scrollIntoViewIfNeeded()
-    await page.click('button:has-text("Add Field")')
+    const addFieldBtn = page.locator('button:has-text("Add Field")').first()
+    await addFieldBtn.scrollIntoViewIfNeeded()
+    await addFieldBtn.click()
     await page.waitForSelector('#field-modal:not(.hidden)')
 
     // Check that reference option exists in field type dropdown
@@ -41,8 +42,9 @@ test.describe('Reference Fields', () => {
     await firstRow.click()
     await expect(page.locator('h1')).toContainText('Edit Collection')
 
-    await page.locator('button:has-text("Add Field")').scrollIntoViewIfNeeded()
-    await page.click('button:has-text("Add Field")')
+    const addFieldBtn2 = page.locator('button:has-text("Add Field")').first()
+    await addFieldBtn2.scrollIntoViewIfNeeded()
+    await addFieldBtn2.click()
     await page.waitForSelector('#field-modal:not(.hidden)')
 
     // Select reference type
@@ -75,8 +77,9 @@ test.describe('Reference Fields', () => {
     let collectionName = ''
     if (!hasRefField) {
       // Create a reference field
-      await page.locator('button:has-text("Add Field")').scrollIntoViewIfNeeded()
-      await page.click('button:has-text("Add Field")')
+      const addFieldBtn3 = page.locator('button:has-text("Add Field")').first()
+      await addFieldBtn3.scrollIntoViewIfNeeded()
+      await addFieldBtn3.click()
       await page.waitForSelector('#field-modal:not(.hidden)')
 
       const fieldNameInput = page.locator('#modal-field-name')
