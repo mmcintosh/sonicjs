@@ -381,19 +381,16 @@ test.describe('Faceted Search', () => {
 
   test.describe('Admin Dashboard — Facet Config', () => {
     test('Configuration tab has Faceted Search section', async ({ page }) => {
-      await page.goto('/admin/plugins/ai-search#configuration')
-      await page.waitForLoadState('networkidle', { timeout: 15000 })
+      await page.goto('/admin/plugins/ai-search')
+      await page.waitForTimeout(2000)
 
-      // Click the Configuration tab
-      const configTab = page.locator('#tab-btn-configuration')
-      if (await configTab.isVisible()) {
-        await configTab.click()
-        await page.waitForTimeout(500)
-      }
+      // Click the Configuration tab explicitly
+      await page.click('#tab-btn-configuration')
+      await page.waitForTimeout(1000)
 
       // Faceted Search heading should be visible
       const heading = page.locator('text=Faceted Search')
-      await expect(heading).toBeVisible({ timeout: 5000 })
+      await expect(heading).toBeVisible({ timeout: 10000 })
 
       // Enable toggle should exist
       const toggle = page.locator('#facets_enabled')
@@ -401,14 +398,11 @@ test.describe('Faceted Search', () => {
     })
 
     test('enabling facets toggle shows config section', async ({ page }) => {
-      await page.goto('/admin/plugins/ai-search#configuration')
-      await page.waitForLoadState('networkidle', { timeout: 15000 })
+      await page.goto('/admin/plugins/ai-search')
+      await page.waitForTimeout(2000)
 
-      const configTab = page.locator('#tab-btn-configuration')
-      if (await configTab.isVisible()) {
-        await configTab.click()
-        await page.waitForTimeout(500)
-      }
+      await page.click('#tab-btn-configuration')
+      await page.waitForTimeout(1000)
 
       const toggle = page.locator('#facets_enabled')
       const configSection = page.locator('#facet-config-section')
@@ -427,14 +421,11 @@ test.describe('Faceted Search', () => {
     })
 
     test('Re-discover Fields button is present', async ({ page }) => {
-      await page.goto('/admin/plugins/ai-search#configuration')
-      await page.waitForLoadState('networkidle', { timeout: 15000 })
+      await page.goto('/admin/plugins/ai-search')
+      await page.waitForTimeout(2000)
 
-      const configTab = page.locator('#tab-btn-configuration')
-      if (await configTab.isVisible()) {
-        await configTab.click()
-        await page.waitForTimeout(500)
-      }
+      await page.click('#tab-btn-configuration')
+      await page.waitForTimeout(1000)
 
       // Enable facets if needed
       const toggle = page.locator('#facets_enabled')

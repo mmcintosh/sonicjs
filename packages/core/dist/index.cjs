@@ -1,10 +1,10 @@
 'use strict';
 
-var chunkC34AYJON_cjs = require('./chunk-C34AYJON.cjs');
+var chunkKAEZ35ZT_cjs = require('./chunk-KAEZ35ZT.cjs');
 var chunkVNLR35GO_cjs = require('./chunk-VNLR35GO.cjs');
-var chunkL2JDZ7NG_cjs = require('./chunk-L2JDZ7NG.cjs');
+var chunkJRX4WLFV_cjs = require('./chunk-JRX4WLFV.cjs');
 var chunkMPT5PA6U_cjs = require('./chunk-MPT5PA6U.cjs');
-var chunkXVXSMOB3_cjs = require('./chunk-XVXSMOB3.cjs');
+var chunkHGZ2ZNYT_cjs = require('./chunk-HGZ2ZNYT.cjs');
 var chunk6WA4KFYZ_cjs = require('./chunk-6WA4KFYZ.cjs');
 var chunkGMUS5V42_cjs = require('./chunk-GMUS5V42.cjs');
 var chunkMNFY6DWY_cjs = require('./chunk-MNFY6DWY.cjs');
@@ -559,7 +559,7 @@ function formatCellValue(value) {
 // src/plugins/core-plugins/database-tools-plugin/admin-routes.ts
 function createDatabaseToolsAdminRoutes() {
   const router3 = new hono.Hono();
-  router3.use("*", chunkL2JDZ7NG_cjs.requireAuth());
+  router3.use("*", chunkJRX4WLFV_cjs.requireAuth());
   router3.get("/api/stats", async (c) => {
     try {
       const user = c.get("user");
@@ -2721,7 +2721,7 @@ function createOTPLoginPlugin() {
           error: "Account is deactivated"
         }, 403);
       }
-      const token = await chunkL2JDZ7NG_cjs.AuthManager.generateToken(user.id, user.email, user.role);
+      const token = await chunkJRX4WLFV_cjs.AuthManager.generateToken(user.id, user.email, user.role);
       cookie.setCookie(c, "auth_token", token, {
         httpOnly: true,
         secure: true,
@@ -3183,7 +3183,7 @@ var RecommendationService = class {
           if (!rec.action_payload?.terms || rec.action_payload.terms.length < 2) {
             return { success: false, message: "Invalid synonym payload" };
           }
-          const synonymService = new chunkC34AYJON_cjs.SynonymService(this.db);
+          const synonymService = new chunkKAEZ35ZT_cjs.SynonymService(this.db);
           await synonymService.create(rec.action_payload.terms);
           await this.updateStatus(id, "applied");
           return { success: true, message: `Created synonym group: ${rec.action_payload.terms.join(", ")}` };
@@ -3192,7 +3192,7 @@ var RecommendationService = class {
           if (!rec.action_payload?.match_pattern || !rec.action_payload?.substitute_query) {
             return { success: false, message: "Invalid query rule payload" };
           }
-          const rulesService = new chunkC34AYJON_cjs.QueryRulesService(this.db);
+          const rulesService = new chunkKAEZ35ZT_cjs.QueryRulesService(this.db);
           await rulesService.create({
             match_pattern: rec.action_payload.match_pattern,
             match_type: rec.action_payload.match_type || "exact",
@@ -3749,7 +3749,7 @@ var clampWeight = (val, fallback) => {
   return isNaN(n) || !isFinite(n) ? fallback : Math.round(Math.min(10, Math.max(0, n)) * 10) / 10;
 };
 var adminRoutes = new hono.Hono();
-adminRoutes.use("*", chunkL2JDZ7NG_cjs.requireAuth());
+adminRoutes.use("*", chunkJRX4WLFV_cjs.requireAuth());
 adminRoutes.get("/", async (c) => {
   try {
     const user = c.get("user");
@@ -3757,14 +3757,35 @@ adminRoutes.get("/", async (c) => {
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
     const kv = c.env.CACHE_KV;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize, kv);
-    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
-    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
-    const settings = await service.getSettings();
-    const collections2 = await service.getAllCollections();
-    const newCollections = await service.detectNewCollections();
-    const indexStatus = await indexer.getAllIndexStatus();
-    const analytics = await service.getSearchAnalytics();
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize, kv);
+    const indexer = new chunkKAEZ35ZT_cjs.IndexManager(db, ai, vectorize);
+    const fts5Service = new chunkKAEZ35ZT_cjs.FTS5Service(db);
+    let settings = null;
+    try {
+      settings = await service.getSettings();
+    } catch {
+    }
+    let collections2 = [];
+    try {
+      collections2 = await service.getAllCollections() || [];
+    } catch {
+    }
+    let newCollections = [];
+    try {
+      const detected = await service.detectNewCollections();
+      newCollections = (detected || []).map((n) => ({ id: String(n.collection.id), name: n.collection.name }));
+    } catch {
+    }
+    let indexStatus = {};
+    try {
+      indexStatus = await indexer.getAllIndexStatus() || {};
+    } catch {
+    }
+    let analytics = null;
+    try {
+      analytics = await service.getSearchAnalytics();
+    } catch {
+    }
     let fts5Status = null;
     try {
       const available = await fts5Service.isAvailable();
@@ -3777,10 +3798,10 @@ adminRoutes.get("/", async (c) => {
     } catch {
     }
     return c.html(
-      chunkC34AYJON_cjs.renderSearchDashboard({
+      chunkKAEZ35ZT_cjs.renderSearchDashboard({
         settings,
         collections: collections2 || [],
-        newCollections: newCollections || [],
+        newCollections,
         indexStatus: indexStatus || {},
         analytics,
         fts5Status,
@@ -3802,8 +3823,8 @@ adminRoutes.post("/", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
-    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
+    const indexer = new chunkKAEZ35ZT_cjs.IndexManager(db, ai, vectorize);
     const body = await c.req.json();
     console.log("[AI Search POST] Received body:", JSON.stringify(body, null, 2));
     const currentSettings = await service.getSettings();
@@ -3848,7 +3869,7 @@ adminRoutes.get("/api/settings", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
     const settings = await service.getSettings();
     return c.json({ success: true, data: settings });
   } catch (error) {
@@ -3861,7 +3882,7 @@ adminRoutes.get("/api/new-collections", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
     const notifications = await service.detectNewCollections();
     return c.json({ success: true, data: notifications });
   } catch (error) {
@@ -3874,7 +3895,7 @@ adminRoutes.get("/api/status", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
+    const indexer = new chunkKAEZ35ZT_cjs.IndexManager(db, ai, vectorize);
     const status = await indexer.getAllIndexStatus();
     return c.json({ success: true, data: status });
   } catch (error) {
@@ -3887,7 +3908,7 @@ adminRoutes.post("/api/reindex", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
+    const indexer = new chunkKAEZ35ZT_cjs.IndexManager(db, ai, vectorize);
     const body = await c.req.json();
     const collectionIdRaw = body.collection_id;
     const collectionId = collectionIdRaw ? String(collectionIdRaw) : "";
@@ -3906,7 +3927,7 @@ adminRoutes.post("/api/reindex", async (c) => {
 adminRoutes.get("/api/fts5/status", async (c) => {
   try {
     const db = c.env.DB;
-    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
+    const fts5Service = new chunkKAEZ35ZT_cjs.FTS5Service(db);
     const isAvailable = await fts5Service.isAvailable();
     if (!isAvailable) {
       return c.json({
@@ -3934,7 +3955,7 @@ adminRoutes.get("/api/fts5/status", async (c) => {
 adminRoutes.post("/api/fts5/index-collection", async (c) => {
   try {
     const db = c.env.DB;
-    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
+    const fts5Service = new chunkKAEZ35ZT_cjs.FTS5Service(db);
     const isAvailable = await fts5Service.isAvailable();
     if (!isAvailable) {
       return c.json({
@@ -3968,8 +3989,8 @@ adminRoutes.post("/api/fts5/reindex-all", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
-    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
+    const fts5Service = new chunkKAEZ35ZT_cjs.FTS5Service(db);
     const isAvailable = await fts5Service.isAvailable();
     if (!isAvailable) {
       return c.json({
@@ -4029,7 +4050,7 @@ adminRoutes.post("/api/vectorize/reindex-all", async (c) => {
     if (!ai || !vectorize) {
       return c.json({ error: "Vectorize reindexing requires AI and VECTORIZE_INDEX bindings." }, 400);
     }
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
     const settings = await service.getSettings();
     const collections2 = settings?.selected_collections || [];
     if (collections2.length === 0) {
@@ -4060,7 +4081,7 @@ adminRoutes.post("/api/vectorize/reindex-all", async (c) => {
     }
     try {
       const benchmarkIds = [];
-      for (const dsId of chunkC34AYJON_cjs.BENCHMARK_DATASETS.map((d) => d.id)) {
+      for (const dsId of chunkKAEZ35ZT_cjs.BENCHMARK_DATASETS.map((d) => d.id)) {
         for (let i = 0; i < 6e3; i++) {
           for (let chunk = 0; chunk < 3; chunk++) {
             benchmarkIds.push(`beir-${dsId}-${i}-chunk-${chunk}`);
@@ -4074,7 +4095,7 @@ adminRoutes.post("/api/vectorize/reindex-all", async (c) => {
     } catch (e) {
       console.warn("[Vectorize Reindex] Orphan cleanup failed (non-fatal):", e);
     }
-    const indexer = new chunkC34AYJON_cjs.IndexManager(db, ai, vectorize);
+    const indexer = new chunkKAEZ35ZT_cjs.IndexManager(db, ai, vectorize);
     c.executionCtx.waitUntil(
       indexer.syncAll(collections2).then(() => console.log("[Vectorize Reindex] All collections reindexed")).catch((error) => console.error("[Vectorize Reindex] Error:", error))
     );
@@ -4095,7 +4116,7 @@ adminRoutes.post("/api/relevance/preview", async (c) => {
     const query = body.query?.trim();
     if (!query) return c.json({ error: "query is required" }, 400);
     const limit = Math.min(body.limit || 10, 20);
-    const service = new chunkC34AYJON_cjs.AISearchService(db);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db);
     const settings = await service.getSettings();
     const titleWeight = clampWeight(body.title_weight, settings?.fts5_title_boost ?? 5);
     const slugWeight = clampWeight(body.slug_weight, settings?.fts5_slug_boost ?? 2);
@@ -4106,13 +4127,13 @@ adminRoutes.post("/api/relevance/preview", async (c) => {
       fts5_slug_boost: slugWeight,
       fts5_body_boost: bodyWeight
     };
-    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
+    const fts5Service = new chunkKAEZ35ZT_cjs.FTS5Service(db);
     let result = await fts5Service.search(
       { query, mode: "fts5", limit, offset: 0 },
       previewSettings,
       { titleBoost: titleWeight, slugBoost: slugWeight, bodyBoost: bodyWeight }
     );
-    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(db);
+    const pipelineService = new chunkKAEZ35ZT_cjs.RankingPipelineService(db);
     let pipelineApplied = false;
     try {
       const config = await pipelineService.getConfig();
@@ -4141,7 +4162,7 @@ adminRoutes.post("/api/relevance/preview", async (c) => {
 });
 adminRoutes.get("/api/relevance/pipeline", async (c) => {
   try {
-    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkKAEZ35ZT_cjs.RankingPipelineService(c.env.DB);
     const config = await pipelineService.getConfig();
     return c.json({ success: true, data: config });
   } catch (error) {
@@ -4155,7 +4176,7 @@ adminRoutes.post("/api/relevance/pipeline", async (c) => {
     if (!Array.isArray(body.stages)) {
       return c.json({ error: "stages must be an array" }, 400);
     }
-    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkKAEZ35ZT_cjs.RankingPipelineService(c.env.DB);
     await pipelineService.saveConfig(body.stages);
     const saved = await pipelineService.getConfig();
     return c.json({ success: true, data: saved });
@@ -4171,7 +4192,7 @@ adminRoutes.get("/api/relevance/content-scores", async (c) => {
     if (!contentId) {
       return c.json({ error: "content_id query parameter is required" }, 400);
     }
-    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkKAEZ35ZT_cjs.RankingPipelineService(c.env.DB);
     const scores = await pipelineService.getContentScores([contentId], scoreType);
     return c.json({
       success: true,
@@ -4192,7 +4213,7 @@ adminRoutes.post("/api/relevance/content-scores", async (c) => {
     if (!["popularity", "custom"].includes(scoreType)) {
       return c.json({ error: 'score_type must be "popularity" or "custom"' }, 400);
     }
-    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkKAEZ35ZT_cjs.RankingPipelineService(c.env.DB);
     await pipelineService.setContentScore(String(contentId), scoreType, Number(score));
     return c.json({ success: true });
   } catch (error) {
@@ -4207,7 +4228,7 @@ adminRoutes.delete("/api/relevance/content-scores", async (c) => {
     if (!contentId || !scoreType) {
       return c.json({ error: "content_id and score_type are required" }, 400);
     }
-    const pipelineService = new chunkC34AYJON_cjs.RankingPipelineService(c.env.DB);
+    const pipelineService = new chunkKAEZ35ZT_cjs.RankingPipelineService(c.env.DB);
     await pipelineService.deleteContentScore(String(contentId), scoreType);
     return c.json({ success: true });
   } catch (error) {
@@ -4217,7 +4238,7 @@ adminRoutes.delete("/api/relevance/content-scores", async (c) => {
 });
 adminRoutes.get("/api/relevance/synonyms", async (c) => {
   try {
-    const synonymService = new chunkC34AYJON_cjs.SynonymService(c.env.DB);
+    const synonymService = new chunkKAEZ35ZT_cjs.SynonymService(c.env.DB);
     const groups = await synonymService.getAll();
     return c.json({ success: true, data: groups });
   } catch (error) {
@@ -4231,7 +4252,7 @@ adminRoutes.post("/api/relevance/synonyms", async (c) => {
     if (!Array.isArray(body.terms) || body.terms.length < 2) {
       return c.json({ error: "terms must be an array with at least 2 items" }, 400);
     }
-    const synonymService = new chunkC34AYJON_cjs.SynonymService(c.env.DB);
+    const synonymService = new chunkKAEZ35ZT_cjs.SynonymService(c.env.DB);
     const group = await synonymService.create(body.terms, body.enabled !== false);
     return c.json({ success: true, data: group });
   } catch (error) {
@@ -4243,7 +4264,7 @@ adminRoutes.put("/api/relevance/synonyms/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const body = await c.req.json();
-    const synonymService = new chunkC34AYJON_cjs.SynonymService(c.env.DB);
+    const synonymService = new chunkKAEZ35ZT_cjs.SynonymService(c.env.DB);
     const group = await synonymService.update(id, {
       terms: body.terms,
       enabled: body.enabled
@@ -4260,7 +4281,7 @@ adminRoutes.put("/api/relevance/synonyms/:id", async (c) => {
 adminRoutes.delete("/api/relevance/synonyms/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const synonymService = new chunkC34AYJON_cjs.SynonymService(c.env.DB);
+    const synonymService = new chunkKAEZ35ZT_cjs.SynonymService(c.env.DB);
     const deleted = await synonymService.delete(id);
     if (!deleted) {
       return c.json({ error: "Synonym group not found" }, 404);
@@ -4273,7 +4294,7 @@ adminRoutes.delete("/api/relevance/synonyms/:id", async (c) => {
 });
 adminRoutes.get("/api/relevance/rules", async (c) => {
   try {
-    const rulesService = new chunkC34AYJON_cjs.QueryRulesService(c.env.DB);
+    const rulesService = new chunkKAEZ35ZT_cjs.QueryRulesService(c.env.DB);
     const rules = await rulesService.getAll();
     return c.json({ success: true, data: rules });
   } catch (error) {
@@ -4287,7 +4308,7 @@ adminRoutes.post("/api/relevance/rules", async (c) => {
     if (!body.match_pattern || !body.substitute_query) {
       return c.json({ error: "match_pattern and substitute_query are required" }, 400);
     }
-    const rulesService = new chunkC34AYJON_cjs.QueryRulesService(c.env.DB);
+    const rulesService = new chunkKAEZ35ZT_cjs.QueryRulesService(c.env.DB);
     const rule = await rulesService.create({
       match_pattern: body.match_pattern,
       match_type: body.match_type,
@@ -4305,7 +4326,7 @@ adminRoutes.put("/api/relevance/rules/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const body = await c.req.json();
-    const rulesService = new chunkC34AYJON_cjs.QueryRulesService(c.env.DB);
+    const rulesService = new chunkKAEZ35ZT_cjs.QueryRulesService(c.env.DB);
     const rule = await rulesService.update(id, {
       match_pattern: body.match_pattern,
       match_type: body.match_type,
@@ -4325,7 +4346,7 @@ adminRoutes.put("/api/relevance/rules/:id", async (c) => {
 adminRoutes.delete("/api/relevance/rules/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const rulesService = new chunkC34AYJON_cjs.QueryRulesService(c.env.DB);
+    const rulesService = new chunkKAEZ35ZT_cjs.QueryRulesService(c.env.DB);
     const deleted = await rulesService.delete(id);
     if (!deleted) {
       return c.json({ error: "Query rule not found" }, 404);
@@ -4338,7 +4359,7 @@ adminRoutes.delete("/api/relevance/rules/:id", async (c) => {
 });
 adminRoutes.get("/api/related-searches", async (c) => {
   try {
-    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkKAEZ35ZT_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const sourceQuery = c.req.query("source_query");
     const source = c.req.query("source");
     const enabled = c.req.query("enabled");
@@ -4363,7 +4384,7 @@ adminRoutes.post("/api/related-searches", async (c) => {
     if (!relatedQuery || typeof relatedQuery !== "string" || !relatedQuery.trim()) {
       return c.json({ success: false, error: "related_query is required" }, 400);
     }
-    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkKAEZ35ZT_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const result = await service.create(sourceQuery, relatedQuery, {
       source: "manual",
       position: typeof position === "number" ? position : 0,
@@ -4382,7 +4403,7 @@ adminRoutes.put("/api/related-searches/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const body = await c.req.json();
-    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkKAEZ35ZT_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const updated = await service.update(id, {
       related_query: body.related_query,
       position: body.position,
@@ -4400,7 +4421,7 @@ adminRoutes.put("/api/related-searches/:id", async (c) => {
 adminRoutes.delete("/api/related-searches/cache", async (c) => {
   try {
     const query = c.req.query("query");
-    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkKAEZ35ZT_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     await service.invalidateCache(query || void 0);
     return c.json({ success: true, message: query ? `Cache cleared for "${query}"` : "All auto-generation cache cleared" });
   } catch (error) {
@@ -4411,7 +4432,7 @@ adminRoutes.delete("/api/related-searches/cache", async (c) => {
 adminRoutes.delete("/api/related-searches/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkKAEZ35ZT_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const deleted = await service.delete(id);
     if (!deleted) {
       return c.json({ error: "Related search not found" }, 404);
@@ -4429,7 +4450,7 @@ adminRoutes.post("/api/related-searches/bulk", async (c) => {
     if (!Array.isArray(entries) || entries.length === 0) {
       return c.json({ success: false, error: "entries array is required and must not be empty" }, 400);
     }
-    const service = new chunkC34AYJON_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
+    const service = new chunkKAEZ35ZT_cjs.RelatedSearchService(c.env.DB, c.env.CACHE_KV);
     const count = await service.bulkCreate(entries);
     return c.json({ success: true, data: { created: count, total: entries.length } });
   } catch (error) {
@@ -4439,7 +4460,7 @@ adminRoutes.post("/api/related-searches/bulk", async (c) => {
 });
 adminRoutes.get("/api/facets/discover", async (c) => {
   try {
-    const facetService = new chunkC34AYJON_cjs.FacetService(c.env.DB);
+    const facetService = new chunkKAEZ35ZT_cjs.FacetService(c.env.DB);
     const discovered = await facetService.discoverFields();
     return c.json({ success: true, data: discovered });
   } catch (error) {
@@ -4453,7 +4474,7 @@ function stripShadowFacets(config) {
 }
 adminRoutes.get("/api/facets/config", async (c) => {
   try {
-    const service = new chunkC34AYJON_cjs.AISearchService(c.env.DB);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(c.env.DB);
     const settings = await service.getSettings();
     const config = stripShadowFacets(settings?.facet_config ?? []);
     return c.json({
@@ -4472,7 +4493,7 @@ adminRoutes.get("/api/facets/config", async (c) => {
 adminRoutes.post("/api/facets/config", async (c) => {
   try {
     const body = await c.req.json();
-    const service = new chunkC34AYJON_cjs.AISearchService(c.env.DB);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(c.env.DB);
     const updates = {};
     if (body.enabled !== void 0) updates.facets_enabled = Boolean(body.enabled);
     if (Array.isArray(body.config)) updates.facet_config = stripShadowFacets(body.config);
@@ -4493,10 +4514,10 @@ adminRoutes.post("/api/facets/config", async (c) => {
 });
 adminRoutes.post("/api/facets/auto-generate", async (c) => {
   try {
-    const facetService = new chunkC34AYJON_cjs.FacetService(c.env.DB);
+    const facetService = new chunkKAEZ35ZT_cjs.FacetService(c.env.DB);
     const discovered = await facetService.discoverFields();
     const config = facetService.autoGenerateConfig(discovered);
-    const service = new chunkC34AYJON_cjs.AISearchService(c.env.DB);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(c.env.DB);
     const saved = await service.updateSettings({
       facets_enabled: true,
       facet_config: config
@@ -4612,7 +4633,7 @@ adminRoutes.get("/api/analytics/extended", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
     const data = await service.getAnalyticsExtended();
     return c.json({ success: true, data });
   } catch (error) {
@@ -4621,14 +4642,14 @@ adminRoutes.get("/api/analytics/extended", async (c) => {
   }
 });
 adminRoutes.get("/api/benchmark/datasets", async (c) => {
-  return c.json({ success: true, datasets: chunkC34AYJON_cjs.BENCHMARK_DATASETS });
+  return c.json({ success: true, datasets: chunkKAEZ35ZT_cjs.BENCHMARK_DATASETS });
 });
 adminRoutes.get("/api/benchmark/status", async (c) => {
   try {
     const db = c.env.DB;
     const kv = c.env.CACHE_KV;
     const dataset = c.req.query("dataset") || "scifact";
-    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkKAEZ35ZT_cjs.BenchmarkService(db, kv, void 0, dataset);
     const { seeded, count } = await benchmarkService.isSeeded();
     const meta = benchmarkService.getMeta();
     const dataAvailable = await benchmarkService.isDataAvailable();
@@ -4673,12 +4694,12 @@ adminRoutes.post("/api/benchmark/seed", async (c) => {
     const body = await c.req.json().catch(() => ({}));
     const dataset = body.dataset || "scifact";
     const useSubset = body.corpus_size !== "full";
-    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkKAEZ35ZT_cjs.BenchmarkService(db, kv, void 0, dataset);
     const collectionId = benchmarkService.getCollectionId();
     const userId = user.userId || user.id;
     const result = await benchmarkService.seed(String(userId), useSubset);
     if (useSubset) {
-      const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
+      const fts5Service = new chunkKAEZ35ZT_cjs.FTS5Service(db);
       c.executionCtx.waitUntil(
         fts5Service.indexCollection(collectionId).then((r) => console.log(`[Benchmark:${dataset}] FTS5 indexed ${r.indexed_items}/${r.total_items} docs`)).catch((e) => console.error(`[Benchmark:${dataset}] FTS5 indexing error:`, e))
       );
@@ -4714,7 +4735,7 @@ adminRoutes.post("/api/benchmark/purge", async (c) => {
     const vectorize = c.env.VECTORIZE_BENCHMARK_INDEX || c.env.VECTORIZE_INDEX;
     const body = await c.req.json().catch(() => ({}));
     const dataset = body.dataset || "scifact";
-    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, vectorize, dataset);
+    const benchmarkService = new chunkKAEZ35ZT_cjs.BenchmarkService(db, kv, vectorize, dataset);
     const deleted = await benchmarkService.purge();
     return c.json({
       success: true,
@@ -4729,7 +4750,7 @@ adminRoutes.post("/api/benchmark/purge", async (c) => {
 adminRoutes.post("/api/benchmark/index-fts5-batch", async (c) => {
   try {
     const db = c.env.DB;
-    const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
+    const fts5Service = new chunkKAEZ35ZT_cjs.FTS5Service(db);
     if (!await fts5Service.isAvailable()) {
       return c.json({ error: "FTS5 tables not available." }, 400);
     }
@@ -4765,10 +4786,10 @@ adminRoutes.post("/api/benchmark/index-vectorize-batch", async (c) => {
     const batchSize = body.batch_size || 25;
     const offset = body.offset || 0;
     const benchmarkCollectionId = `benchmark-${dataset}-collection`;
-    const datasetInfo = chunkC34AYJON_cjs.BENCHMARK_DATASETS.find((d) => d.id === dataset);
+    const datasetInfo = chunkKAEZ35ZT_cjs.BENCHMARK_DATASETS.find((d) => d.id === dataset);
     const displayName = datasetInfo ? `${datasetInfo.name} Benchmark` : `BEIR ${dataset} Benchmark`;
-    const embeddingService = new chunkC34AYJON_cjs.EmbeddingService(ai);
-    const chunkingService = new chunkC34AYJON_cjs.ChunkingService();
+    const embeddingService = new chunkKAEZ35ZT_cjs.EmbeddingService(ai);
+    const chunkingService = new chunkKAEZ35ZT_cjs.ChunkingService();
     const totalResult = await db.prepare("SELECT COUNT(*) as cnt FROM content WHERE collection_id = ? AND status != 'deleted'").bind(benchmarkCollectionId).first();
     const total = totalResult?.cnt || 0;
     if (offset >= total) {
@@ -4878,7 +4899,7 @@ adminRoutes.post("/api/benchmark/index-vectorize", async (c) => {
     }
     const body = await c.req.json().catch(() => ({}));
     const dataset = body.dataset || "scifact";
-    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkKAEZ35ZT_cjs.BenchmarkService(db, kv, void 0, dataset);
     const { seeded } = await benchmarkService.isSeeded();
     if (!seeded) {
       return c.json({ error: "Benchmark data not seeded. Seed first." }, 400);
@@ -4914,7 +4935,7 @@ adminRoutes.post("/api/benchmark/evaluate", async (c) => {
     const limit = body.limit || 10;
     const maxQueries = body.max_queries || 0;
     const dataset = body.dataset || "scifact";
-    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkKAEZ35ZT_cjs.BenchmarkService(db, kv, void 0, dataset);
     const collectionId = benchmarkService.getCollectionId();
     const { seeded } = await benchmarkService.isSeeded();
     if (!seeded) {
@@ -4924,7 +4945,7 @@ adminRoutes.post("/api/benchmark/evaluate", async (c) => {
       );
     }
     if (mode === "fts5" || mode === "hybrid") {
-      const fts5Service = new chunkC34AYJON_cjs.FTS5Service(db);
+      const fts5Service = new chunkKAEZ35ZT_cjs.FTS5Service(db);
       if (await fts5Service.isAvailable()) {
         const ftsCount = await db.prepare("SELECT COUNT(*) as cnt FROM content_fts WHERE collection_id = ?").bind(collectionId).first();
         if (!ftsCount || ftsCount.cnt === 0) {
@@ -4963,7 +4984,7 @@ adminRoutes.post("/api/benchmark/evaluate", async (c) => {
         );
       }
     }
-    const aiSearchService = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const aiSearchService = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
     const searchFn = async (query, searchMode, searchLimit) => {
       const response = await aiSearchService.search({
         query,
@@ -4994,7 +5015,7 @@ adminRoutes.get("/api/benchmark/query-ids", async (c) => {
     const dataset = c.req.query("dataset") || "scifact";
     const db = c.env.DB;
     const kv = c.env.CACHE_KV;
-    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkKAEZ35ZT_cjs.BenchmarkService(db, kv, void 0, dataset);
     const ids = await benchmarkService.getEvaluableQueryIds(maxQueries);
     return c.json({ success: true, query_ids: ids, total: ids.length });
   } catch (error) {
@@ -5018,9 +5039,9 @@ adminRoutes.post("/api/benchmark/evaluate-batch", async (c) => {
     if ((mode === "ai" || mode === "hybrid") && !vectorize) {
       return c.json({ error: `${mode.toUpperCase()} mode requires Vectorize binding.` }, 400);
     }
-    const benchmarkService = new chunkC34AYJON_cjs.BenchmarkService(db, kv, void 0, dataset);
+    const benchmarkService = new chunkKAEZ35ZT_cjs.BenchmarkService(db, kv, void 0, dataset);
     const collectionId = benchmarkService.getCollectionId();
-    const aiSearchService = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const aiSearchService = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
     const searchFn = async (query, searchMode, searchLimit) => {
       const response = await aiSearchService.search({
         query,
@@ -5344,7 +5365,7 @@ apiRoutes.post("/", async (c) => {
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
     const kv = c.env.CACHE_KV;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize, kv);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize, kv);
     const body = await c.req.json();
     const query = {
       query: body.query || "",
@@ -5465,7 +5486,7 @@ apiRoutes.get("/suggest", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
     const query = c.req.query("q") || "";
     const suggestions = await service.getSearchSuggestions(query);
     return c.json({
@@ -5571,7 +5592,7 @@ apiRoutes.get("/analytics", async (c) => {
     const db = c.env.DB;
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
-    const service = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize);
+    const service = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize);
     const analytics = await service.getSearchAnalytics();
     return c.json({
       success: true,
@@ -5594,7 +5615,7 @@ apiRoutes.get("/related", async (c) => {
     const kv = c.env.CACHE_KV;
     const q = c.req.query("q") || "";
     const limit = Math.min(Math.max(Number(c.req.query("limit")) || 5, 1), 20);
-    const service = new chunkC34AYJON_cjs.RelatedSearchService(db, kv);
+    const service = new chunkKAEZ35ZT_cjs.RelatedSearchService(db, kv);
     const related = await service.getRelatedSearches(q, limit);
     return c.json({
       success: true,
@@ -5614,7 +5635,7 @@ apiRoutes.get("/trending", async (c) => {
     const kv = c.env.CACHE_KV;
     const limit = Math.min(Math.max(Number(c.req.query("limit")) || 5, 1), 20);
     const period = Math.min(Math.max(Number(c.req.query("period")) || 7, 1), 30);
-    const service = new chunkC34AYJON_cjs.TrendingSearchService(db, kv);
+    const service = new chunkKAEZ35ZT_cjs.TrendingSearchService(db, kv);
     const result = await service.getTrending(limit, period);
     return c.json({
       trending: result.items,
@@ -5864,7 +5885,7 @@ instantSearchRoutes.post("/", async (c) => {
     const ai = c.env.AI;
     const vectorize = c.env.VECTORIZE_INDEX;
     const kv = c.env.CACHE_KV;
-    const searchService = new chunkC34AYJON_cjs.AISearchService(db, ai, vectorize, kv);
+    const searchService = new chunkKAEZ35ZT_cjs.AISearchService(db, ai, vectorize, kv);
     const adapter = new InstantSearchAdapter(db);
     const body = await c.req.json();
     if (!body.requests || !Array.isArray(body.requests)) {
@@ -7831,7 +7852,7 @@ var aiSearchPlugin = new chunk6FHNRRJ3_cjs.PluginBuilder({
 }).metadata({
   description: manifest_default.description,
   author: { name: manifest_default.author }
-}).addService("aiSearch", chunkC34AYJON_cjs.AISearchService).addService("indexManager", chunkC34AYJON_cjs.IndexManager).addRoute("/admin/plugins/ai-search", admin_default).addRoute("/api/search", api_default2).addRoute("/api/instantsearch", instantsearch_api_default).addRoute("/admin/plugins/ai-search", test_page_default).addRoute("/admin/plugins/ai-search", instantsearch_test_page_default).addRoute("/admin/plugins/ai-search", integration_guide_default).build();
+}).addService("aiSearch", chunkKAEZ35ZT_cjs.AISearchService).addService("indexManager", chunkKAEZ35ZT_cjs.IndexManager).addRoute("/admin/plugins/ai-search", admin_default).addRoute("/api/search", api_default2).addRoute("/api/instantsearch", instantsearch_api_default).addRoute("/admin/plugins/ai-search", test_page_default).addRoute("/admin/plugins/ai-search", instantsearch_test_page_default).addRoute("/admin/plugins/ai-search", integration_guide_default).build();
 var magicLinkRequestSchema = zod.z.object({
   email: zod.z.string().email("Valid email is required")
 });
@@ -7978,12 +7999,12 @@ function createMagicLinkAuthPlugin() {
         SET used = 1, used_at = ?
         WHERE id = ?
       `).bind(Date.now(), magicLink.id).run();
-      const jwtToken = await chunkL2JDZ7NG_cjs.AuthManager.generateToken(
+      const jwtToken = await chunkJRX4WLFV_cjs.AuthManager.generateToken(
         user.id,
         user.email,
         user.role
       );
-      chunkL2JDZ7NG_cjs.AuthManager.setAuthCookie(c, jwtToken);
+      chunkJRX4WLFV_cjs.AuthManager.setAuthCookie(c, jwtToken);
       await db.prepare(`
         UPDATE users SET last_login_at = ? WHERE id = ?
       `).bind(Date.now(), user.id).run();
@@ -9269,7 +9290,7 @@ function renderCacheDashboard(data) {
     </script>
 
     <!-- Confirmation Dialogs -->
-    ${chunkC34AYJON_cjs.renderConfirmationDialog({
+    ${chunkKAEZ35ZT_cjs.renderConfirmationDialog({
     id: "clear-all-cache-confirm",
     title: "Clear All Cache",
     message: "Are you sure you want to clear all cache entries? This cannot be undone.",
@@ -9280,7 +9301,7 @@ function renderCacheDashboard(data) {
     onConfirm: "performClearAllCaches()"
   })}
 
-    ${chunkC34AYJON_cjs.renderConfirmationDialog({
+    ${chunkKAEZ35ZT_cjs.renderConfirmationDialog({
     id: "clear-namespace-cache-confirm",
     title: "Clear Namespace Cache",
     message: "Clear cache for this namespace?",
@@ -9291,7 +9312,7 @@ function renderCacheDashboard(data) {
     onConfirm: "performClearNamespaceCache()"
   })}
 
-    ${chunkC34AYJON_cjs.getConfirmationDialogScript()}
+    ${chunkKAEZ35ZT_cjs.getConfirmationDialogScript()}
   `;
   const layoutData = {
     title: "Cache System",
@@ -10019,8 +10040,8 @@ function createSonicJSApp(config = {}) {
     c.set("appVersion", appVersion);
     await next();
   });
-  app2.use("*", chunkL2JDZ7NG_cjs.metricsMiddleware());
-  app2.use("*", chunkL2JDZ7NG_cjs.bootstrapMiddleware(config));
+  app2.use("*", chunkJRX4WLFV_cjs.metricsMiddleware());
+  app2.use("*", chunkJRX4WLFV_cjs.bootstrapMiddleware(config));
   if (config.middleware?.beforeAuth) {
     for (const middleware of config.middleware.beforeAuth) {
       app2.use("*", middleware);
@@ -10037,22 +10058,22 @@ function createSonicJSApp(config = {}) {
       app2.use("*", middleware);
     }
   }
-  app2.route("/api", chunkC34AYJON_cjs.api_default);
-  app2.route("/api/media", chunkC34AYJON_cjs.api_media_default);
-  app2.route("/api/system", chunkC34AYJON_cjs.api_system_default);
-  app2.route("/admin/api", chunkC34AYJON_cjs.admin_api_default);
-  app2.route("/admin/dashboard", chunkC34AYJON_cjs.router);
-  app2.route("/admin/collections", chunkC34AYJON_cjs.adminCollectionsRoutes);
-  app2.route("/admin/forms", chunkC34AYJON_cjs.adminFormsRoutes);
-  app2.route("/admin/settings", chunkC34AYJON_cjs.adminSettingsRoutes);
-  app2.route("/forms", chunkC34AYJON_cjs.public_forms_default);
-  app2.route("/api/forms", chunkC34AYJON_cjs.public_forms_default);
-  app2.route("/admin/api-reference", chunkC34AYJON_cjs.router2);
+  app2.route("/api", chunkKAEZ35ZT_cjs.api_default);
+  app2.route("/api/media", chunkKAEZ35ZT_cjs.api_media_default);
+  app2.route("/api/system", chunkKAEZ35ZT_cjs.api_system_default);
+  app2.route("/admin/api", chunkKAEZ35ZT_cjs.admin_api_default);
+  app2.route("/admin/dashboard", chunkKAEZ35ZT_cjs.router);
+  app2.route("/admin/collections", chunkKAEZ35ZT_cjs.adminCollectionsRoutes);
+  app2.route("/admin/forms", chunkKAEZ35ZT_cjs.adminFormsRoutes);
+  app2.route("/admin/settings", chunkKAEZ35ZT_cjs.adminSettingsRoutes);
+  app2.route("/forms", chunkKAEZ35ZT_cjs.public_forms_default);
+  app2.route("/api/forms", chunkKAEZ35ZT_cjs.public_forms_default);
+  app2.route("/admin/api-reference", chunkKAEZ35ZT_cjs.router2);
   app2.route("/admin/database-tools", createDatabaseToolsAdminRoutes());
   app2.route("/admin/seed-data", createSeedDataAdminRoutes());
-  app2.route("/admin/content", chunkC34AYJON_cjs.admin_content_default);
-  app2.route("/admin/media", chunkC34AYJON_cjs.adminMediaRoutes);
-  app2.route("/admin/search", chunkC34AYJON_cjs.adminSearchRoutes);
+  app2.route("/admin/content", chunkKAEZ35ZT_cjs.admin_content_default);
+  app2.route("/admin/media", chunkKAEZ35ZT_cjs.adminMediaRoutes);
+  app2.route("/admin/search", chunkKAEZ35ZT_cjs.adminSearchRoutes);
   if (aiSearchPlugin.routes && aiSearchPlugin.routes.length > 0) {
     for (const route of aiSearchPlugin.routes) {
       app2.route(route.path, route.handler);
@@ -10064,11 +10085,11 @@ function createSonicJSApp(config = {}) {
       app2.route(route.path, route.handler);
     }
   }
-  app2.route("/admin/plugins", chunkC34AYJON_cjs.adminPluginRoutes);
-  app2.route("/admin/logs", chunkC34AYJON_cjs.adminLogsRoutes);
-  app2.route("/admin", chunkC34AYJON_cjs.userRoutes);
-  app2.route("/auth", chunkC34AYJON_cjs.auth_default);
-  app2.route("/", chunkC34AYJON_cjs.test_cleanup_default);
+  app2.route("/admin/plugins", chunkKAEZ35ZT_cjs.adminPluginRoutes);
+  app2.route("/admin/logs", chunkKAEZ35ZT_cjs.adminLogsRoutes);
+  app2.route("/admin", chunkKAEZ35ZT_cjs.userRoutes);
+  app2.route("/auth", chunkKAEZ35ZT_cjs.auth_default);
+  app2.route("/", chunkKAEZ35ZT_cjs.test_cleanup_default);
   if (emailPlugin.routes && emailPlugin.routes.length > 0) {
     for (const route of emailPlugin.routes) {
       app2.route(route.path, route.handler);
@@ -10160,79 +10181,79 @@ var VERSION = chunkUOEIMC67_cjs.package_default.version;
 
 Object.defineProperty(exports, "ROUTES_INFO", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.ROUTES_INFO; }
+  get: function () { return chunkKAEZ35ZT_cjs.ROUTES_INFO; }
 });
 Object.defineProperty(exports, "adminApiRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.admin_api_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.admin_api_default; }
 });
 Object.defineProperty(exports, "adminCheckboxRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.adminCheckboxRoutes; }
+  get: function () { return chunkKAEZ35ZT_cjs.adminCheckboxRoutes; }
 });
 Object.defineProperty(exports, "adminCodeExamplesRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.admin_code_examples_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.admin_code_examples_default; }
 });
 Object.defineProperty(exports, "adminCollectionsRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.adminCollectionsRoutes; }
+  get: function () { return chunkKAEZ35ZT_cjs.adminCollectionsRoutes; }
 });
 Object.defineProperty(exports, "adminContentRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.admin_content_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.admin_content_default; }
 });
 Object.defineProperty(exports, "adminDashboardRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.router; }
+  get: function () { return chunkKAEZ35ZT_cjs.router; }
 });
 Object.defineProperty(exports, "adminDesignRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.adminDesignRoutes; }
+  get: function () { return chunkKAEZ35ZT_cjs.adminDesignRoutes; }
 });
 Object.defineProperty(exports, "adminLogsRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.adminLogsRoutes; }
+  get: function () { return chunkKAEZ35ZT_cjs.adminLogsRoutes; }
 });
 Object.defineProperty(exports, "adminMediaRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.adminMediaRoutes; }
+  get: function () { return chunkKAEZ35ZT_cjs.adminMediaRoutes; }
 });
 Object.defineProperty(exports, "adminPluginRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.adminPluginRoutes; }
+  get: function () { return chunkKAEZ35ZT_cjs.adminPluginRoutes; }
 });
 Object.defineProperty(exports, "adminSettingsRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.adminSettingsRoutes; }
+  get: function () { return chunkKAEZ35ZT_cjs.adminSettingsRoutes; }
 });
 Object.defineProperty(exports, "adminTestimonialsRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.admin_testimonials_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.admin_testimonials_default; }
 });
 Object.defineProperty(exports, "adminUsersRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.userRoutes; }
+  get: function () { return chunkKAEZ35ZT_cjs.userRoutes; }
 });
 Object.defineProperty(exports, "apiContentCrudRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.api_content_crud_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.api_content_crud_default; }
 });
 Object.defineProperty(exports, "apiMediaRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.api_media_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.api_media_default; }
 });
 Object.defineProperty(exports, "apiRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.api_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.api_default; }
 });
 Object.defineProperty(exports, "apiSystemRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.api_system_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.api_system_default; }
 });
 Object.defineProperty(exports, "authRoutes", {
   enumerable: true,
-  get: function () { return chunkC34AYJON_cjs.auth_default; }
+  get: function () { return chunkKAEZ35ZT_cjs.auth_default; }
 });
 Object.defineProperty(exports, "Logger", {
   enumerable: true,
@@ -10400,83 +10421,83 @@ Object.defineProperty(exports, "workflowHistory", {
 });
 Object.defineProperty(exports, "AuthManager", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.AuthManager; }
+  get: function () { return chunkJRX4WLFV_cjs.AuthManager; }
 });
 Object.defineProperty(exports, "PermissionManager", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.PermissionManager; }
+  get: function () { return chunkJRX4WLFV_cjs.PermissionManager; }
 });
 Object.defineProperty(exports, "bootstrapMiddleware", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.bootstrapMiddleware; }
+  get: function () { return chunkJRX4WLFV_cjs.bootstrapMiddleware; }
 });
 Object.defineProperty(exports, "cacheHeaders", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.cacheHeaders; }
+  get: function () { return chunkJRX4WLFV_cjs.cacheHeaders; }
 });
 Object.defineProperty(exports, "compressionMiddleware", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.compressionMiddleware; }
+  get: function () { return chunkJRX4WLFV_cjs.compressionMiddleware; }
 });
 Object.defineProperty(exports, "detailedLoggingMiddleware", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.detailedLoggingMiddleware; }
+  get: function () { return chunkJRX4WLFV_cjs.detailedLoggingMiddleware; }
 });
 Object.defineProperty(exports, "getActivePlugins", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.getActivePlugins; }
+  get: function () { return chunkJRX4WLFV_cjs.getActivePlugins; }
 });
 Object.defineProperty(exports, "isPluginActive", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.isPluginActive; }
+  get: function () { return chunkJRX4WLFV_cjs.isPluginActive; }
 });
 Object.defineProperty(exports, "logActivity", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.logActivity; }
+  get: function () { return chunkJRX4WLFV_cjs.logActivity; }
 });
 Object.defineProperty(exports, "loggingMiddleware", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.loggingMiddleware; }
+  get: function () { return chunkJRX4WLFV_cjs.loggingMiddleware; }
 });
 Object.defineProperty(exports, "optionalAuth", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.optionalAuth; }
+  get: function () { return chunkJRX4WLFV_cjs.optionalAuth; }
 });
 Object.defineProperty(exports, "performanceLoggingMiddleware", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.performanceLoggingMiddleware; }
+  get: function () { return chunkJRX4WLFV_cjs.performanceLoggingMiddleware; }
 });
 Object.defineProperty(exports, "requireActivePlugin", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.requireActivePlugin; }
+  get: function () { return chunkJRX4WLFV_cjs.requireActivePlugin; }
 });
 Object.defineProperty(exports, "requireActivePlugins", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.requireActivePlugins; }
+  get: function () { return chunkJRX4WLFV_cjs.requireActivePlugins; }
 });
 Object.defineProperty(exports, "requireAnyPermission", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.requireAnyPermission; }
+  get: function () { return chunkJRX4WLFV_cjs.requireAnyPermission; }
 });
 Object.defineProperty(exports, "requireAuth", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.requireAuth; }
+  get: function () { return chunkJRX4WLFV_cjs.requireAuth; }
 });
 Object.defineProperty(exports, "requirePermission", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.requirePermission; }
+  get: function () { return chunkJRX4WLFV_cjs.requirePermission; }
 });
 Object.defineProperty(exports, "requireRole", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.requireRole; }
+  get: function () { return chunkJRX4WLFV_cjs.requireRole; }
 });
 Object.defineProperty(exports, "securityHeaders", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.securityHeaders; }
+  get: function () { return chunkJRX4WLFV_cjs.securityHeaders; }
 });
 Object.defineProperty(exports, "securityLoggingMiddleware", {
   enumerable: true,
-  get: function () { return chunkL2JDZ7NG_cjs.securityLoggingMiddleware; }
+  get: function () { return chunkJRX4WLFV_cjs.securityLoggingMiddleware; }
 });
 Object.defineProperty(exports, "PluginBootstrapService", {
   enumerable: true,
@@ -10532,7 +10553,7 @@ Object.defineProperty(exports, "validateCollectionConfig", {
 });
 Object.defineProperty(exports, "MigrationService", {
   enumerable: true,
-  get: function () { return chunkXVXSMOB3_cjs.MigrationService; }
+  get: function () { return chunkHGZ2ZNYT_cjs.MigrationService; }
 });
 Object.defineProperty(exports, "renderFilterBar", {
   enumerable: true,

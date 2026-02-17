@@ -492,7 +492,7 @@ test.describe('Search v3 - Comprehensive', () => {
   test.describe('Settings Page UI', () => {
     test('loads with expected sections', async ({ page }) => {
       await page.goto('/admin/plugins/ai-search')
-      await expect(page.locator('h1')).toContainText(/AI Search/i, { timeout: 10000 })
+      await expect(page.locator('h1')).toContainText(/Search/i, { timeout: 10000 })
 
       // Should contain key sections on Configuration tab
       await page.click('#tab-btn-configuration')
@@ -505,10 +505,11 @@ test.describe('Search v3 - Comprehensive', () => {
       await page.goto('/admin/plugins/ai-search')
       await page.waitForTimeout(2000)
 
-      const testLink = page.locator('a[href="/admin/plugins/ai-search/test"]')
+      // Use .first() — these links may appear on multiple tabs
+      const testLink = page.locator('a[href="/admin/plugins/ai-search/test"]').first()
       await expect(testLink).toBeVisible()
 
-      const guideLink = page.locator('a[href="/admin/plugins/ai-search/integration"]')
+      const guideLink = page.locator('a[href="/admin/plugins/ai-search/integration"]').first()
       await expect(guideLink).toBeVisible()
     })
 

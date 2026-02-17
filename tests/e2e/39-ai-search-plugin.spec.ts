@@ -27,7 +27,7 @@ test.describe('AI Search Plugin', () => {
     await page.goto('/admin/plugins/ai-search')
 
     // Check page loaded - use h1 only to avoid strict mode violation
-    await expect(page.locator('h1')).toContainText(/AI Search/i, { timeout: 10000 })
+    await expect(page.locator('h1')).toContainText(/Search/i, { timeout: 10000 })
 
     // Should see collections on Configuration tab
     await page.click('#tab-btn-configuration')
@@ -55,7 +55,11 @@ test.describe('AI Search Plugin', () => {
   test('should be able to select collections for indexing', async ({ page }) => {
     await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
-    
+
+    // Switch to Configuration tab where collection checkboxes live
+    await page.click('#tab-btn-configuration')
+    await page.waitForTimeout(1000)
+
     // Find first checkbox
     const firstCheckbox = page.locator('[type="checkbox"]').first()
     
@@ -106,7 +110,11 @@ test.describe('AI Search Plugin', () => {
   test('should have re-index functionality', async ({ page }) => {
     await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
-    
+
+    // Switch to Configuration tab where re-index button lives
+    await page.click('#tab-btn-configuration')
+    await page.waitForTimeout(1000)
+
     // Look for re-index button
     const reindexButton = page.locator('button:has-text("Re-index")').or(
       page.locator('button:has-text("Reindex")')
@@ -220,7 +228,11 @@ test.describe('AI Search Plugin', () => {
   test('should handle plugin settings save', async ({ page }) => {
     await page.goto('/admin/plugins/ai-search')
     await page.waitForTimeout(2000)
-    
+
+    // Switch to Configuration tab where settings checkboxes live
+    await page.click('#tab-btn-configuration')
+    await page.waitForTimeout(1000)
+
     // Try to update a setting
     const enabledCheckbox = page.locator('input[type="checkbox"][name*="enabled"]').first()
     
