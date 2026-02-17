@@ -8,6 +8,7 @@ import { TrendingSearchService } from '../services/trending-search.service'
 import { teamDraftInterleave } from '../services/interleave.service'
 import { optionalApiKey } from '../../../../middleware/api-key'
 import type { ApiKeyContext } from '../../../../middleware/api-key'
+import { optionalAuth } from '../../../../middleware/auth'
 import type { SearchQuery } from '../types'
 
 type Variables = {
@@ -21,6 +22,8 @@ type Variables = {
 
 const apiRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
+// Extract user context from session cookies (if present)
+apiRoutes.use('*', optionalAuth())
 // Validate API key if present on all search routes
 apiRoutes.use('*', optionalApiKey())
 

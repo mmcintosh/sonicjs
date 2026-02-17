@@ -21,6 +21,7 @@ test.describe('Reference Fields', () => {
     await expect(page.locator('h1')).toContainText('Edit Collection')
 
     // Open add field modal
+    await page.locator('button:has-text("Add Field")').scrollIntoViewIfNeeded()
     await page.click('button:has-text("Add Field")')
     await page.waitForSelector('#field-modal:not(.hidden)')
 
@@ -40,6 +41,7 @@ test.describe('Reference Fields', () => {
     await firstRow.click()
     await expect(page.locator('h1')).toContainText('Edit Collection')
 
+    await page.locator('button:has-text("Add Field")').scrollIntoViewIfNeeded()
     await page.click('button:has-text("Add Field")')
     await page.waitForSelector('#field-modal:not(.hidden)')
 
@@ -73,6 +75,7 @@ test.describe('Reference Fields', () => {
     let collectionName = ''
     if (!hasRefField) {
       // Create a reference field
+      await page.locator('button:has-text("Add Field")').scrollIntoViewIfNeeded()
       await page.click('button:has-text("Add Field")')
       await page.waitForSelector('#field-modal:not(.hidden)')
 
