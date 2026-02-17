@@ -6,6 +6,8 @@ import { ExperimentService } from '../services/experiment.service'
 import { RelatedSearchService } from '../services/related-search.service'
 import { TrendingSearchService } from '../services/trending-search.service'
 import { teamDraftInterleave } from '../services/interleave.service'
+import { optionalApiKey } from '../../../../middleware/api-key'
+import type { ApiKeyContext } from '../../../../middleware/api-key'
 import type { SearchQuery } from '../types'
 
 type Variables = {
@@ -14,9 +16,13 @@ type Variables = {
     email: string
     role: string
   }
+  apiKey?: ApiKeyContext
 }
 
 const apiRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+
+// Validate API key if present on all search routes
+apiRoutes.use('*', optionalApiKey())
 
 /**
  * POST /api/search
@@ -24,6 +30,12 @@ const apiRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
  */
 apiRoutes.post('/', async (c) => {
   try {
+    // Scope check: if an API key is present it must have search:read
+    const apiKey = c.get('apiKey')
+    if (apiKey && !apiKey.scopes.includes('search:read')) {
+      return c.json({ error: 'Insufficient scope. Required: search:read' }, 403)
+    }
+
     const db = c.env.DB
     const ai = (c.env as any).AI
     const vectorize = (c.env as any).VECTORIZE_INDEX
@@ -324,6 +336,13 @@ apiRoutes.post('/facet-click', async (c) => {
  */
 apiRoutes.get('/analytics', async (c) => {
   try {
+    // Allow access via admin session OR API key with search:analytics scope
+    const user = c.get('user')
+    const apiKeyCtx = c.get('apiKey')
+    if (!user && (!apiKeyCtx || !apiKeyCtx.scopes.includes('search:analytics'))) {
+      return c.json({ error: 'Insufficient scope. Required: search:analytics' }, 403)
+    }
+
     const db = c.env.DB
     const ai = (c.env as any).AI
     const vectorize = (c.env as any).VECTORIZE_INDEX
