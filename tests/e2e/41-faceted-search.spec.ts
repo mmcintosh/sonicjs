@@ -388,13 +388,13 @@ test.describe('Faceted Search', () => {
       await page.click('#tab-btn-configuration')
       await page.waitForTimeout(1000)
 
-      // Faceted Search heading should be visible
-      const heading = page.locator('text=Faceted Search')
+      // Faceted Search heading should be visible (use heading role to avoid strict mode - overview tab also has "Faceted Search" text)
+      const heading = page.getByRole('heading', { name: 'Faceted Search' })
       await expect(heading).toBeVisible({ timeout: 10000 })
 
-      // Enable toggle should exist
+      // Enable toggle should exist (sr-only checkbox, check it exists in DOM)
       const toggle = page.locator('#facets_enabled')
-      await expect(toggle).toBeVisible()
+      await expect(toggle).toHaveCount(1)
     })
 
     test('enabling facets toggle shows config section', async ({ page }) => {
@@ -407,9 +407,9 @@ test.describe('Faceted Search', () => {
       const toggle = page.locator('#facets_enabled')
       const configSection = page.locator('#facet-config-section')
 
-      // Toggle on
+      // Toggle on — checkbox is sr-only with visual div overlay, use force click
       if (!(await toggle.isChecked())) {
-        await toggle.click()
+        await toggle.click({ force: true })
         await page.waitForTimeout(1000)
       }
 
@@ -427,10 +427,10 @@ test.describe('Faceted Search', () => {
       await page.click('#tab-btn-configuration')
       await page.waitForTimeout(1000)
 
-      // Enable facets if needed
+      // Enable facets if needed — checkbox is sr-only, use force click
       const toggle = page.locator('#facets_enabled')
       if (!(await toggle.isChecked())) {
-        await toggle.click()
+        await toggle.click({ force: true })
         await page.waitForTimeout(1000)
       }
 
