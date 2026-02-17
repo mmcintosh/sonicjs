@@ -155,6 +155,17 @@ test.describe('Search A/B Testing Experiments', () => {
   // =============================================
 
   test.describe('Experiment Lifecycle', () => {
+    // Clean up any orphaned running experiments before each test
+    test.beforeEach(async ({ page }) => {
+      const listResp = await page.request.get(`${ADMIN_API}?status=running`)
+      const list = await listResp.json()
+      if (list.success && Array.isArray(list.data)) {
+        for (const exp of list.data) {
+          await page.request.post(`${ADMIN_API}/${exp.id}/complete`, { data: {} })
+        }
+      }
+    })
+
     test('start experiment changes status to running', async ({ page }) => {
       const createResp = await page.request.post(ADMIN_API, {
         data: {
@@ -280,6 +291,17 @@ test.describe('Search A/B Testing Experiments', () => {
   // =============================================
 
   test.describe('Search with Active Experiment', () => {
+    // Clean up any orphaned running experiments before each test
+    test.beforeEach(async ({ page }) => {
+      const listResp = await page.request.get(`${ADMIN_API}?status=running`)
+      const list = await listResp.json()
+      if (list.success && Array.isArray(list.data)) {
+        for (const exp of list.data) {
+          await page.request.post(`${ADMIN_API}/${exp.id}/complete`, { data: {} })
+        }
+      }
+    })
+
     test('search returns experiment metadata when experiment is running', async ({ page }) => {
       // Create and start experiment
       const createResp = await page.request.post(ADMIN_API, {
@@ -301,9 +323,9 @@ test.describe('Search A/B Testing Experiments', () => {
       const json = await response.json()
       expect(json.success).toBe(true)
       expect(json.experiment).toBeDefined()
-      expect(json.experiment.id).toBe(exp.id)
-      expect(json.experiment.mode).toBe('ab')
-      expect(['control', 'treatment']).toContain(json.experiment.variant)
+      expect(json.experiment.experiment_id).toBe(exp.id)
+      expect(json.experiment.experiment_mode).toBe('ab')
+      expect(['control', 'treatment']).toContain(json.experiment.experiment_variant)
 
       // Clean up
       await page.request.post(`${ADMIN_API}/${exp.id}/complete`, { data: {} })
@@ -336,7 +358,7 @@ test.describe('Search A/B Testing Experiments', () => {
       expect(response.status()).toBe(200)
       const json = await response.json()
       expect(json.experiment).toBeDefined()
-      expect(json.experiment.mode).toBe('interleave')
+      expect(json.experiment.experiment_mode).toBe('interleave')
       expect(json.experiment.result_origins).toBeDefined()
       expect(typeof json.experiment.result_origins).toBe('object')
 
@@ -385,6 +407,17 @@ test.describe('Search A/B Testing Experiments', () => {
   // =============================================
 
   test.describe('Experiment Metrics', () => {
+    // Clean up any orphaned running experiments before each test
+    test.beforeEach(async ({ page }) => {
+      const listResp = await page.request.get(`${ADMIN_API}?status=running`)
+      const list = await listResp.json()
+      if (list.success && Array.isArray(list.data)) {
+        for (const exp of list.data) {
+          await page.request.post(`${ADMIN_API}/${exp.id}/complete`, { data: {} })
+        }
+      }
+    })
+
     test('metrics endpoint returns structured response for running experiment', async ({ page }) => {
       const createResp = await page.request.post(ADMIN_API, {
         data: {
@@ -394,7 +427,9 @@ test.describe('Search A/B Testing Experiments', () => {
         },
       })
       const exp = (await createResp.json()).data
-      await page.request.post(`${ADMIN_API}/${exp.id}/start`)
+
+      const startResp = await page.request.post(`${ADMIN_API}/${exp.id}/start`)
+      expect(startResp.status()).toBe(200)
 
       const response = await page.request.get(`${ADMIN_API}/${exp.id}/metrics`)
       expect(response.status()).toBe(200)
