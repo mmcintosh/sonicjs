@@ -12,15 +12,22 @@ import type { SonicJSConfig } from '@sonicjs-cms/core'
 import blogPostsCollection from './collections/blog-posts.collection'
 import pageBlocksCollection from './collections/page-blocks.collection'
 import contactMessagesCollection from './collections/contact-messages.collection'
+import venuesCollection from './collections/venues.collection'
+import bookingsCollection from './collections/bookings.collection'
 
 // Import plugins (manual mounting until auto-loading is implemented)
 import contactFormPlugin from './plugins/contact-form/index'
+
+// Import Family Fun in Bmore demo site routes
+import bmoreRoutes from './bmore/routes'
 
 // Register all custom collections
 registerCollections([
   blogPostsCollection,
   pageBlocksCollection,
-  contactMessagesCollection
+  contactMessagesCollection,
+  venuesCollection,
+  bookingsCollection,
 ])
 
 // Application configuration
@@ -49,6 +56,9 @@ if (contactFormPlugin.routes) {
     app.route(route.path, route.handler)
   }
 }
+
+// Mount Family Fun in Bmore demo site
+app.route('/bmore', bmoreRoutes)
 
 // Mount core app last (catch-all)
 app.route('/', coreApp)
