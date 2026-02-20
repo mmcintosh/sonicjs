@@ -1,6 +1,6 @@
 import * as hono from 'hono';
 import { Context, Next, MiddlewareHandler } from 'hono';
-import { S as SonicJSConfig } from './app-3Zr8JaYf.cjs';
+import { S as SonicJSConfig } from './app-W3KpdLmE.cjs';
 import '@cloudflare/workers-types';
 
 type Bindings = {
@@ -23,10 +23,12 @@ type JWTPayload = {
     iat: number;
 };
 declare class AuthManager {
-    static generateToken(userId: string, email: string, role: string): Promise<string>;
-    static verifyToken(token: string): Promise<JWTPayload | null>;
+    static generateToken(userId: string, email: string, role: string, secret?: string): Promise<string>;
+    static verifyToken(token: string, secret?: string): Promise<JWTPayload | null>;
     static hashPassword(password: string): Promise<string>;
-    static verifyPassword(password: string, hash: string): Promise<boolean>;
+    static hashPasswordLegacy(password: string): Promise<string>;
+    static verifyPassword(password: string, storedHash: string): Promise<boolean>;
+    static isLegacyHash(storedHash: string): boolean;
     /**
      * Set authentication cookie - useful for plugins implementing alternative auth methods
      * @param c - Hono context
@@ -73,6 +75,19 @@ declare const optionalApiKey: () => (c: Context, next: Next) => Promise<void>;
  */
 declare const metricsMiddleware: () => MiddlewareHandler;
 
+interface RateLimitOptions {
+    max: number;
+    windowMs: number;
+    keyPrefix: string;
+}
+/**
+ * KV-based sliding window rate limiter middleware.
+ * Gracefully skips if CACHE_KV binding is not available.
+ */
+declare function rateLimit(options: RateLimitOptions): (c: Context, next: Next) => Promise<void | (Response & hono.TypedResponse<{
+    error: string;
+}, 429, "json">)>;
+
 /**
  * Middleware Module Exports
  *
@@ -103,4 +118,4 @@ declare const requireActivePlugins: any;
 declare const getActivePlugins: any;
 declare const isPluginActive: any;
 
-export { AuthManager, type Permission, PermissionManager, type UserPermissions, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware };
+export { AuthManager, type Permission, PermissionManager, type UserPermissions, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware };

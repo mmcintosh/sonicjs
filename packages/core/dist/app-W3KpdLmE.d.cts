@@ -18,6 +18,8 @@ interface Bindings {
     IMAGES_ACCOUNT_ID?: string;
     IMAGES_API_TOKEN?: string;
     ENVIRONMENT?: string;
+    JWT_SECRET?: string;
+    CORS_ORIGINS?: string;
     BUCKET_NAME?: string;
     GOOGLE_MAPS_API_KEY?: string;
     REQUIRE_API_KEY?: string;
