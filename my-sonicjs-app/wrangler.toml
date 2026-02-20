@@ -43,6 +43,7 @@ index_name = "sonicjs-benchmark"
 # Environment variables
 [vars]
 ENVIRONMENT = "development"
+CORS_ORIGINS = "http://localhost:8787"
 
 # Extended CPU time for benchmark seeding (57K+ docs) and large evaluations
 [limits]
