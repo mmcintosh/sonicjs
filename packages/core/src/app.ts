@@ -31,6 +31,7 @@ import {
 import { getCoreVersion } from './utils/version'
 import { bootstrapMiddleware } from './middleware/bootstrap'
 import { metricsMiddleware } from './middleware/metrics'
+import { securityHeadersMiddleware } from './middleware/security-headers'
 import { createDatabaseToolsAdminRoutes } from './plugins/core-plugins/database-tools-plugin/admin-routes'
 import { createSeedDataAdminRoutes } from './plugins/core-plugins/seed-data-plugin/admin-routes'
 import { emailPlugin } from './plugins/core-plugins/email-plugin'
@@ -171,10 +172,7 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
   })
 
   // Security middleware
-  app.use('*', async (_c, next) => {
-    // Security headers, CORS, etc.
-    await next()
-  })
+  app.use('*', securityHeadersMiddleware())
 
   // Custom middleware - after auth
   if (config.middleware?.afterAuth) {
