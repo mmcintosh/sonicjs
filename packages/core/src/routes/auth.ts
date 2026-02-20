@@ -150,7 +150,7 @@ authRoutes.post('/register',
       ).run()
       
       // Generate JWT token
-      const token = await AuthManager.generateToken(userId, normalizedEmail, 'viewer')
+      const token = await AuthManager.generateToken(userId, normalizedEmail, 'viewer', c.env.JWT_SECRET)
       
       // Set HTTP-only cookie
       setCookie(c, 'auth_token', token, {
@@ -238,7 +238,7 @@ authRoutes.post('/login', async (c) => {
       }
 
       // Generate JWT token
-      const token = await AuthManager.generateToken(user.id, user.email, user.role)
+      const token = await AuthManager.generateToken(user.id, user.email, user.role, c.env.JWT_SECRET)
 
       // Set HTTP-only cookie
       setCookie(c, 'auth_token', token, {
@@ -335,7 +335,7 @@ authRoutes.post('/refresh', requireAuth(), async (c) => {
     }
     
     // Generate new token
-    const token = await AuthManager.generateToken(user.userId, user.email, user.role)
+    const token = await AuthManager.generateToken(user.userId, user.email, user.role, c.env.JWT_SECRET)
     
     // Set new cookie
     setCookie(c, 'auth_token', token, {
@@ -448,7 +448,7 @@ authRoutes.post('/register/form', async (c) => {
     ).run()
 
     // Generate JWT token
-    const token = await AuthManager.generateToken(userId, normalizedEmail, role)
+    const token = await AuthManager.generateToken(userId, normalizedEmail, role, c.env.JWT_SECRET)
 
     // Set HTTP-only cookie
     setCookie(c, 'auth_token', token, {
@@ -540,7 +540,7 @@ authRoutes.post('/login/form', async (c) => {
     }
 
     // Generate JWT token
-    const token = await AuthManager.generateToken(user.id, user.email, user.role)
+    const token = await AuthManager.generateToken(user.id, user.email, user.role, c.env.JWT_SECRET)
 
     // Set HTTP-only cookie
     setCookie(c, 'auth_token', token, {
@@ -908,7 +908,7 @@ authRoutes.post('/accept-invitation', async (c) => {
     ).run()
 
     // Generate JWT token for auto-login
-    const authToken = await AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role)
+    const authToken = await AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role, c.env.JWT_SECRET)
     
     // Set HTTP-only cookie
     setCookie(c, 'auth_token', authToken, {
