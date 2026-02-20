@@ -1,7 +1,7 @@
-import { getCacheService, CACHE_CONFIGS, getLogger, SettingsService } from './chunk-G44QUVNM.js';
-import { requireAuth, isPluginActive, requireRole, AuthManager, logActivity, VALID_SCOPES, hashApiKey } from './chunk-MKMPLJIX.js';
+import { getCacheService, CACHE_CONFIGS, getLogger, SettingsService, getAppInstance, buildRouteList, CATEGORY_INFO } from './chunk-7JMMLHPQ.js';
+import { requireAuth, isPluginActive, requireRole, rateLimit, AuthManager, logActivity, VALID_SCOPES, hashApiKey } from './chunk-DHI4NEBY.js';
 import { PluginService } from './chunk-YFJJU26H.js';
-import { MigrationService } from './chunk-ONRG4CFP.js';
+import { MigrationService } from './chunk-HAM64OGO.js';
 import { init_admin_layout_catalyst_template, renderDesignPage, renderCheckboxPage, renderTestimonialsList, renderCodeExamplesList, renderAlert, renderTable, renderPagination, renderConfirmationDialog, getConfirmationDialogScript, renderAdminLayoutCatalyst, renderAdminLayout, adminLayoutV2, renderForm } from './chunk-AAU4BTDE.js';
 import { PluginBuilder, TurnstileService } from './chunk-J5WGMRSU.js';
 import { QueryFilterBuilder, sanitizeInput, getCoreVersion, escapeHtml, getBlocksFieldConfig, parseBlocksValue } from './chunk-7DXWBEQP.js';
@@ -1468,9 +1468,14 @@ apiRoutes.use("*", async (c, next) => {
   await next();
 });
 apiRoutes.use("*", cors({
-  origin: "*",
+  origin: (origin, c) => {
+    const allowed = c.env?.CORS_ORIGINS;
+    if (!allowed) return null;
+    const list = allowed.split(",").map((s) => s.trim());
+    return list.includes(origin) ? origin : null;
+  },
   allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowHeaders: ["Content-Type", "Authorization"]
+  allowHeaders: ["Content-Type", "Authorization", "X-API-Key"]
 }));
 function addTimingMeta(c, meta = {}, executionStartTime) {
   const totalTime = Date.now() - c.get("startTime");
@@ -3454,7 +3459,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-4VL6P47M.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-UDUH7UCG.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -3479,7 +3484,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-4VL6P47M.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-UDUH7UCG.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -3498,7 +3503,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-4VL6P47M.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-UDUH7UCG.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -3944,6 +3949,7 @@ var loginSchema = z.object({
 });
 authRoutes.post(
   "/register",
+  rateLimit({ max: 3, windowMs: 60 * 1e3, keyPrefix: "register" }),
   async (c) => {
     try {
       const db = c.env.DB;
@@ -4000,7 +4006,7 @@ authRoutes.post(
         now.getTime(),
         now.getTime()
       ).run();
-      const token = await AuthManager.generateToken(userId, normalizedEmail, "viewer");
+      const token = await AuthManager.generateToken(userId, normalizedEmail, "viewer", c.env.JWT_SECRET);
       setCookie(c, "auth_token", token, {
         httpOnly: true,
         secure: true,
@@ -4031,59 +4037,71 @@ authRoutes.post(
     }
   }
 );
-authRoutes.post("/login", async (c) => {
-  try {
-    const body = await c.req.json();
-    const validation = loginSchema.safeParse(body);
-    if (!validation.success) {
-      return c.json({ error: "Validation failed", details: validation.error.issues }, 400);
-    }
-    const { email, password } = validation.data;
-    const db = c.env.DB;
-    const normalizedEmail = email.toLowerCase();
-    const cache = getCacheService(CACHE_CONFIGS.user);
-    let user = await cache.get(cache.generateKey("user", `email:${normalizedEmail}`));
-    if (!user) {
-      user = await db.prepare("SELECT * FROM users WHERE email = ? AND is_active = 1").bind(normalizedEmail).first();
-      if (user) {
-        await cache.set(cache.generateKey("user", `email:${normalizedEmail}`), user);
-        await cache.set(cache.generateKey("user", user.id), user);
+authRoutes.post(
+  "/login",
+  rateLimit({ max: 5, windowMs: 60 * 1e3, keyPrefix: "login" }),
+  async (c) => {
+    try {
+      const body = await c.req.json();
+      const validation = loginSchema.safeParse(body);
+      if (!validation.success) {
+        return c.json({ error: "Validation failed", details: validation.error.issues }, 400);
       }
+      const { email, password } = validation.data;
+      const db = c.env.DB;
+      const normalizedEmail = email.toLowerCase();
+      const cache = getCacheService(CACHE_CONFIGS.user);
+      let user = await cache.get(cache.generateKey("user", `email:${normalizedEmail}`));
+      if (!user) {
+        user = await db.prepare("SELECT * FROM users WHERE email = ? AND is_active = 1").bind(normalizedEmail).first();
+        if (user) {
+          await cache.set(cache.generateKey("user", `email:${normalizedEmail}`), user);
+          await cache.set(cache.generateKey("user", user.id), user);
+        }
+      }
+      if (!user) {
+        return c.json({ error: "Invalid email or password" }, 401);
+      }
+      const isValidPassword = await AuthManager.verifyPassword(password, user.password_hash);
+      if (!isValidPassword) {
+        return c.json({ error: "Invalid email or password" }, 401);
+      }
+      if (AuthManager.isLegacyHash(user.password_hash)) {
+        try {
+          const newHash = await AuthManager.hashPassword(password);
+          await db.prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?").bind(newHash, Date.now(), user.id).run();
+        } catch (rehashError) {
+          console.error("Password rehash failed (non-fatal):", rehashError);
+        }
+      }
+      const token = await AuthManager.generateToken(user.id, user.email, user.role, c.env.JWT_SECRET);
+      setCookie(c, "auth_token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+        maxAge: 60 * 60 * 24
+        // 24 hours
+      });
+      await db.prepare("UPDATE users SET last_login_at = ? WHERE id = ?").bind((/* @__PURE__ */ new Date()).getTime(), user.id).run();
+      await cache.delete(cache.generateKey("user", user.id));
+      await cache.delete(cache.generateKey("user", `email:${normalizedEmail}`));
+      return c.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          role: user.role
+        },
+        token
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      return c.json({ error: "Login failed" }, 500);
     }
-    if (!user) {
-      return c.json({ error: "Invalid email or password" }, 401);
-    }
-    const isValidPassword = await AuthManager.verifyPassword(password, user.password_hash);
-    if (!isValidPassword) {
-      return c.json({ error: "Invalid email or password" }, 401);
-    }
-    const token = await AuthManager.generateToken(user.id, user.email, user.role);
-    setCookie(c, "auth_token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "Strict",
-      maxAge: 60 * 60 * 24
-      // 24 hours
-    });
-    await db.prepare("UPDATE users SET last_login_at = ? WHERE id = ?").bind((/* @__PURE__ */ new Date()).getTime(), user.id).run();
-    await cache.delete(cache.generateKey("user", user.id));
-    await cache.delete(cache.generateKey("user", `email:${normalizedEmail}`));
-    return c.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        role: user.role
-      },
-      token
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    return c.json({ error: "Login failed" }, 500);
   }
-});
+);
 authRoutes.post("/logout", (c) => {
   setCookie(c, "auth_token", "", {
     httpOnly: true,
@@ -4129,7 +4147,7 @@ authRoutes.post("/refresh", requireAuth(), async (c) => {
     if (!user) {
       return c.json({ error: "Not authenticated" }, 401);
     }
-    const token = await AuthManager.generateToken(user.userId, user.email, user.role);
+    const token = await AuthManager.generateToken(user.userId, user.email, user.role, c.env.JWT_SECRET);
     setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: true,
@@ -4143,83 +4161,86 @@ authRoutes.post("/refresh", requireAuth(), async (c) => {
     return c.json({ error: "Token refresh failed" }, 500);
   }
 });
-authRoutes.post("/register/form", async (c) => {
-  try {
-    const db = c.env.DB;
-    const isFirstUser = await isFirstUserRegistration(db);
-    if (!isFirstUser) {
-      const registrationEnabled = await isRegistrationEnabled(db);
-      if (!registrationEnabled) {
-        return c.html(html`
+authRoutes.post(
+  "/register/form",
+  rateLimit({ max: 3, windowMs: 60 * 1e3, keyPrefix: "register" }),
+  async (c) => {
+    try {
+      const db = c.env.DB;
+      const isFirstUser = await isFirstUserRegistration(db);
+      if (!isFirstUser) {
+        const registrationEnabled = await isRegistrationEnabled(db);
+        if (!registrationEnabled) {
+          return c.html(html`
           <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             Registration is currently disabled. Please contact an administrator.
           </div>
         `);
+        }
       }
-    }
-    const formData = await c.req.formData();
-    const requestData = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      username: formData.get("username"),
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName")
-    };
-    const normalizedEmail = requestData.email?.toLowerCase();
-    requestData.email = normalizedEmail;
-    const validationSchema = await authValidationService.buildRegistrationSchema(db);
-    const validation = await validationSchema.safeParseAsync(requestData);
-    if (!validation.success) {
-      return c.html(html`
+      const formData = await c.req.formData();
+      const requestData = {
+        email: formData.get("email"),
+        password: formData.get("password"),
+        username: formData.get("username"),
+        firstName: formData.get("firstName"),
+        lastName: formData.get("lastName")
+      };
+      const normalizedEmail = requestData.email?.toLowerCase();
+      requestData.email = normalizedEmail;
+      const validationSchema = await authValidationService.buildRegistrationSchema(db);
+      const validation = await validationSchema.safeParseAsync(requestData);
+      if (!validation.success) {
+        return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           ${validation.error.issues.map((err) => err.message).join(", ")}
         </div>
       `);
-    }
-    const validatedData = validation.data;
-    const password = validatedData.password;
-    const username = validatedData.username || authValidationService.generateDefaultValue("username", validatedData);
-    const firstName = validatedData.firstName || authValidationService.generateDefaultValue("firstName", validatedData);
-    const lastName = validatedData.lastName || authValidationService.generateDefaultValue("lastName", validatedData);
-    const existingUser = await db.prepare("SELECT id FROM users WHERE email = ? OR username = ?").bind(normalizedEmail, username).first();
-    if (existingUser) {
-      return c.html(html`
+      }
+      const validatedData = validation.data;
+      const password = validatedData.password;
+      const username = validatedData.username || authValidationService.generateDefaultValue("username", validatedData);
+      const firstName = validatedData.firstName || authValidationService.generateDefaultValue("firstName", validatedData);
+      const lastName = validatedData.lastName || authValidationService.generateDefaultValue("lastName", validatedData);
+      const existingUser = await db.prepare("SELECT id FROM users WHERE email = ? OR username = ?").bind(normalizedEmail, username).first();
+      if (existingUser) {
+        return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           User with this email or username already exists
         </div>
       `);
-    }
-    const passwordHash = await AuthManager.hashPassword(password);
-    const role = isFirstUser ? "admin" : "viewer";
-    const userId = crypto.randomUUID();
-    const now = /* @__PURE__ */ new Date();
-    await db.prepare(`
+      }
+      const passwordHash = await AuthManager.hashPassword(password);
+      const role = isFirstUser ? "admin" : "viewer";
+      const userId = crypto.randomUUID();
+      const now = /* @__PURE__ */ new Date();
+      await db.prepare(`
       INSERT INTO users (id, email, username, first_name, last_name, password_hash, role, is_active, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
-      userId,
-      normalizedEmail,
-      username,
-      firstName,
-      lastName,
-      passwordHash,
-      role,
-      1,
-      // is_active
-      now.getTime(),
-      now.getTime()
-    ).run();
-    const token = await AuthManager.generateToken(userId, normalizedEmail, role);
-    setCookie(c, "auth_token", token, {
-      httpOnly: true,
-      secure: false,
-      // Set to true in production with HTTPS
-      sameSite: "Strict",
-      maxAge: 60 * 60 * 24
-      // 24 hours
-    });
-    const redirectUrl = role === "admin" ? "/admin/dashboard" : "/admin/dashboard";
-    return c.html(html`
+        userId,
+        normalizedEmail,
+        username,
+        firstName,
+        lastName,
+        passwordHash,
+        role,
+        1,
+        // is_active
+        now.getTime(),
+        now.getTime()
+      ).run();
+      const token = await AuthManager.generateToken(userId, normalizedEmail, role, c.env.JWT_SECRET);
+      setCookie(c, "auth_token", token, {
+        httpOnly: true,
+        secure: false,
+        // Set to true in production with HTTPS
+        sameSite: "Strict",
+        maxAge: 60 * 60 * 24
+        // 24 hours
+      });
+      const redirectUrl = role === "admin" ? "/admin/dashboard" : "/admin/dashboard";
+      return c.html(html`
       <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
         Account created successfully! Redirecting...
         <script>
@@ -4229,57 +4250,69 @@ authRoutes.post("/register/form", async (c) => {
         </script>
       </div>
     `);
-  } catch (error) {
-    console.error("Registration error:", error);
-    return c.html(html`
+    } catch (error) {
+      console.error("Registration error:", error);
+      return c.html(html`
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
         Registration failed. Please try again.
       </div>
     `);
+    }
   }
-});
-authRoutes.post("/login/form", async (c) => {
-  try {
-    const formData = await c.req.formData();
-    const email = formData.get("email");
-    const password = formData.get("password");
-    const normalizedEmail = email.toLowerCase();
-    const validation = loginSchema.safeParse({ email: normalizedEmail, password });
-    if (!validation.success) {
-      return c.html(html`
+);
+authRoutes.post(
+  "/login/form",
+  rateLimit({ max: 5, windowMs: 60 * 1e3, keyPrefix: "login" }),
+  async (c) => {
+    try {
+      const formData = await c.req.formData();
+      const email = formData.get("email");
+      const password = formData.get("password");
+      const normalizedEmail = email.toLowerCase();
+      const validation = loginSchema.safeParse({ email: normalizedEmail, password });
+      if (!validation.success) {
+        return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           ${validation.error.issues.map((err) => err.message).join(", ")}
         </div>
       `);
-    }
-    const db = c.env.DB;
-    const user = await db.prepare("SELECT * FROM users WHERE email = ? AND is_active = 1").bind(normalizedEmail).first();
-    if (!user) {
-      return c.html(html`
+      }
+      const db = c.env.DB;
+      const user = await db.prepare("SELECT * FROM users WHERE email = ? AND is_active = 1").bind(normalizedEmail).first();
+      if (!user) {
+        return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           Invalid email or password
         </div>
       `);
-    }
-    const isValidPassword = await AuthManager.verifyPassword(password, user.password_hash);
-    if (!isValidPassword) {
-      return c.html(html`
+      }
+      const isValidPassword = await AuthManager.verifyPassword(password, user.password_hash);
+      if (!isValidPassword) {
+        return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           Invalid email or password
         </div>
       `);
-    }
-    const token = await AuthManager.generateToken(user.id, user.email, user.role);
-    setCookie(c, "auth_token", token, {
-      httpOnly: true,
-      secure: false,
-      // Set to true in production with HTTPS
-      sameSite: "Strict",
-      maxAge: 60 * 60 * 24
-      // 24 hours
-    });
-    await db.prepare("UPDATE users SET last_login_at = ? WHERE id = ?").bind((/* @__PURE__ */ new Date()).getTime(), user.id).run();
-    return c.html(html`
+      }
+      if (AuthManager.isLegacyHash(user.password_hash)) {
+        try {
+          const newHash = await AuthManager.hashPassword(password);
+          await db.prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?").bind(newHash, Date.now(), user.id).run();
+        } catch (rehashError) {
+          console.error("Password rehash failed (non-fatal):", rehashError);
+        }
+      }
+      const token = await AuthManager.generateToken(user.id, user.email, user.role, c.env.JWT_SECRET);
+      setCookie(c, "auth_token", token, {
+        httpOnly: true,
+        secure: false,
+        // Set to true in production with HTTPS
+        sameSite: "Strict",
+        maxAge: 60 * 60 * 24
+        // 24 hours
+      });
+      await db.prepare("UPDATE users SET last_login_at = ? WHERE id = ?").bind((/* @__PURE__ */ new Date()).getTime(), user.id).run();
+      return c.html(html`
       <div id="form-response">
         <div class="rounded-lg bg-green-100 dark:bg-lime-500/10 p-4 ring-1 ring-green-400 dark:ring-lime-500/20">
           <div class="flex items-start gap-x-3">
@@ -4298,19 +4331,23 @@ authRoutes.post("/login/form", async (c) => {
         </div>
       </div>
     `);
-  } catch (error) {
-    console.error("Login error:", error);
-    return c.html(html`
+    } catch (error) {
+      console.error("Login error:", error);
+      return c.html(html`
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
         Login failed. Please try again.
       </div>
     `);
+    }
   }
-});
-authRoutes.post("/seed-admin", async (c) => {
-  try {
-    const db = c.env.DB;
-    await db.prepare(`
+);
+authRoutes.post(
+  "/seed-admin",
+  rateLimit({ max: 2, windowMs: 60 * 1e3, keyPrefix: "seed-admin" }),
+  async (c) => {
+    try {
+      const db = c.env.DB;
+      await db.prepare(`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         email TEXT NOT NULL UNIQUE,
@@ -4326,56 +4363,57 @@ authRoutes.post("/seed-admin", async (c) => {
         updated_at INTEGER NOT NULL
       )
     `).run();
-    const existingAdmin = await db.prepare("SELECT id FROM users WHERE email = ? OR username = ?").bind("admin@sonicjs.com", "admin").first();
-    if (existingAdmin) {
-      const passwordHash2 = await AuthManager.hashPassword("sonicjs!");
-      await db.prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?").bind(passwordHash2, Date.now(), existingAdmin.id).run();
-      return c.json({
-        message: "Admin user already exists (password updated)",
-        user: {
-          id: existingAdmin.id,
-          email: "admin@sonicjs.com",
-          username: "admin",
-          role: "admin"
-        }
-      });
-    }
-    const passwordHash = await AuthManager.hashPassword("sonicjs!");
-    const userId = "admin-user-id";
-    const now = Date.now();
-    const adminEmail = "admin@sonicjs.com".toLowerCase();
-    await db.prepare(`
+      const existingAdmin = await db.prepare("SELECT id FROM users WHERE email = ? OR username = ?").bind("admin@sonicjs.com", "admin").first();
+      if (existingAdmin) {
+        const passwordHash2 = await AuthManager.hashPassword("sonicjs!");
+        await db.prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?").bind(passwordHash2, Date.now(), existingAdmin.id).run();
+        return c.json({
+          message: "Admin user already exists (password updated)",
+          user: {
+            id: existingAdmin.id,
+            email: "admin@sonicjs.com",
+            username: "admin",
+            role: "admin"
+          }
+        });
+      }
+      const passwordHash = await AuthManager.hashPassword("sonicjs!");
+      const userId = "admin-user-id";
+      const now = Date.now();
+      const adminEmail = "admin@sonicjs.com".toLowerCase();
+      await db.prepare(`
       INSERT INTO users (id, email, username, first_name, last_name, password_hash, role, is_active, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
-      userId,
-      adminEmail,
-      "admin",
-      "Admin",
-      "User",
-      passwordHash,
-      "admin",
-      1,
-      // is_active
-      now,
-      now
-    ).run();
-    return c.json({
-      message: "Admin user created successfully",
-      user: {
-        id: userId,
-        email: adminEmail,
-        username: "admin",
-        role: "admin"
-      },
-      passwordHash
-      // For debugging
-    });
-  } catch (error) {
-    console.error("Seed admin error:", error);
-    return c.json({ error: "Failed to create admin user", details: error instanceof Error ? error.message : String(error) }, 500);
+        userId,
+        adminEmail,
+        "admin",
+        "Admin",
+        "User",
+        passwordHash,
+        "admin",
+        1,
+        // is_active
+        now,
+        now
+      ).run();
+      return c.json({
+        message: "Admin user created successfully",
+        user: {
+          id: userId,
+          email: adminEmail,
+          username: "admin",
+          role: "admin"
+        },
+        passwordHash
+        // For debugging
+      });
+    } catch (error) {
+      console.error("Seed admin error:", error);
+      return c.json({ error: "Failed to create admin user", details: error instanceof Error ? error.message : String(error) }, 500);
+    }
   }
-});
+);
 authRoutes.get("/accept-invitation", async (c) => {
   try {
     const token = c.req.query("token");
@@ -4579,7 +4617,7 @@ authRoutes.post("/accept-invitation", async (c) => {
       Date.now(),
       invitedUser.id
     ).run();
-    const authToken = await AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role);
+    const authToken = await AuthManager.generateToken(invitedUser.id, invitedUser.email, invitedUser.role, c.env.JWT_SECRET);
     setCookie(c, "auth_token", authToken, {
       httpOnly: true,
       secure: true,
@@ -4593,56 +4631,60 @@ authRoutes.post("/accept-invitation", async (c) => {
     return c.json({ error: "Failed to accept invitation" }, 500);
   }
 });
-authRoutes.post("/request-password-reset", async (c) => {
-  try {
-    const formData = await c.req.formData();
-    const email = formData.get("email")?.toString()?.trim()?.toLowerCase();
-    if (!email) {
-      return c.json({ error: "Email is required" }, 400);
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return c.json({ error: "Please enter a valid email address" }, 400);
-    }
-    const db = c.env.DB;
-    const userStmt = db.prepare(`
+authRoutes.post(
+  "/request-password-reset",
+  rateLimit({ max: 3, windowMs: 15 * 60 * 1e3, keyPrefix: "password-reset" }),
+  async (c) => {
+    try {
+      const formData = await c.req.formData();
+      const email = formData.get("email")?.toString()?.trim()?.toLowerCase();
+      if (!email) {
+        return c.json({ error: "Email is required" }, 400);
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return c.json({ error: "Please enter a valid email address" }, 400);
+      }
+      const db = c.env.DB;
+      const userStmt = db.prepare(`
       SELECT id, email, first_name, last_name FROM users 
       WHERE email = ? AND is_active = 1
     `);
-    const user = await userStmt.bind(email).first();
-    if (!user) {
-      return c.json({
-        success: true,
-        message: "If an account with this email exists, a password reset link has been sent."
-      });
-    }
-    const resetToken = crypto.randomUUID();
-    const resetExpires = Date.now() + 60 * 60 * 1e3;
-    const updateStmt = db.prepare(`
+      const user = await userStmt.bind(email).first();
+      if (!user) {
+        return c.json({
+          success: true,
+          message: "If an account with this email exists, a password reset link has been sent."
+        });
+      }
+      const resetToken = crypto.randomUUID();
+      const resetExpires = Date.now() + 60 * 60 * 1e3;
+      const updateStmt = db.prepare(`
       UPDATE users SET 
         password_reset_token = ?,
         password_reset_expires = ?,
         updated_at = ?
       WHERE id = ?
     `);
-    await updateStmt.bind(
-      resetToken,
-      resetExpires,
-      Date.now(),
-      user.id
-    ).run();
-    const resetLink = `${c.req.header("origin") || "http://localhost:8787"}/auth/reset-password?token=${resetToken}`;
-    return c.json({
-      success: true,
-      message: "If an account with this email exists, a password reset link has been sent.",
-      reset_link: resetLink
-      // In production, this would be sent via email
-    });
-  } catch (error) {
-    console.error("Password reset request error:", error);
-    return c.json({ error: "Failed to process password reset request" }, 500);
+      await updateStmt.bind(
+        resetToken,
+        resetExpires,
+        Date.now(),
+        user.id
+      ).run();
+      const resetLink = `${c.req.header("origin") || "http://localhost:8787"}/auth/reset-password?token=${resetToken}`;
+      return c.json({
+        success: true,
+        message: "If an account with this email exists, a password reset link has been sent.",
+        reset_link: resetLink
+        // In production, this would be sent via email
+      });
+    } catch (error) {
+      console.error("Password reset request error:", error);
+      return c.json({ error: "Failed to process password reset request" }, 500);
+    }
   }
-});
+);
 authRoutes.get("/reset-password", async (c) => {
   try {
     const token = c.req.query("token");
@@ -28414,6 +28456,33 @@ var public_forms_default = publicFormsRoutes;
 
 // src/templates/pages/admin-api-reference.template.ts
 init_admin_layout_catalyst_template();
+function renderAuthBadge(auth) {
+  if (auth === true) {
+    return `
+      <span class="shrink-0 inline-flex items-center gap-x-1 rounded-md bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-300 ring-1 ring-inset ring-amber-700/10 dark:ring-amber-400/20">
+        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        Auth
+      </span>`;
+  }
+  if (auth === false) {
+    return `
+      <span class="shrink-0 inline-flex items-center gap-x-1 rounded-md bg-lime-50 dark:bg-lime-500/10 px-2 py-1 text-xs font-medium text-lime-700 dark:text-lime-300 ring-1 ring-inset ring-lime-700/10 dark:ring-lime-400/20">
+        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Public
+      </span>`;
+  }
+  return `
+    <span class="shrink-0 inline-flex items-center gap-x-1 rounded-md bg-zinc-50 dark:bg-zinc-500/10 px-2 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/10 dark:ring-zinc-400/20">
+      <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Unknown
+    </span>`;
+}
 function renderAPIReferencePage(data) {
   const endpointsByCategory = data.endpoints.reduce((acc, endpoint) => {
     if (!acc[endpoint.category]) {
@@ -28422,40 +28491,18 @@ function renderAPIReferencePage(data) {
     acc[endpoint.category].push(endpoint);
     return acc;
   }, {});
-  const categoryInfo = {
-    "Auth": {
-      title: "Authentication",
-      description: "User authentication and authorization endpoints",
-      icon: "\u{1F510}"
-    },
-    "Content": {
-      title: "Content Management",
-      description: "Content creation, retrieval, and management",
-      icon: "\u{1F4DD}"
-    },
-    "Media": {
-      title: "Media Management",
-      description: "File upload, storage, and media operations",
-      icon: "\u{1F5BC}\uFE0F"
-    },
-    "Admin": {
-      title: "Admin Interface",
-      description: "Administrative panel and management features",
-      icon: "\u2699\uFE0F"
-    },
-    "System": {
-      title: "System",
-      description: "Health checks and system information",
-      icon: "\u{1F527}"
-    }
-  };
+  const categories = Object.keys(endpointsByCategory);
+  const totalEndpoints = data.endpoints.length;
+  const publicEndpoints = data.endpoints.filter((e) => e.authentication === false).length;
+  const protectedEndpoints = data.endpoints.filter((e) => e.authentication === true).length;
+  const undocumentedCount = data.endpoints.filter((e) => e.documented === false).length;
   const pageContent = `
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 class="text-2xl/8 font-semibold text-zinc-950 dark:text-white sm:text-xl/8">API Reference</h1>
-          <p class="mt-2 text-sm/6 text-zinc-500 dark:text-zinc-400">Complete documentation of all available API endpoints</p>
+          <p class="mt-2 text-sm/6 text-zinc-500 dark:text-zinc-400">Auto-discovered documentation of all registered API endpoints</p>
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <a href="/api" target="_blank" class="inline-flex items-center justify-center gap-x-1.5 rounded-lg bg-zinc-950 dark:bg-white px-3.5 py-2.5 text-sm font-semibold text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors shadow-sm">
@@ -28468,29 +28515,35 @@ function renderAPIReferencePage(data) {
       </div>
 
       <!-- Stats -->
-      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div class="rounded-lg bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 px-6 py-5">
           <dt class="text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">Total Endpoints</dt>
           <dd class="mt-2 flex items-baseline gap-x-2">
-            <span class="text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white">${data.endpoints.length}</span>
+            <span class="text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white">${totalEndpoints}</span>
           </dd>
         </div>
         <div class="rounded-lg bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 px-6 py-5">
           <dt class="text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">Public Endpoints</dt>
           <dd class="mt-2 flex items-baseline gap-x-2">
-            <span class="text-4xl font-semibold tracking-tight text-lime-600 dark:text-lime-400">${data.endpoints.filter((e) => !e.authentication).length}</span>
+            <span class="text-4xl font-semibold tracking-tight text-lime-600 dark:text-lime-400">${publicEndpoints}</span>
           </dd>
         </div>
         <div class="rounded-lg bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 px-6 py-5">
           <dt class="text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">Protected Endpoints</dt>
           <dd class="mt-2 flex items-baseline gap-x-2">
-            <span class="text-4xl font-semibold tracking-tight text-amber-600 dark:text-amber-400">${data.endpoints.filter((e) => e.authentication).length}</span>
+            <span class="text-4xl font-semibold tracking-tight text-amber-600 dark:text-amber-400">${protectedEndpoints}</span>
           </dd>
         </div>
         <div class="rounded-lg bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 px-6 py-5">
           <dt class="text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">Categories</dt>
           <dd class="mt-2 flex items-baseline gap-x-2">
-            <span class="text-4xl font-semibold tracking-tight text-cyan-600 dark:text-cyan-400">${Object.keys(endpointsByCategory).length}</span>
+            <span class="text-4xl font-semibold tracking-tight text-cyan-600 dark:text-cyan-400">${categories.length}</span>
+          </dd>
+        </div>
+        <div class="rounded-lg bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 px-6 py-5">
+          <dt class="text-sm/6 font-medium text-zinc-500 dark:text-zinc-400">Undocumented</dt>
+          <dd class="mt-2 flex items-baseline gap-x-2">
+            <span class="text-4xl font-semibold tracking-tight ${undocumentedCount > 0 ? "text-zinc-400 dark:text-zinc-500" : "text-lime-600 dark:text-lime-400"}">${undocumentedCount}</span>
           </dd>
         </div>
       </dl>
@@ -28542,9 +28595,11 @@ function renderAPIReferencePage(data) {
                   class="col-start-1 row-start-1 w-full appearance-none rounded-lg bg-white dark:bg-zinc-800 py-2 pl-3 pr-8 text-sm text-zinc-950 dark:text-white outline outline-1 -outline-offset-1 outline-zinc-950/10 dark:outline-white/10 *:bg-white dark:*:bg-zinc-800 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-zinc-950 dark:focus:outline-white min-w-[200px]"
                 >
                   <option value="">All Categories</option>
-                  ${Object.keys(categoryInfo).map((category) => `
-                    <option value="${category}">${categoryInfo[category].title}</option>
-                  `).join("")}
+                  ${categories.map((category) => {
+    const info = CATEGORY_INFO[category];
+    const title = info ? info.title : category;
+    return `<option value="${category}">${title}</option>`;
+  }).join("\n                  ")}
                 </select>
                 <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-zinc-500 dark:text-zinc-400 sm:size-4">
                   <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
@@ -28558,7 +28613,7 @@ function renderAPIReferencePage(data) {
       <!-- API Categories -->
       <div class="space-y-6">
         ${Object.entries(endpointsByCategory).map(([category, endpoints]) => {
-    const info = categoryInfo[category] || { title: category, description: "", icon: "\u{1F4CB}" };
+    const info = CATEGORY_INFO[category] || { title: category, description: "", icon: "&#x1f4cb;" };
     return `
             <div class="api-category" data-category="${category}">
               <div class="rounded-lg bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 overflow-hidden">
@@ -28592,23 +28647,14 @@ function renderAPIReferencePage(data) {
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center gap-x-2 mb-2">
                             <code class="text-zinc-950 dark:text-white text-sm font-mono font-medium break-all">${endpoint.path}</code>
-                            ${endpoint.authentication ? `
-                              <span class="shrink-0 inline-flex items-center gap-x-1 rounded-md bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-300 ring-1 ring-inset ring-amber-700/10 dark:ring-amber-400/20">
-                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                </svg>
-                                Auth
+                            ${renderAuthBadge(endpoint.authentication)}
+                            ${endpoint.documented === false ? `
+                              <span class="shrink-0 inline-flex items-center rounded-md bg-zinc-50 dark:bg-zinc-800 px-2 py-1 text-xs font-medium text-zinc-400 dark:text-zinc-500 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700">
+                                Auto-discovered
                               </span>
-                            ` : `
-                              <span class="shrink-0 inline-flex items-center gap-x-1 rounded-md bg-lime-50 dark:bg-lime-500/10 px-2 py-1 text-xs font-medium text-lime-700 dark:text-lime-300 ring-1 ring-inset ring-lime-700/10 dark:ring-lime-400/20">
-                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                Public
-                              </span>
-                            `}
+                            ` : ""}
                           </div>
-                          <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-6">${endpoint.description}</p>
+                          <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-6">${endpoint.description || '<em class="text-zinc-400 dark:text-zinc-500">No description available</em>'}</p>
                         </div>
                       </div>
                     </div>
@@ -28686,8 +28732,8 @@ function renderAPIReferencePage(data) {
               const path = endpoint.dataset.path.toLowerCase();
               const description = endpoint.dataset.description.toLowerCase();
 
-              const matchesSearch = !searchTerm || 
-                path.includes(searchTerm) || 
+              const matchesSearch = !searchTerm ||
+                path.includes(searchTerm) ||
                 description.includes(searchTerm);
               const matchesMethod = !selectedMethod || method === selectedMethod;
 
@@ -28747,207 +28793,13 @@ function renderAPIReferencePage(data) {
 var VERSION2 = getCoreVersion();
 var router2 = new Hono();
 router2.use("*", requireAuth());
-var apiEndpoints = [
-  // Auth endpoints
-  {
-    method: "POST",
-    path: "/auth/login",
-    description: "Authenticate user with email and password",
-    authentication: false,
-    category: "Auth"
-  },
-  {
-    method: "POST",
-    path: "/auth/register",
-    description: "Register a new user account",
-    authentication: false,
-    category: "Auth"
-  },
-  {
-    method: "POST",
-    path: "/auth/logout",
-    description: "Log out the current user and invalidate session",
-    authentication: true,
-    category: "Auth"
-  },
-  {
-    method: "GET",
-    path: "/auth/me",
-    description: "Get current authenticated user information",
-    authentication: true,
-    category: "Auth"
-  },
-  {
-    method: "POST",
-    path: "/auth/refresh",
-    description: "Refresh authentication token",
-    authentication: true,
-    category: "Auth"
-  },
-  // Content endpoints
-  {
-    method: "GET",
-    path: "/api/collections",
-    description: "List all available collections",
-    authentication: false,
-    category: "Content"
-  },
-  {
-    method: "GET",
-    path: "/api/collections/:collection/content",
-    description: "Get all content items from a specific collection",
-    authentication: false,
-    category: "Content"
-  },
-  {
-    method: "GET",
-    path: "/api/content/:id",
-    description: "Get a specific content item by ID",
-    authentication: false,
-    category: "Content"
-  },
-  {
-    method: "POST",
-    path: "/api/content",
-    description: "Create a new content item",
-    authentication: true,
-    category: "Content"
-  },
-  {
-    method: "PUT",
-    path: "/api/content/:id",
-    description: "Update an existing content item",
-    authentication: true,
-    category: "Content"
-  },
-  {
-    method: "DELETE",
-    path: "/api/content/:id",
-    description: "Delete a content item",
-    authentication: true,
-    category: "Content"
-  },
-  // Media endpoints
-  {
-    method: "GET",
-    path: "/api/media",
-    description: "List all media files with pagination",
-    authentication: false,
-    category: "Media"
-  },
-  {
-    method: "GET",
-    path: "/api/media/:id",
-    description: "Get a specific media file by ID",
-    authentication: false,
-    category: "Media"
-  },
-  {
-    method: "POST",
-    path: "/api/media/upload",
-    description: "Upload a new media file to R2 storage",
-    authentication: true,
-    category: "Media"
-  },
-  {
-    method: "DELETE",
-    path: "/api/media/:id",
-    description: "Delete a media file from storage",
-    authentication: true,
-    category: "Media"
-  },
-  // Admin endpoints
-  {
-    method: "GET",
-    path: "/admin/api/stats",
-    description: "Get dashboard statistics (collections, content, media, users)",
-    authentication: true,
-    category: "Admin"
-  },
-  {
-    method: "GET",
-    path: "/admin/api/storage",
-    description: "Get storage usage information",
-    authentication: true,
-    category: "Admin"
-  },
-  {
-    method: "GET",
-    path: "/admin/api/activity",
-    description: "Get recent activity logs",
-    authentication: true,
-    category: "Admin"
-  },
-  {
-    method: "GET",
-    path: "/admin/api/collections",
-    description: "List all collections with field counts",
-    authentication: true,
-    category: "Admin"
-  },
-  {
-    method: "POST",
-    path: "/admin/api/collections",
-    description: "Create a new collection",
-    authentication: true,
-    category: "Admin"
-  },
-  {
-    method: "PATCH",
-    path: "/admin/api/collections/:id",
-    description: "Update an existing collection",
-    authentication: true,
-    category: "Admin"
-  },
-  {
-    method: "DELETE",
-    path: "/admin/api/collections/:id",
-    description: "Delete a collection (must be empty)",
-    authentication: true,
-    category: "Admin"
-  },
-  {
-    method: "GET",
-    path: "/admin/api/migrations/status",
-    description: "Get database migration status",
-    authentication: true,
-    category: "Admin"
-  },
-  {
-    method: "POST",
-    path: "/admin/api/migrations/run",
-    description: "Run pending database migrations",
-    authentication: true,
-    category: "Admin"
-  },
-  // System endpoints
-  {
-    method: "GET",
-    path: "/health",
-    description: "Health check endpoint for monitoring",
-    authentication: false,
-    category: "System"
-  },
-  {
-    method: "GET",
-    path: "/api/health",
-    description: "API health check with schema information",
-    authentication: false,
-    category: "System"
-  },
-  {
-    method: "GET",
-    path: "/api",
-    description: "API root - returns API information and OpenAPI spec",
-    authentication: false,
-    category: "System"
-  }
-];
 router2.get("/", async (c) => {
   const user = c.get("user");
   try {
+    const app2 = getAppInstance();
+    const endpoints = buildRouteList(app2);
     const pageData = {
-      endpoints: apiEndpoints,
+      endpoints,
       user: user ? {
         name: user.email.split("@")[0] || user.email,
         email: user.email,
@@ -39019,5 +38871,5 @@ var ROUTES_INFO = {
 };
 
 export { AISearchService, BENCHMARK_DATASETS, BenchmarkService, ChunkingService, EmbeddingService, FTS5Service, FacetService, IndexManager, QueryRulesService, ROUTES_INFO, RankingPipelineService, RelatedSearchService, SynonymService, TrendingSearchService, adminApiKeyRoutes, adminCheckboxRoutes, adminCollectionsRoutes, adminDesignRoutes, adminFormsRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSearchRoutes, adminSettingsRoutes, admin_api_default, admin_code_examples_default, admin_content_default, admin_testimonials_default, api_content_crud_default, api_default, api_media_default, api_system_default, auth_default, getConfirmationDialogScript2 as getConfirmationDialogScript, public_forms_default, renderConfirmationDialog2 as renderConfirmationDialog, renderSearchDashboard, router, router2, test_cleanup_default, userRoutes };
-//# sourceMappingURL=chunk-QV2OEZZW.js.map
-//# sourceMappingURL=chunk-QV2OEZZW.js.map
+//# sourceMappingURL=chunk-G6P24QYD.js.map
+//# sourceMappingURL=chunk-G6P24QYD.js.map

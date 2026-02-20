@@ -1,10 +1,8 @@
-'use strict';
-
-var chunkMPT5PA6U_cjs = require('./chunk-MPT5PA6U.cjs');
-var chunkX2WLCJD3_cjs = require('./chunk-X2WLCJD3.cjs');
-var chunkRCQ2HIQD_cjs = require('./chunk-RCQ2HIQD.cjs');
-var jwt = require('hono/jwt');
-var cookie = require('hono/cookie');
+import { syncCollections, PluginBootstrapService } from './chunk-YFJJU26H.js';
+import { MigrationService } from './chunk-HAM64OGO.js';
+import { metricsTracker } from './chunk-FICTAGD4.js';
+import { sign, verify } from 'hono/jwt';
+import { setCookie, getCookie } from 'hono/cookie';
 
 // src/middleware/bootstrap.ts
 var bootstrapComplete = false;
@@ -20,17 +18,17 @@ function bootstrapMiddleware(config = {}) {
     try {
       console.log("[Bootstrap] Starting system initialization...");
       console.log("[Bootstrap] Running database migrations...");
-      const migrationService = new chunkX2WLCJD3_cjs.MigrationService(c.env.DB);
+      const migrationService = new MigrationService(c.env.DB);
       await migrationService.runPendingMigrations();
       console.log("[Bootstrap] Syncing collection configurations...");
       try {
-        await chunkMPT5PA6U_cjs.syncCollections(c.env.DB);
+        await syncCollections(c.env.DB);
       } catch (error) {
         console.error("[Bootstrap] Error syncing collections:", error);
       }
       if (!config.plugins?.disableAll) {
         console.log("[Bootstrap] Bootstrapping core plugins...");
-        const bootstrapService = new chunkMPT5PA6U_cjs.PluginBootstrapService(c.env.DB);
+        const bootstrapService = new PluginBootstrapService(c.env.DB);
         const needsBootstrap = await bootstrapService.isBootstrapNeeded();
         if (needsBootstrap) {
           await bootstrapService.bootstrapCorePlugins();
@@ -46,9 +44,9 @@ function bootstrapMiddleware(config = {}) {
     return next();
   };
 }
-var JWT_SECRET = "your-super-secret-jwt-key-change-in-production";
+var JWT_SECRET_FALLBACK = "your-super-secret-jwt-key-change-in-production";
 var AuthManager = class {
-  static async generateToken(userId, email, role) {
+  static async generateToken(userId, email, role, secret) {
     const payload = {
       userId,
       email,
@@ -57,11 +55,11 @@ var AuthManager = class {
       // 24 hours
       iat: Math.floor(Date.now() / 1e3)
     };
-    return await jwt.sign(payload, JWT_SECRET, "HS256");
+    return await sign(payload, secret || JWT_SECRET_FALLBACK, "HS256");
   }
-  static async verifyToken(token) {
+  static async verifyToken(token, secret) {
     try {
-      const payload = await jwt.verify(token, JWT_SECRET, "HS256");
+      const payload = await verify(token, secret || JWT_SECRET_FALLBACK, "HS256");
       if (payload.exp < Math.floor(Date.now() / 1e3)) {
         return null;
       }
@@ -72,15 +70,85 @@ var AuthManager = class {
     }
   }
   static async hashPassword(password) {
+    const iterations = 1e5;
+    const salt = new Uint8Array(16);
+    crypto.getRandomValues(salt);
+    const encoder = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(password),
+      "PBKDF2",
+      false,
+      ["deriveBits"]
+    );
+    const hashBuffer = await crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt,
+        iterations,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      256
+    );
+    const saltHex = Array.from(salt).map((b) => b.toString(16).padStart(2, "0")).join("");
+    const hashHex = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    return `pbkdf2:${iterations}:${saltHex}:${hashHex}`;
+  }
+  static async hashPasswordLegacy(password) {
     const encoder = new TextEncoder();
     const data = encoder.encode(password + "salt-change-in-production");
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   }
-  static async verifyPassword(password, hash) {
-    const passwordHash = await this.hashPassword(password);
-    return passwordHash === hash;
+  static async verifyPassword(password, storedHash) {
+    if (storedHash.startsWith("pbkdf2:")) {
+      const parts = storedHash.split(":");
+      if (parts.length !== 4) return false;
+      const iterationsStr = parts[1];
+      const saltHex = parts[2];
+      const expectedHashHex = parts[3];
+      const iterations = parseInt(iterationsStr, 10);
+      const saltBytes = saltHex.match(/.{2}/g);
+      if (!saltBytes) return false;
+      const salt = new Uint8Array(saltBytes.map((byte) => parseInt(byte, 16)));
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(password),
+        "PBKDF2",
+        false,
+        ["deriveBits"]
+      );
+      const hashBuffer = await crypto.subtle.deriveBits(
+        {
+          name: "PBKDF2",
+          salt,
+          iterations,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        256
+      );
+      const actualHashHex = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
+      if (actualHashHex.length !== expectedHashHex.length) return false;
+      let result2 = 0;
+      for (let i = 0; i < actualHashHex.length; i++) {
+        result2 |= actualHashHex.charCodeAt(i) ^ expectedHashHex.charCodeAt(i);
+      }
+      return result2 === 0;
+    }
+    const legacyHash = await this.hashPasswordLegacy(password);
+    if (legacyHash.length !== storedHash.length) return false;
+    let result = 0;
+    for (let i = 0; i < legacyHash.length; i++) {
+      result |= legacyHash.charCodeAt(i) ^ storedHash.charCodeAt(i);
+    }
+    return result === 0;
+  }
+  static isLegacyHash(storedHash) {
+    return !storedHash.startsWith("pbkdf2:");
   }
   /**
    * Set authentication cookie - useful for plugins implementing alternative auth methods
@@ -89,7 +157,7 @@ var AuthManager = class {
    * @param options - Optional cookie configuration
    */
   static setAuthCookie(c, token, options) {
-    cookie.setCookie(c, "auth_token", token, {
+    setCookie(c, "auth_token", token, {
       httpOnly: options?.httpOnly ?? true,
       secure: options?.secure ?? true,
       sameSite: options?.sameSite ?? "Strict",
@@ -103,7 +171,7 @@ var requireAuth = () => {
     try {
       let token = c.req.header("Authorization")?.replace("Bearer ", "");
       if (!token) {
-        token = cookie.getCookie(c, "auth_token");
+        token = getCookie(c, "auth_token");
       }
       if (!token) {
         const acceptHeader = c.req.header("Accept") || "";
@@ -122,7 +190,8 @@ var requireAuth = () => {
         }
       }
       if (!payload) {
-        payload = await AuthManager.verifyToken(token);
+        const jwtSecret = c.env?.JWT_SECRET;
+        payload = await AuthManager.verifyToken(token, jwtSecret);
         if (payload && kv) {
           const cacheKey = `auth:${token.substring(0, 20)}`;
           await kv.put(cacheKey, JSON.stringify(payload), { expirationTtl: 300 });
@@ -173,10 +242,11 @@ var optionalAuth = () => {
     try {
       let token = c.req.header("Authorization")?.replace("Bearer ", "");
       if (!token) {
-        token = cookie.getCookie(c, "auth_token");
+        token = getCookie(c, "auth_token");
       }
       if (token) {
-        const payload = await AuthManager.verifyToken(token);
+        const jwtSecret = c.env?.JWT_SECRET;
+        const payload = await AuthManager.verifyToken(token, jwtSecret);
         if (payload) {
           c.set("user", payload);
         }
@@ -288,11 +358,53 @@ var metricsMiddleware = () => {
   return async (c, next) => {
     const path = new URL(c.req.url).pathname;
     if (path !== "/admin/dashboard/api/metrics") {
-      chunkRCQ2HIQD_cjs.metricsTracker.recordRequest();
+      metricsTracker.recordRequest();
     }
     await next();
   };
 };
+
+// src/middleware/rate-limit.ts
+function rateLimit(options) {
+  const { max, windowMs, keyPrefix } = options;
+  return async (c, next) => {
+    const kv = c.env?.CACHE_KV;
+    if (!kv) {
+      return await next();
+    }
+    const ip = c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for") || "unknown";
+    const key = `ratelimit:${keyPrefix}:${ip}`;
+    try {
+      const now = Date.now();
+      const stored = await kv.get(key, "json");
+      let entry;
+      if (stored && stored.resetAt > now) {
+        entry = stored;
+      } else {
+        entry = { count: 0, resetAt: now + windowMs };
+      }
+      entry.count++;
+      const ttlSeconds = Math.ceil((entry.resetAt - now) / 1e3);
+      if (entry.count > max) {
+        await kv.put(key, JSON.stringify(entry), { expirationTtl: Math.max(ttlSeconds, 1) });
+        const retryAfter = Math.ceil((entry.resetAt - now) / 1e3);
+        c.header("Retry-After", String(retryAfter));
+        c.header("X-RateLimit-Limit", String(max));
+        c.header("X-RateLimit-Remaining", "0");
+        c.header("X-RateLimit-Reset", String(Math.ceil(entry.resetAt / 1e3)));
+        return c.json({ error: "Too many requests. Please try again later." }, 429);
+      }
+      await kv.put(key, JSON.stringify(entry), { expirationTtl: Math.max(ttlSeconds, 1) });
+      c.header("X-RateLimit-Limit", String(max));
+      c.header("X-RateLimit-Remaining", String(max - entry.count));
+      c.header("X-RateLimit-Reset", String(Math.ceil(entry.resetAt / 1e3)));
+      return await next();
+    } catch (error) {
+      console.error("Rate limiter error (non-fatal):", error);
+      return await next();
+    }
+  };
+}
 
 // src/middleware/index.ts
 var loggingMiddleware = () => async (_c, next) => await next();
@@ -312,30 +424,6 @@ var requireActivePlugins = () => async (_c, next) => await next();
 var getActivePlugins = () => [];
 var isPluginActive = () => false;
 
-exports.AuthManager = AuthManager;
-exports.PermissionManager = PermissionManager;
-exports.VALID_SCOPES = VALID_SCOPES;
-exports.bootstrapMiddleware = bootstrapMiddleware;
-exports.cacheHeaders = cacheHeaders;
-exports.compressionMiddleware = compressionMiddleware;
-exports.detailedLoggingMiddleware = detailedLoggingMiddleware;
-exports.getActivePlugins = getActivePlugins;
-exports.hashApiKey = hashApiKey;
-exports.isPluginActive = isPluginActive;
-exports.logActivity = logActivity;
-exports.loggingMiddleware = loggingMiddleware;
-exports.metricsMiddleware = metricsMiddleware;
-exports.optionalApiKey = optionalApiKey;
-exports.optionalAuth = optionalAuth;
-exports.performanceLoggingMiddleware = performanceLoggingMiddleware;
-exports.requireActivePlugin = requireActivePlugin;
-exports.requireActivePlugins = requireActivePlugins;
-exports.requireAnyPermission = requireAnyPermission;
-exports.requireApiKey = requireApiKey;
-exports.requireAuth = requireAuth;
-exports.requirePermission = requirePermission;
-exports.requireRole = requireRole;
-exports.securityHeaders = securityHeaders;
-exports.securityLoggingMiddleware = securityLoggingMiddleware;
-//# sourceMappingURL=chunk-A2PAIKJI.cjs.map
-//# sourceMappingURL=chunk-A2PAIKJI.cjs.map
+export { AuthManager, PermissionManager, VALID_SCOPES, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, hashApiKey, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware };
+//# sourceMappingURL=chunk-DHI4NEBY.js.map
+//# sourceMappingURL=chunk-DHI4NEBY.js.map

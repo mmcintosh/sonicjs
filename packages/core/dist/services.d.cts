@@ -232,4 +232,29 @@ declare function initTelemetry(identity: TelemetryIdentity, config?: Partial<Tel
  */
 declare function createInstallationIdentity(projectName?: string): TelemetryIdentity;
 
-export { CACHE_CONFIGS, type CacheConfig, CacheService, type GeneralSettings, type Setting, SettingsService, TelemetryService, createInstallationIdentity, getCacheService, getTelemetryService, initTelemetry };
+/**
+ * Route Metadata Service
+ *
+ * Auto-discovers API routes using Hono's inspectRoutes() and enriches them
+ * with metadata from a static registry. Routes without metadata still appear
+ * as "auto-discovered" — nothing is ever invisible.
+ */
+interface RouteMetadata {
+    method: string;
+    path: string;
+    description: string;
+    authentication: boolean | 'unknown';
+    category: string;
+    documented: boolean;
+}
+interface CategoryInfo {
+    title: string;
+    description: string;
+    icon: string;
+}
+declare function setAppInstance(app: any): void;
+declare function getAppInstance(): any;
+declare const CATEGORY_INFO: Record<string, CategoryInfo>;
+declare function buildRouteList(app: any): RouteMetadata[];
+
+export { CACHE_CONFIGS, CATEGORY_INFO, type CacheConfig, CacheService, type GeneralSettings, type RouteMetadata, type Setting, SettingsService, TelemetryService, buildRouteList, createInstallationIdentity, getAppInstance, getCacheService, getTelemetryService, initTelemetry, setAppInstance };
