@@ -1,11 +1,48 @@
 import { syncCollections, PluginBootstrapService } from './chunk-YFJJU26H.js';
-import { MigrationService } from './chunk-HAM64OGO.js';
+import { MigrationService } from './chunk-JA2HFLAO.js';
 import { metricsTracker } from './chunk-FICTAGD4.js';
 import { sign, verify } from 'hono/jwt';
 import { setCookie, getCookie } from 'hono/cookie';
 
 // src/middleware/bootstrap.ts
 var bootstrapComplete = false;
+function verifySecurityConfig(env) {
+  const warnings = [];
+  if (!env.JWT_SECRET) {
+    warnings.push(
+      "JWT_SECRET is not set \u2014 using hardcoded fallback. Set via `wrangler secret put JWT_SECRET`"
+    );
+  } else if (env.JWT_SECRET.includes("change-in-production")) {
+    warnings.push(
+      "JWT_SECRET contains the default value \u2014 tokens are forgeable. Generate a strong random secret"
+    );
+  }
+  if (!env.CORS_ORIGINS) {
+    warnings.push(
+      "CORS_ORIGINS is not set \u2014 all cross-origin API requests will be rejected"
+    );
+  }
+  if (!env.ENVIRONMENT) {
+    warnings.push(
+      'ENVIRONMENT is not set \u2014 HSTS header will not be applied. Set to "production" or "development"'
+    );
+  }
+  if (warnings.length === 0) {
+    return;
+  }
+  const isProduction = env.ENVIRONMENT === "production";
+  for (const warning of warnings) {
+    console.warn(`[SonicJS Security] ${warning}`);
+  }
+  if (isProduction) {
+    const hasCritical = !env.JWT_SECRET || env.JWT_SECRET.includes("change-in-production");
+    if (hasCritical) {
+      throw new Error(
+        "[SonicJS Security] CRITICAL: Production deployment is missing a secure JWT_SECRET. Set it via `wrangler secret put JWT_SECRET` before deploying."
+      );
+    }
+  }
+}
 function bootstrapMiddleware(config = {}) {
   return async (c, next) => {
     if (bootstrapComplete) {
@@ -41,6 +78,7 @@ function bootstrapMiddleware(config = {}) {
     } catch (error) {
       console.error("[Bootstrap] Error during system initialization:", error);
     }
+    verifySecurityConfig(c.env);
     return next();
   };
 }
@@ -405,6 +443,162 @@ function rateLimit(options) {
     }
   };
 }
+var JWT_SECRET_FALLBACK2 = "your-super-secret-jwt-key-change-in-production";
+function arrayBufferToBase64Url(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+async function getHmacKey(secret) {
+  const encoder = new TextEncoder();
+  return crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
+}
+async function generateCsrfToken(secret) {
+  const nonceBytes = new Uint8Array(32);
+  crypto.getRandomValues(nonceBytes);
+  const nonce = arrayBufferToBase64Url(nonceBytes.buffer);
+  const key = await getHmacKey(secret);
+  const encoder = new TextEncoder();
+  const signatureBuffer = await crypto.subtle.sign("HMAC", key, encoder.encode(nonce));
+  const signature = arrayBufferToBase64Url(signatureBuffer);
+  return `${nonce}.${signature}`;
+}
+async function validateCsrfToken(token, secret) {
+  if (!token || typeof token !== "string") return false;
+  const dotIndex = token.indexOf(".");
+  if (dotIndex === -1) return false;
+  const nonce = token.substring(0, dotIndex);
+  const signature = token.substring(dotIndex + 1);
+  if (!nonce || !signature) return false;
+  try {
+    const key = await getHmacKey(secret);
+    const encoder = new TextEncoder();
+    const sigPadded = signature.replace(/-/g, "+").replace(/_/g, "/");
+    const sigBinary = atob(sigPadded);
+    const sigBytes = new Uint8Array(sigBinary.length);
+    for (let i = 0; i < sigBinary.length; i++) {
+      sigBytes[i] = sigBinary.charCodeAt(i);
+    }
+    return await crypto.subtle.verify("HMAC", key, sigBytes.buffer, encoder.encode(nonce));
+  } catch {
+    return false;
+  }
+}
+var DEFAULT_EXEMPT_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/seed-admin",
+  "/auth/accept-invitation",
+  "/auth/reset-password",
+  "/auth/request-password-reset"
+];
+function isExemptPath(path, extraExemptPaths = []) {
+  if (path.startsWith("/forms/") || path.startsWith("/api/forms/") || path === "/forms" || path === "/api/forms") {
+    return true;
+  }
+  const allExempt = [...DEFAULT_EXEMPT_PATHS, ...extraExemptPaths];
+  for (const exempt of allExempt) {
+    if (path === exempt || path.startsWith(exempt + "/")) {
+      return true;
+    }
+  }
+  return false;
+}
+function csrfProtection(options = {}) {
+  return async (c, next) => {
+    const method = c.req.method.toUpperCase();
+    const path = new URL(c.req.url).pathname;
+    const secret = c.env?.JWT_SECRET || JWT_SECRET_FALLBACK2;
+    if (c.env?.ENVIRONMENT === "production" && !c.env?.JWT_SECRET) {
+      console.warn(
+        "[CSRF] WARNING: JWT_SECRET is not set in production. CSRF tokens are signed with the fallback key, which is insecure."
+      );
+    }
+    if (method === "GET" || method === "HEAD" || method === "OPTIONS") {
+      await ensureCsrfCookie(c, secret);
+      await next();
+      return;
+    }
+    if (isExemptPath(path, options.exemptPaths)) {
+      await next();
+      return;
+    }
+    const authCookie = getCookie(c, "auth_token");
+    if (!authCookie) {
+      await next();
+      return;
+    }
+    const cookieToken = getCookie(c, "csrf_token");
+    const headerToken = c.req.header("X-CSRF-Token");
+    if (!cookieToken || !headerToken) {
+      return csrfError(c, "CSRF token missing");
+    }
+    if (cookieToken !== headerToken) {
+      return csrfError(c, "CSRF token mismatch");
+    }
+    const isValid = await validateCsrfToken(cookieToken, secret);
+    if (!isValid) {
+      return csrfError(c, "CSRF token invalid");
+    }
+    await next();
+  };
+}
+async function ensureCsrfCookie(c, secret) {
+  const existing = getCookie(c, "csrf_token");
+  if (existing) {
+    const isValid = await validateCsrfToken(existing, secret);
+    if (isValid) {
+      c.set("csrfToken", existing);
+      return;
+    }
+  }
+  const token = await generateCsrfToken(secret);
+  c.set("csrfToken", token);
+  const isDev = c.env?.ENVIRONMENT === "development" || !c.env?.ENVIRONMENT;
+  setCookie(c, "csrf_token", token, {
+    httpOnly: false,
+    // JS must read this cookie
+    secure: !isDev,
+    sameSite: "Strict",
+    path: "/",
+    maxAge: 86400
+    // 24 hours — browser-side expiry
+  });
+}
+function csrfError(c, message) {
+  const accept = c.req.header("Accept") || "";
+  if (accept.includes("text/html")) {
+    return c.html(
+      `<!DOCTYPE html><html><head><title>403 Forbidden</title></head><body><h1>403 Forbidden</h1><p>${message}</p></body></html>`,
+      403
+    );
+  }
+  return c.json({ error: message, status: 403 }, 403);
+}
+
+// src/middleware/security-headers.ts
+var securityHeadersMiddleware = () => {
+  return async (c, next) => {
+    await next();
+    c.header("X-Content-Type-Options", "nosniff");
+    c.header("X-Frame-Options", "SAMEORIGIN");
+    c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+    c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    const environment = c.env?.ENVIRONMENT;
+    if (environment !== "development") {
+      c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    }
+  };
+};
 
 // src/middleware/index.ts
 var loggingMiddleware = () => async (_c, next) => await next();
@@ -413,7 +607,6 @@ var securityLoggingMiddleware = () => async (_c, next) => await next();
 var performanceLoggingMiddleware = () => async (_c, next) => await next();
 var cacheHeaders = () => async (_c, next) => await next();
 var compressionMiddleware = async (_c, next) => await next();
-var securityHeaders = () => async (_c, next) => await next();
 var PermissionManager = {};
 var requirePermission = () => async (_c, next) => await next();
 var requireAnyPermission = () => async (_c, next) => await next();
@@ -424,6 +617,6 @@ var requireActivePlugins = () => async (_c, next) => await next();
 var getActivePlugins = () => [];
 var isPluginActive = () => false;
 
-export { AuthManager, PermissionManager, VALID_SCOPES, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, hashApiKey, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware };
-//# sourceMappingURL=chunk-DHI4NEBY.js.map
-//# sourceMappingURL=chunk-DHI4NEBY.js.map
+export { AuthManager, PermissionManager, VALID_SCOPES, bootstrapMiddleware, cacheHeaders, compressionMiddleware, csrfProtection, detailedLoggingMiddleware, generateCsrfToken, getActivePlugins, hashApiKey, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeadersMiddleware, securityLoggingMiddleware, validateCsrfToken, verifySecurityConfig };
+//# sourceMappingURL=chunk-YBPQ5DL7.js.map
+//# sourceMappingURL=chunk-YBPQ5DL7.js.map

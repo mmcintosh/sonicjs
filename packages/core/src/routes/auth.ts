@@ -3,13 +3,40 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { setCookie } from 'hono/cookie'
 import { html } from 'hono/html'
-import { AuthManager, requireAuth, rateLimit } from '../middleware'
+import { AuthManager, requireAuth, rateLimit, generateCsrfToken } from '../middleware'
 import { renderLoginPage, LoginPageData } from '../templates/pages/auth-login.template'
 import { renderRegisterPage, RegisterPageData } from '../templates/pages/auth-register.template'
 import { getCacheService, CACHE_CONFIGS } from '../services'
 import { authValidationService, isRegistrationEnabled, isFirstUserRegistration } from '../services/auth-validation'
 import type { RegistrationData } from '../services/auth-validation'
 import type { Bindings, Variables } from '../app'
+
+const JWT_SECRET_FALLBACK = 'your-super-secret-jwt-key-change-in-production'
+
+/** Set a signed CSRF cookie alongside the auth cookie on login/register. */
+async function setCsrfCookie(c: any): Promise<void> {
+  const secret = c.env?.JWT_SECRET || JWT_SECRET_FALLBACK
+  const isDev = c.env?.ENVIRONMENT === 'development' || !c.env?.ENVIRONMENT
+  const csrfToken = await generateCsrfToken(secret)
+  setCookie(c, 'csrf_token', csrfToken, {
+    httpOnly: false,
+    secure: !isDev,
+    sameSite: 'Strict',
+    path: '/',
+    maxAge: 86400,
+  })
+}
+
+/** Clear the CSRF cookie on logout. */
+function clearCsrfCookie(c: any): void {
+  setCookie(c, 'csrf_token', '', {
+    httpOnly: false,
+    secure: false,
+    sameSite: 'Strict',
+    path: '/',
+    maxAge: 0,
+  })
+}
 
 const authRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -160,7 +187,10 @@ authRoutes.post('/register',
         sameSite: 'Strict',
         maxAge: 60 * 60 * 24 // 24 hours
       })
-      
+
+      // Set CSRF cookie for browser sessions
+      await setCsrfCookie(c)
+
       return c.json({
         user: {
           id: userId,
@@ -251,6 +281,9 @@ authRoutes.post('/login',
         maxAge: 60 * 60 * 24 // 24 hours
       })
 
+      // Set CSRF cookie for browser sessions
+      await setCsrfCookie(c)
+
       // Update last login
       await db.prepare('UPDATE users SET last_login_at = ? WHERE id = ?')
         .bind(new Date().getTime(), user.id)
@@ -286,7 +319,8 @@ authRoutes.post('/logout', (c) => {
     sameSite: 'Strict',
     maxAge: 0 // Expire immediately
   })
-  
+  clearCsrfCookie(c)
+
   return c.json({ message: 'Logged out successfully' })
 })
 
@@ -298,7 +332,8 @@ authRoutes.get('/logout', (c) => {
     sameSite: 'Strict',
     maxAge: 0 // Expire immediately
   })
-  
+  clearCsrfCookie(c)
+
   return c.redirect('/auth/login?message=You have been logged out successfully')
 })
 
@@ -463,6 +498,9 @@ authRoutes.post('/register/form',
       maxAge: 60 * 60 * 24 // 24 hours
     })
 
+    // Set CSRF cookie for browser sessions
+    await setCsrfCookie(c)
+
     // Redirect based on role
     const redirectUrl = role === 'admin' ? '/admin/dashboard' : '/admin/dashboard'
 
@@ -556,6 +594,9 @@ authRoutes.post('/login/form',
       sameSite: 'Strict',
       maxAge: 60 * 60 * 24 // 24 hours
     })
+
+    // Set CSRF cookie for browser sessions
+    await setCsrfCookie(c)
 
     // Update last login
     await db.prepare('UPDATE users SET last_login_at = ? WHERE id = ?')
@@ -926,6 +967,9 @@ authRoutes.post('/accept-invitation', async (c) => {
       sameSite: 'Strict',
       maxAge: 60 * 60 * 24 // 24 hours
     })
+
+    // Set CSRF cookie for browser sessions
+    await setCsrfCookie(c)
 
     // Log the activity (TODO: implement activity logging)
     // Activity logging is deferred until utils/log-activity is implemented

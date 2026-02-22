@@ -1,4 +1,6 @@
-import { __esm, __export, __toCommonJS } from './chunk-V4OQ3NZ2.js';
+'use strict';
+
+var chunkIGJUBJBW_cjs = require('./chunk-IGJUBJBW.cjs');
 
 // src/templates/components/logo.template.ts
 function renderLogo(data = {}) {
@@ -42,7 +44,7 @@ function renderLogo(data = {}) {
   return logoContent;
 }
 var sizeClasses;
-var init_logo_template = __esm({
+var init_logo_template = chunkIGJUBJBW_cjs.__esm({
   "src/templates/components/logo.template.ts"() {
     sizeClasses = {
       sm: "h-6 w-auto",
@@ -55,7 +57,7 @@ var init_logo_template = __esm({
 
 // src/templates/layouts/admin-layout-catalyst.template.ts
 var admin_layout_catalyst_template_exports = {};
-__export(admin_layout_catalyst_template_exports, {
+chunkIGJUBJBW_cjs.__export(admin_layout_catalyst_template_exports, {
   renderAdminLayoutCatalyst: () => renderAdminLayoutCatalyst,
   renderCatalystCheckbox: () => renderCatalystCheckbox
 });
@@ -224,6 +226,41 @@ function renderAdminLayoutCatalyst(data) {
   <script src="https://unpkg.com/htmx.org@2.0.3"></script>
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- CSRF: Auto-attach token to all HTMX and fetch requests -->
+  <script>
+    function getCsrfToken() {
+      var cookie = document.cookie.split('; ')
+        .find(function(row) { return row.startsWith('csrf_token='); });
+      return cookie ? cookie.substring(cookie.indexOf('=') + 1) : '';
+    }
+
+    document.addEventListener('htmx:configRequest', function(event) {
+      var token = getCsrfToken();
+      if (token) {
+        event.detail.headers['X-CSRF-Token'] = token;
+      }
+    });
+
+    (function() {
+      var originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        options = options || {};
+        var method = (options.method || 'GET').toUpperCase();
+        if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+          options.headers = options.headers || {};
+          if (options.headers instanceof Headers) {
+            if (!options.headers.has('X-CSRF-Token')) {
+              options.headers.set('X-CSRF-Token', getCsrfToken());
+            }
+          } else if (!Array.isArray(options.headers) && !options.headers['X-CSRF-Token']) {
+            options.headers['X-CSRF-Token'] = getCsrfToken();
+          }
+        }
+        return originalFetch.call(this, url, options);
+      };
+    })();
+  </script>
 
   ${data.styles ? data.styles.map((style) => `<link rel="stylesheet" href="${style}">`).join("\n  ") : ""}
   ${data.scripts ? data.scripts.map((script) => `<script src="${script}"></script>`).join("\n  ") : ""}
@@ -622,7 +659,7 @@ function renderCatalystSidebar(currentPath = "", user, dynamicMenuItems, isMobil
     </nav>
   `;
 }
-var init_admin_layout_catalyst_template = __esm({
+var init_admin_layout_catalyst_template = chunkIGJUBJBW_cjs.__esm({
   "src/templates/layouts/admin-layout-catalyst.template.ts"() {
     init_logo_template();
   }
@@ -1160,7 +1197,7 @@ init_logo_template();
 function renderAdminLayout(data) {
   const {
     renderAdminLayoutCatalyst: renderAdminLayoutCatalyst2
-  } = (init_admin_layout_catalyst_template(), __toCommonJS(admin_layout_catalyst_template_exports));
+  } = (init_admin_layout_catalyst_template(), chunkIGJUBJBW_cjs.__toCommonJS(admin_layout_catalyst_template_exports));
   return renderAdminLayoutCatalyst2(data);
 }
 function adminLayoutV2(data) {
@@ -3371,7 +3408,7 @@ function renderCodeExamplesList(data) {
 // src/templates/form.template.ts
 function renderForm(data) {
   return `
-    <form 
+    <form
       ${data.id ? `id="${data.id}"` : ""}
       ${data.hxPost ? `hx-post="${data.hxPost}"` : data.hxPut ? `hx-put="${data.hxPut}"` : data.action ? `action="${data.action}"` : ""}
       ${data.hxTarget ? `hx-target="${data.hxTarget}"` : ""}
@@ -3379,15 +3416,16 @@ function renderForm(data) {
       class="${data.className || "space-y-6"}"
       ${data.fields.some((f) => f.type === "file") ? 'enctype="multipart/form-data"' : ""}
     >
+      ${data.csrfToken ? `<input type="hidden" name="_csrf" value="${data.csrfToken}">` : ""}
       ${data.title ? `
         <div class="mb-6">
           <h2 class="text-lg font-medium text-gray-1">${data.title}</h2>
           ${data.description ? `<p class="mt-1 text-sm text-gray-4">${data.description}</p>` : ""}
         </div>
       ` : ""}
-      
+
       <div id="form-messages"></div>
-      
+
       ${data.fields.map((field) => renderFormField(field)).join("")}
       
       <div class="flex justify-between items-center pt-6 border-t border-gray-7">
@@ -3556,6 +3594,22 @@ function renderFormField(field) {
   `;
 }
 
-export { adminLayoutV2, getConfirmationDialogScript, init_admin_layout_catalyst_template, init_logo_template, renderAdminLayout, renderAdminLayoutCatalyst, renderAlert, renderCheckboxPage, renderCodeExamplesList, renderConfirmationDialog, renderDesignPage, renderForm, renderFormField, renderLogo, renderPagination, renderTable, renderTestimonialsList };
-//# sourceMappingURL=chunk-AAU4BTDE.js.map
-//# sourceMappingURL=chunk-AAU4BTDE.js.map
+exports.adminLayoutV2 = adminLayoutV2;
+exports.getConfirmationDialogScript = getConfirmationDialogScript;
+exports.init_admin_layout_catalyst_template = init_admin_layout_catalyst_template;
+exports.init_logo_template = init_logo_template;
+exports.renderAdminLayout = renderAdminLayout;
+exports.renderAdminLayoutCatalyst = renderAdminLayoutCatalyst;
+exports.renderAlert = renderAlert;
+exports.renderCheckboxPage = renderCheckboxPage;
+exports.renderCodeExamplesList = renderCodeExamplesList;
+exports.renderConfirmationDialog = renderConfirmationDialog;
+exports.renderDesignPage = renderDesignPage;
+exports.renderForm = renderForm;
+exports.renderFormField = renderFormField;
+exports.renderLogo = renderLogo;
+exports.renderPagination = renderPagination;
+exports.renderTable = renderTable;
+exports.renderTestimonialsList = renderTestimonialsList;
+//# sourceMappingURL=chunk-5ZO6N3JW.cjs.map
+//# sourceMappingURL=chunk-5ZO6N3JW.cjs.map

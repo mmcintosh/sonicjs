@@ -1,12 +1,21 @@
 import * as hono from 'hono';
 import { Context, Next, MiddlewareHandler } from 'hono';
-import { S as SonicJSConfig } from './app-W3KpdLmE.cjs';
+import { S as SonicJSConfig } from './app-BO5F5JJy.cjs';
 import '@cloudflare/workers-types';
 
 type Bindings = {
     DB: D1Database;
     KV: KVNamespace;
+    JWT_SECRET?: string;
+    CORS_ORIGINS?: string;
+    ENVIRONMENT?: string;
 };
+/**
+ * Verify security-critical environment configuration at startup.
+ * Logs warnings in development, throws in production to prevent
+ * insecure deployments from silently running.
+ */
+declare function verifySecurityConfig(env: Bindings): void;
 /**
  * Bootstrap middleware that ensures system initialization
  * Runs once per worker instance
@@ -89,6 +98,62 @@ declare function rateLimit(options: RateLimitOptions): (c: Context, next: Next) 
 }, 429, "json">)>;
 
 /**
+ * CSRF Protection Middleware — Signed Double-Submit Cookie
+ *
+ * Stateless CSRF protection for Cloudflare Workers (no session store needed).
+ * Token format: `<nonce>.<hmac>` where HMAC-SHA256 is keyed with JWT_SECRET.
+ *
+ * Flow:
+ *   GET  — ensureCsrfCookie(): reuse existing valid cookie or set a new one
+ *   POST/PUT/DELETE/PATCH — validate X-CSRF-Token header === csrf_token cookie, HMAC valid
+ *
+ * Exempt:
+ *   - Safe methods (GET, HEAD, OPTIONS)
+ *   - Auth routes that create sessions (/auth/login*, /auth/register*, etc.)
+ *   - Public form submissions (/forms/*, /api/forms/*) — NOT /admin/forms/*
+ *   - Requests with no auth_token cookie (Bearer-only or API-key-only)
+ */
+
+/**
+ * Generate a signed CSRF token: `<nonce>.<hmac_signature>`
+ * - nonce = 32 random bytes, base64url-encoded
+ * - signature = HMAC-SHA256(nonce, secret), base64url-encoded
+ */
+declare function generateCsrfToken(secret: string): Promise<string>;
+/**
+ * Validate a signed CSRF token.
+ *
+ * Checks that the token has the correct `<nonce>.<signature>` format and that
+ * the HMAC signature is valid for the given secret. Uses crypto.subtle.verify
+ * which provides constant-time comparison.
+ *
+ * NOTE: No expiry check here — by design. The security property of signed
+ * double-submit comes from the unpredictability of the nonce + the
+ * secret-bound HMAC, not from time-bounding. The cookie's maxAge (86400s)
+ * handles expiry at the browser level.
+ */
+declare function validateCsrfToken(token: string, secret: string): Promise<boolean>;
+interface CsrfOptions {
+    /** Additional paths to exempt from CSRF validation. */
+    exemptPaths?: string[];
+}
+/**
+ * CSRF protection middleware (Signed Double-Submit Cookie).
+ *
+ * - GET/HEAD/OPTIONS: ensure a valid csrf_token cookie exists
+ * - POST/PUT/DELETE/PATCH: validate X-CSRF-Token header matches cookie, HMAC valid
+ * - Exempt: auth routes, public /forms/*, Bearer-only, API-key-only
+ */
+declare function csrfProtection(options?: CsrfOptions): (c: Context, next: Next) => Promise<Response | void>;
+
+/**
+ * Security headers middleware.
+ * Sets standard security headers on every response.
+ * Skips HSTS in development to avoid local dev issues.
+ */
+declare const securityHeadersMiddleware: () => (c: Context, next: Next) => Promise<void>;
+
+/**
  * Middleware Module Exports
  *
  * Request processing middleware for SonicJS
@@ -108,7 +173,7 @@ declare const securityLoggingMiddleware: any;
 declare const performanceLoggingMiddleware: any;
 declare const cacheHeaders: any;
 declare const compressionMiddleware: any;
-declare const securityHeaders: any;
+
 declare const PermissionManager: any;
 declare const requirePermission: any;
 declare const requireAnyPermission: any;
@@ -118,4 +183,4 @@ declare const requireActivePlugins: any;
 declare const getActivePlugins: any;
 declare const isPluginActive: any;
 
-export { AuthManager, type Permission, PermissionManager, type UserPermissions, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeaders, securityLoggingMiddleware };
+export { AuthManager, type Permission, PermissionManager, type UserPermissions, bootstrapMiddleware, cacheHeaders, compressionMiddleware, csrfProtection, detailedLoggingMiddleware, generateCsrfToken, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeadersMiddleware as securityHeaders, securityLoggingMiddleware, validateCsrfToken, verifySecurityConfig };
