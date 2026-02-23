@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ADMIN_CREDENTIALS } from './utils/test-helpers';
+import { ADMIN_CREDENTIALS, extractCsrfToken } from './utils/test-helpers';
 
 test.describe('Authentication API', () => {
   const testUser = {
@@ -355,14 +355,16 @@ test.describe('Authentication API', () => {
       });
       expect(loginResponse.status()).toBe(200);
 
-      // Extract auth cookie
+      // Extract auth cookie and CSRF token
       const cookies = loginResponse.headers()['set-cookie'];
       const authCookie = cookies?.split(';')[0] || '';
+      const csrfToken = extractCsrfToken(cookies);
 
       // Logout with the session
       const logoutResponse = await request.post('/auth/logout', {
         headers: {
-          'Cookie': authCookie
+          'Cookie': `${authCookie}; csrf_token=${csrfToken}`,
+          'X-CSRF-Token': csrfToken
         }
       });
 
@@ -458,9 +460,10 @@ test.describe('Authentication API', () => {
       const loginData = await loginResponse.json();
       const originalToken = loginData.token;
 
-      // Extract auth cookie
+      // Extract auth cookie and CSRF token
       const cookies = loginResponse.headers()['set-cookie'];
       const authCookie = cookies?.split(';')[0] || '';
+      const csrfToken = extractCsrfToken(cookies);
 
       // Wait a moment to ensure different timestamp
       await new Promise(resolve => setTimeout(resolve, 1100));
@@ -468,7 +471,8 @@ test.describe('Authentication API', () => {
       // Refresh token
       const refreshResponse = await request.post('/auth/refresh', {
         headers: {
-          'Cookie': authCookie
+          'Cookie': `${authCookie}; csrf_token=${csrfToken}`,
+          'X-CSRF-Token': csrfToken
         }
       });
 
@@ -678,11 +682,13 @@ test.describe('Authentication API', () => {
 
       const cookies = loginResponse.headers()['set-cookie'];
       const authCookie = cookies?.split(';')[0] || '';
+      const csrfToken = extractCsrfToken(cookies);
+      const fullCookie = `${authCookie}; csrf_token=${csrfToken}`;
 
       // Make authenticated request
       const meResponse = await request.get('/auth/me', {
         headers: {
-          'Cookie': authCookie
+          'Cookie': fullCookie
         }
       });
       expect(meResponse.status()).toBe(200);
@@ -690,7 +696,8 @@ test.describe('Authentication API', () => {
       // Make another authenticated request
       const refreshResponse = await request.post('/auth/refresh', {
         headers: {
-          'Cookie': authCookie
+          'Cookie': fullCookie,
+          'X-CSRF-Token': csrfToken
         }
       });
       expect(refreshResponse.status()).toBe(200);

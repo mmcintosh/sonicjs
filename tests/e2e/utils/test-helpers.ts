@@ -29,6 +29,26 @@ export const TEST_DATA = {
 };
 
 /**
+ * Extract CSRF token value from Set-Cookie response header.
+ * Works with Playwright's newline-joined Set-Cookie format.
+ */
+export function extractCsrfToken(setCookieHeader: string | undefined): string {
+  if (!setCookieHeader) return '';
+  const match = setCookieHeader.match(/csrf_token=([^;\s]+)/);
+  return match ? match[1] : '';
+}
+
+/**
+ * Get CSRF token from page context cookies.
+ * Use with page.request.post() calls that need CSRF headers.
+ */
+export async function getCsrfTokenFromPage(page: Page): Promise<string> {
+  const cookies = await page.context().cookies();
+  const csrfCookie = cookies.find(c => c.name === 'csrf_token');
+  return csrfCookie?.value || '';
+}
+
+/**
  * Ensure admin user exists (for testing)
  */
 export async function ensureAdminUserExists(page: Page) {
@@ -46,9 +66,11 @@ export async function ensureAdminUserExists(page: Page) {
 export async function ensureWorkflowTablesExist(page: Page) {
   try {
     // Make an authenticated request using the page's cookies
+    const csrfToken = await getCsrfTokenFromPage(page);
     const response = await page.request.post('/admin/api/migrations/run', {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
       }
     });
 
