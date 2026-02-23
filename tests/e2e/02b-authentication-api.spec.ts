@@ -1,6 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { ADMIN_CREDENTIALS, extractCsrfToken } from './utils/test-helpers';
 
+/**
+ * Check if a registration response indicates registration is disabled
+ * by a concurrent test shard (37-disable-registration.spec.ts).
+ * Returns true if the test should be skipped.
+ */
+function isRegistrationDisabled(status: number, body: any): boolean {
+  if (status !== 403) return false;
+  const msg = body?.error || '';
+  return msg.includes('disabled') || msg.includes('Registration');
+}
+
 test.describe('Authentication API', () => {
   const testUser = {
     email: 'test.api.user@example.com',
@@ -55,12 +66,13 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
-      expect(response.status()).toBe(201);
-      
       const data = await response.json();
+      if (isRegistrationDisabled(response.status(), data)) return;
+
+      expect(response.status()).toBe(201);
       expect(data).toHaveProperty('user');
       expect(data).toHaveProperty('token');
-      
+
       // Verify user object
       expect(data.user).toMatchObject({
         email: uniqueUser.email.toLowerCase(),
@@ -69,10 +81,10 @@ test.describe('Authentication API', () => {
         lastName: uniqueUser.lastName,
         role: 'viewer'
       });
-      
+
       // Should have a valid UUID
       expect(data.user.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
-      
+
       // Should have a JWT token
       expect(data.token).toBeTruthy();
       expect(data.token.split('.')).toHaveLength(3); // JWT format
@@ -89,9 +101,10 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
-      expect(response.status()).toBe(201);
-      
       const data = await response.json();
+      if (isRegistrationDisabled(response.status(), data)) return;
+
+      expect(response.status()).toBe(201);
       expect(data.user.email).toBe(uniqueUser.email.toLowerCase());
     });
 
@@ -130,6 +143,8 @@ test.describe('Authentication API', () => {
       const firstResponse = await request.post('/auth/register', {
         data: uniqueUser
       });
+      const firstData = await firstResponse.json();
+      if (isRegistrationDisabled(firstResponse.status(), firstData)) return;
       expect(firstResponse.status()).toBe(201);
 
       // Second registration with same email should fail
@@ -141,7 +156,7 @@ test.describe('Authentication API', () => {
       });
 
       expect(secondResponse.status()).toBe(400);
-      
+
       const data = await secondResponse.json();
       expect(data.error).toContain('already exists');
     });
@@ -157,6 +172,8 @@ test.describe('Authentication API', () => {
       const firstResponse = await request.post('/auth/register', {
         data: uniqueUser
       });
+      const firstData = await firstResponse.json();
+      if (isRegistrationDisabled(firstResponse.status(), firstData)) return;
       expect(firstResponse.status()).toBe(201);
 
       // Second registration with same username should fail
@@ -168,7 +185,7 @@ test.describe('Authentication API', () => {
       });
 
       expect(secondResponse.status()).toBe(400);
-      
+
       const data = await secondResponse.json();
       expect(data.error).toContain('already exists');
     });
@@ -184,8 +201,13 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
+      if (response.status() === 403) {
+        const body = await response.json();
+        if (isRegistrationDisabled(response.status(), body)) return;
+      }
+
       expect(response.status()).toBe(201);
-      
+
       // Check for auth cookie
       const cookies = response.headers()['set-cookie'];
       expect(cookies).toBeTruthy();
@@ -205,9 +227,10 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
-      expect(response.status()).toBe(201);
-      
       const data = await response.json();
+      if (isRegistrationDisabled(response.status(), data)) return;
+
+      expect(response.status()).toBe(201);
       expect(data.user.role).toBe('viewer');
     });
   });
@@ -515,19 +538,10 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
-      // Registration may be temporarily disabled by concurrent test shard
-      // (37-disable-registration.spec.ts toggles the setting)
-      if (response.status() === 403) {
-        const body = await response.json();
-        if (body.error?.includes('disabled') || body.error?.includes('Registration')) {
-          console.log('Registration disabled by concurrent test — skipping');
-          return;
-        }
-      }
+      const data = await response.json();
+      if (isRegistrationDisabled(response.status(), data)) return;
 
       expect(response.status()).toBe(201);
-
-      const data = await response.json();
 
       // Should not expose password or hash
       expect(data.user).not.toHaveProperty('password');
