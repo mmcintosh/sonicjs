@@ -128,11 +128,17 @@ const DEFAULT_EXEMPT_PATHS = [
  * Check whether a request path is exempt from CSRF validation.
  * - Exact match or startsWith for auth routes (e.g. /auth/login/form)
  * - /forms/* and /api/forms/* are exempt (public submissions)
+ * - /api/search* is exempt (read-only POST for complex query params)
  * - /admin/forms/* is NOT exempt
  */
 function isExemptPath(path: string, extraExemptPaths: string[] = []): boolean {
   // Public form routes — NOT /admin/forms/*
   if (path.startsWith('/forms/') || path.startsWith('/api/forms/') || path === '/forms' || path === '/api/forms') {
+    return true
+  }
+
+  // Search API — read-only POST (includes /api/search/click, /api/search/facet-click)
+  if (path.startsWith('/api/search')) {
     return true
   }
 

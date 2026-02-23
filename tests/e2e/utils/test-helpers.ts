@@ -390,6 +390,23 @@ export async function loginAsAdmin(page: Page) {
   // Navigate back to admin dashboard after plugin setup
   await page.goto('/admin');
   await page.waitForLoadState('networkidle', { timeout: 15000 });
+
+  // Auto-attach CSRF token to all state-changing page.request calls
+  const csrfToken = await getCsrfTokenFromPage(page);
+  if (csrfToken) {
+    const addCsrf = (opts?: any) => ({
+      ...opts,
+      headers: { ...(opts?.headers || {}), 'X-CSRF-Token': csrfToken }
+    });
+    const origPost = page.request.post.bind(page.request);
+    const origPut = page.request.put.bind(page.request);
+    const origDelete = page.request.delete.bind(page.request);
+    const origPatch = page.request.patch.bind(page.request);
+    (page.request as any).post = (url: string, opts?: any) => origPost(url, addCsrf(opts));
+    (page.request as any).put = (url: string, opts?: any) => origPut(url, addCsrf(opts));
+    (page.request as any).delete = (url: string, opts?: any) => origDelete(url, addCsrf(opts));
+    (page.request as any).patch = (url: string, opts?: any) => origPatch(url, addCsrf(opts));
+  }
 }
 
 /**
