@@ -282,6 +282,23 @@ export function renderAdminLayoutCatalyst(
         return originalFetch.call(this, url, options);
       };
     })();
+
+    // Inject _csrf hidden field into regular form submissions (non-HTMX)
+    document.addEventListener('submit', function(event) {
+      var form = event.target;
+      if (!form || !form.tagName || form.tagName !== 'FORM') return;
+      var method = (form.method || 'GET').toUpperCase();
+      if (method === 'GET') return;
+      if (form.hasAttribute('hx-post') || form.hasAttribute('hx-put') ||
+          form.hasAttribute('hx-delete') || form.hasAttribute('hx-patch')) return;
+      if (!form.querySelector('input[name="_csrf"]')) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = '_csrf';
+        input.value = getCsrfToken();
+        form.appendChild(input);
+      }
+    });
   </script>
 
   ${

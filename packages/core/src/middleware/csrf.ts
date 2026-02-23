@@ -204,7 +204,20 @@ export function csrfProtection(options: CsrfOptions = {}) {
 
     // State-changing request with cookie auth — validate CSRF
     const cookieToken = getCookie(c, 'csrf_token')
-    const headerToken = c.req.header('X-CSRF-Token')
+    let headerToken = c.req.header('X-CSRF-Token')
+
+    // Fallback: check _csrf field in form-encoded body (regular HTML form submissions)
+    if (!headerToken) {
+      const contentType = c.req.header('Content-Type') || ''
+      if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
+        try {
+          const body = await c.req.parseBody()
+          headerToken = body['_csrf'] as string | undefined
+        } catch {
+          // Body not parseable — leave headerToken undefined
+        }
+      }
+    }
 
     if (!cookieToken || !headerToken) {
       return csrfError(c, 'CSRF token missing')
