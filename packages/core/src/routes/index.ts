@@ -34,6 +34,7 @@ export { adminSettingsRoutes } from './admin-settings'
 export { adminFormsRoutes } from './admin-forms'
 export { default as publicFormsRoutes } from './public-forms'
 export { adminApiReferenceRoutes } from './admin-api-reference'
+export { adminApiDocsRoutes } from './admin-api-docs'
 export { adminSearchRoutes } from './admin-search'
 export { adminApiKeyRoutes } from './admin-api-keys'
 
@@ -62,6 +63,7 @@ export const ROUTES_INFO = {
     'adminFormsRoutes',
     'publicFormsRoutes',
     'adminApiReferenceRoutes',
+    'adminApiDocsRoutes',
     'adminSearchRoutes',
     'adminApiKeyRoutes'
   ],
