@@ -46,3 +46,20 @@ export {
 } from './telemetry-config'
 
 export { getBlocksFieldConfig, parseBlocksValue } from './blocks'
+
+// File Upload Validation
+export {
+  ALLOWED_MIME_TYPES,
+  MAX_FILE_SIZE,
+  MIME_TO_EXTENSIONS,
+  normalizeMimeType,
+  validateFileExtension,
+  validateFolder,
+  validateMagicBytes,
+  validateUploadedFile,
+  fileValidationSchema,
+  getContentDisposition,
+  type AllowedMimeType,
+  type MagicByteResult,
+  type FileValidationResult,
+} from './file-validation'
