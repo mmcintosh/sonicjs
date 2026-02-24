@@ -1,67 +1,83 @@
 import * as hono_types from 'hono/types';
 import { Hono } from 'hono';
-import { B as Bindings$a, V as Variables$b } from './app-BO5F5JJy.cjs';
+import { B as Bindings$b, V as Variables$c } from './app-BO5F5JJy.cjs';
 import { D1Database as D1Database$1, KVNamespace as KVNamespace$1, R2Bucket as R2Bucket$1 } from '@cloudflare/workers-types';
 
-interface Variables$a extends Variables$b {
+interface Variables$b extends Variables$c {
     startTime: number;
     cacheEnabled?: boolean;
 }
 declare const apiRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$a;
+    Bindings: Bindings$b;
+    Variables: Variables$b;
 }, hono_types.BlankSchema, "/">;
 
 declare const apiContentCrudRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const apiMediaRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const apiSystemRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const adminApiRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const authRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const app: Hono<hono_types.BlankEnv, hono_types.BlankSchema, "/">;
 
 declare const adminContentRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const userRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const adminMediaRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const adminPluginRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const adminLogsRoutes: Hono<{
+    Bindings: Bindings$b;
+    Variables: Variables$c;
+}, hono_types.BlankSchema, "/">;
+
+type Bindings$a = {
+    DB: D1Database;
+    KV: KVNamespace;
+};
+type Variables$a = {
+    user: {
+        userId: string;
+        email: string;
+        role: string;
+    };
+};
+declare const adminDesignRoutes: Hono<{
     Bindings: Bindings$a;
-    Variables: Variables$b;
+    Variables: Variables$a;
 }, hono_types.BlankSchema, "/">;
 
 type Bindings$9 = {
@@ -75,7 +91,7 @@ type Variables$9 = {
         role: string;
     };
 };
-declare const adminDesignRoutes: Hono<{
+declare const adminCheckboxRoutes: Hono<{
     Bindings: Bindings$9;
     Variables: Variables$9;
 }, hono_types.BlankSchema, "/">;
@@ -85,13 +101,15 @@ type Bindings$8 = {
     KV: KVNamespace;
 };
 type Variables$8 = {
-    user: {
+    user?: {
         userId: string;
         email: string;
         role: string;
+        exp: number;
+        iat: number;
     };
 };
-declare const adminCheckboxRoutes: Hono<{
+declare const adminTestimonialsRoutes: Hono<{
     Bindings: Bindings$8;
     Variables: Variables$8;
 }, hono_types.BlankSchema, "/">;
@@ -109,16 +127,41 @@ type Variables$7 = {
         iat: number;
     };
 };
-declare const adminTestimonialsRoutes: Hono<{
+declare const adminCodeExamplesRoutes: Hono<{
     Bindings: Bindings$7;
     Variables: Variables$7;
 }, hono_types.BlankSchema, "/">;
 
 type Bindings$6 = {
-    DB: D1Database;
-    KV: KVNamespace;
+    DB: D1Database$1;
+    CACHE_KV: KVNamespace$1;
+    MEDIA_BUCKET: R2Bucket$1;
 };
 type Variables$6 = {
+    user?: {
+        userId: string;
+        email: string;
+        role: string;
+    };
+};
+declare const router$2: Hono<{
+    Bindings: Bindings$6;
+    Variables: Variables$6;
+}, hono_types.BlankSchema, "/">;
+
+type Bindings$5 = {
+    DB: D1Database;
+    CACHE_KV: KVNamespace;
+    MEDIA_BUCKET: R2Bucket;
+    ASSETS: Fetcher;
+    EMAIL_QUEUE?: Queue;
+    SENDGRID_API_KEY?: string;
+    DEFAULT_FROM_EMAIL?: string;
+    IMAGES_ACCOUNT_ID?: string;
+    IMAGES_API_TOKEN?: string;
+    ENVIRONMENT?: string;
+};
+type Variables$5 = {
     user?: {
         userId: string;
         email: string;
@@ -126,25 +169,11 @@ type Variables$6 = {
         exp: number;
         iat: number;
     };
+    requestId?: string;
+    startTime?: number;
+    appVersion?: string;
 };
-declare const adminCodeExamplesRoutes: Hono<{
-    Bindings: Bindings$6;
-    Variables: Variables$6;
-}, hono_types.BlankSchema, "/">;
-
-type Bindings$5 = {
-    DB: D1Database$1;
-    CACHE_KV: KVNamespace$1;
-    MEDIA_BUCKET: R2Bucket$1;
-};
-type Variables$5 = {
-    user?: {
-        userId: string;
-        email: string;
-        role: string;
-    };
-};
-declare const router$1: Hono<{
+declare const adminCollectionsRoutes: Hono<{
     Bindings: Bindings$5;
     Variables: Variables$5;
 }, hono_types.BlankSchema, "/">;
@@ -173,7 +202,7 @@ type Variables$4 = {
     startTime?: number;
     appVersion?: string;
 };
-declare const adminCollectionsRoutes: Hono<{
+declare const adminSettingsRoutes: Hono<{
     Bindings: Bindings$4;
     Variables: Variables$4;
 }, hono_types.BlankSchema, "/">;
@@ -186,9 +215,8 @@ type Bindings$3 = {
     EMAIL_QUEUE?: Queue;
     SENDGRID_API_KEY?: string;
     DEFAULT_FROM_EMAIL?: string;
-    IMAGES_ACCOUNT_ID?: string;
-    IMAGES_API_TOKEN?: string;
     ENVIRONMENT?: string;
+    GOOGLE_MAPS_API_KEY?: string;
 };
 type Variables$3 = {
     user?: {
@@ -202,7 +230,7 @@ type Variables$3 = {
     startTime?: number;
     appVersion?: string;
 };
-declare const adminSettingsRoutes: Hono<{
+declare const adminFormsRoutes: Hono<{
     Bindings: Bindings$3;
     Variables: Variables$3;
 }, hono_types.BlankSchema, "/">;
@@ -230,35 +258,24 @@ type Variables$2 = {
     startTime?: number;
     appVersion?: string;
 };
-declare const adminFormsRoutes: Hono<{
+declare const publicFormsRoutes: Hono<{
     Bindings: Bindings$2;
     Variables: Variables$2;
 }, hono_types.BlankSchema, "/">;
 
 type Bindings$1 = {
-    DB: D1Database;
-    CACHE_KV: KVNamespace;
-    MEDIA_BUCKET: R2Bucket;
-    ASSETS: Fetcher;
-    EMAIL_QUEUE?: Queue;
-    SENDGRID_API_KEY?: string;
-    DEFAULT_FROM_EMAIL?: string;
-    ENVIRONMENT?: string;
-    GOOGLE_MAPS_API_KEY?: string;
+    DB: D1Database$1;
+    CACHE_KV: KVNamespace$1;
+    MEDIA_BUCKET: R2Bucket$1;
 };
 type Variables$1 = {
     user?: {
         userId: string;
         email: string;
         role: string;
-        exp: number;
-        iat: number;
     };
-    requestId?: string;
-    startTime?: number;
-    appVersion?: string;
 };
-declare const publicFormsRoutes: Hono<{
+declare const router$1: Hono<{
     Bindings: Bindings$1;
     Variables: Variables$1;
 }, hono_types.BlankSchema, "/">;
@@ -281,13 +298,13 @@ declare const router: Hono<{
 }, hono_types.BlankSchema, "/">;
 
 declare const adminSearchRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 declare const adminApiKeyRoutes: Hono<{
-    Bindings: Bindings$a;
-    Variables: Variables$b;
+    Bindings: Bindings$b;
+    Variables: Variables$c;
 }, hono_types.BlankSchema, "/">;
 
 /**
@@ -299,9 +316,9 @@ declare const adminApiKeyRoutes: Hono<{
 
 declare const ROUTES_INFO: {
     readonly message: "Core routes available";
-    readonly available: readonly ["apiRoutes", "apiContentCrudRoutes", "apiMediaRoutes", "apiSystemRoutes", "adminApiRoutes", "authRoutes", "testCleanupRoutes", "adminContentRoutes", "adminUsersRoutes", "adminMediaRoutes", "adminPluginRoutes", "adminLogsRoutes", "adminDesignRoutes", "adminCheckboxRoutes", "adminTestimonialsRoutes", "adminCodeExamplesRoutes", "adminDashboardRoutes", "adminCollectionsRoutes", "adminSettingsRoutes", "adminFormsRoutes", "publicFormsRoutes", "adminApiReferenceRoutes", "adminSearchRoutes", "adminApiKeyRoutes"];
+    readonly available: readonly ["apiRoutes", "apiContentCrudRoutes", "apiMediaRoutes", "apiSystemRoutes", "adminApiRoutes", "authRoutes", "testCleanupRoutes", "adminContentRoutes", "adminUsersRoutes", "adminMediaRoutes", "adminPluginRoutes", "adminLogsRoutes", "adminDesignRoutes", "adminCheckboxRoutes", "adminTestimonialsRoutes", "adminCodeExamplesRoutes", "adminDashboardRoutes", "adminCollectionsRoutes", "adminSettingsRoutes", "adminFormsRoutes", "publicFormsRoutes", "adminApiReferenceRoutes", "adminApiDocsRoutes", "adminSearchRoutes", "adminApiKeyRoutes"];
     readonly status: "Core package routes ready";
     readonly reference: "https://github.com/sonicjs/sonicjs";
 };
 
-export { ROUTES_INFO, adminApiKeyRoutes, router as adminApiReferenceRoutes, adminApiRoutes, adminCheckboxRoutes, adminCodeExamplesRoutes, adminCollectionsRoutes, adminContentRoutes, router$1 as adminDashboardRoutes, adminDesignRoutes, adminFormsRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSearchRoutes, adminSettingsRoutes, adminTestimonialsRoutes, userRoutes as adminUsersRoutes, apiContentCrudRoutes, apiMediaRoutes, apiRoutes, apiSystemRoutes, authRoutes, publicFormsRoutes, app as testCleanupRoutes };
+export { ROUTES_INFO, router as adminApiDocsRoutes, adminApiKeyRoutes, router$1 as adminApiReferenceRoutes, adminApiRoutes, adminCheckboxRoutes, adminCodeExamplesRoutes, adminCollectionsRoutes, adminContentRoutes, router$2 as adminDashboardRoutes, adminDesignRoutes, adminFormsRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSearchRoutes, adminSettingsRoutes, adminTestimonialsRoutes, userRoutes as adminUsersRoutes, apiContentCrudRoutes, apiMediaRoutes, apiRoutes, apiSystemRoutes, authRoutes, publicFormsRoutes, app as testCleanupRoutes };

@@ -1,9 +1,12 @@
-export { C as CorePlugin, n as LogCategory, o as LogEntry, p as LogFilter, m as LogLevel, L as Logger, e as Migration, M as MigrationService, h as MigrationStatus, q as PluginBootstrapService, P as PluginService, d as cleanupRemovedCollections, f as fullCollectionSync, g as getAvailableCollectionNames, j as getLogger, c as getManagedCollections, k as initLogger, i as isCollectionManaged, a as loadCollectionConfig, l as loadCollectionConfigs, r as registerCollections, b as syncCollection, s as syncCollections, v as validateCollectionConfig } from './plugin-bootstrap-DKB5f8-E.cjs';
+import { b as PluginRoutes } from './types-yEtlJwI7.cjs';
+export { G as CorePlugin, D as LogCategory, E as LogEntry, F as LogFilter, C as LogLevel, L as Logger, A as Migration, M as MigrationService, B as MigrationStatus, z as PluginBootstrapService, y as PluginService, t as cleanupRemovedCollections, u as fullCollectionSync, m as getAvailableCollectionNames, w as getLogger, q as getManagedCollections, x as initLogger, p as isCollectionManaged, k as loadCollectionConfig, l as loadCollectionConfigs, r as registerCollections, o as syncCollection, n as syncCollections, v as validateCollectionConfig } from './types-yEtlJwI7.cjs';
 import { b as TelemetryConfig, c as TelemetryIdentity, T as TelemetryEvent, a as TelemetryProperties } from './telemetry-UiD1i9GS.cjs';
-import './collection-config-BF95LgQb.cjs';
+import { a as FieldConfig } from './collection-config-BF95LgQb.cjs';
 import '@cloudflare/workers-types';
 import 'drizzle-zod';
 import 'drizzle-orm/sqlite-core';
+import 'hono';
+import 'zod';
 
 /**
  * Simple Cache Service
@@ -256,5 +259,91 @@ declare function setAppInstance(app: any): void;
 declare function getAppInstance(): any;
 declare const CATEGORY_INFO: Record<string, CategoryInfo>;
 declare function buildRouteList(app: any): RouteMetadata[];
+declare function buildOpenAPISpec(app: any, serverUrl: string): object;
 
-export { CACHE_CONFIGS, CATEGORY_INFO, type CacheConfig, CacheService, type GeneralSettings, type RouteMetadata, type Setting, SettingsService, TelemetryService, buildRouteList, createInstallationIdentity, getAppInstance, getCacheService, getTelemetryService, initTelemetry, setAppInstance };
+/**
+ * OpenAPI Specification Generator
+ *
+ * Converts the route metadata registry into a complete OpenAPI 3.0.0 spec.
+ * Uses Hono's inspectRoutes() for auto-discovery and enriches endpoints
+ * with detailed parameter, request body, and response schemas.
+ */
+
+interface OpenAPISpec {
+    openapi: string;
+    info: {
+        title: string;
+        version: string;
+        description: string;
+        contact?: {
+            name: string;
+            url: string;
+            email: string;
+        };
+        license?: {
+            name: string;
+            url: string;
+        };
+    };
+    servers: Array<{
+        url: string;
+        description: string;
+    }>;
+    paths: Record<string, Record<string, any>>;
+    components: {
+        securitySchemes: Record<string, any>;
+        schemas: Record<string, any>;
+    };
+    tags: Array<{
+        name: string;
+        description: string;
+    }>;
+}
+/**
+ * Convert a collection name to PascalCase for use as a schema name.
+ * e.g., 'blog_posts' → 'BlogPosts', 'news' → 'News'
+ */
+declare function toPascalCase(name: string): string;
+/**
+ * Map a single FieldConfig to an OpenAPI schema object.
+ */
+declare function fieldConfigToOpenAPISchema(field: FieldConfig): Record<string, any>;
+/**
+ * Generate 3 OpenAPI component schemas for a single collection:
+ *   - {PascalName}Data — the `data` field properties
+ *   - {PascalName}Content — full content object with $ref to Data
+ *   - {PascalName}Input — creation payload with $ref to Data
+ */
+declare function collectionSchemaToOpenAPI(collectionName: string, displayName: string, schema: {
+    properties?: Record<string, FieldConfig>;
+    required?: string[];
+}): Record<string, any>;
+/**
+ * Clear the in-memory collection schema cache.
+ * Call this after collection or field mutations.
+ */
+declare function clearCollectionSchemaCache(): void;
+/**
+ * Fetch collection schemas from D1 and convert to OpenAPI component schemas.
+ * Results are cached in-memory for 60 seconds.
+ */
+declare function getCollectionOpenAPIData(db: any): Promise<Record<string, any>>;
+/**
+ * Register OpenAPI metadata from a plugin's routes.
+ * Called during app bootstrap for each plugin that has routes.
+ */
+declare function registerPluginOpenAPI(pluginName: string, routes: PluginRoutes[]): void;
+/**
+ * Clear all registered plugin OpenAPI data. Used in tests.
+ */
+declare function clearPluginOpenAPIRegistry(): void;
+/**
+ * Generate a complete OpenAPI 3.0.0 specification from auto-discovered routes
+ *
+ * @param app - Hono app instance for route introspection
+ * @param serverUrl - Base server URL (e.g., https://my-app.workers.dev)
+ * @param db - Optional D1 database instance for collection schema enrichment
+ */
+declare function generateOpenAPISpec(app: any, serverUrl: string, db?: any): Promise<OpenAPISpec>;
+
+export { CACHE_CONFIGS, CATEGORY_INFO, type CacheConfig, CacheService, type GeneralSettings, type RouteMetadata, type Setting, SettingsService, TelemetryService, buildOpenAPISpec, buildRouteList, clearCollectionSchemaCache, clearPluginOpenAPIRegistry, collectionSchemaToOpenAPI, createInstallationIdentity, fieldConfigToOpenAPISchema, generateOpenAPISpec, getAppInstance, getCacheService, getCollectionOpenAPIData, getTelemetryService, initTelemetry, registerPluginOpenAPI, setAppInstance, toPascalCase };

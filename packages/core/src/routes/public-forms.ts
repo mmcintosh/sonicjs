@@ -1,5 +1,29 @@
 import { Hono } from 'hono'
 import { TurnstileService } from '../plugins/core-plugins/turnstile-plugin/services/turnstile'
+import { createContentFromSubmission } from '../services/form-collection-sync'
+import { sanitizeInput } from '../utils/sanitize'
+
+/**
+ * Recursively sanitize all string values in arbitrary JSON data.
+ * HTML-encodes entities (e.g., < becomes &lt;) to prevent stored XSS
+ * when form submission data is rendered in admin templates.
+ */
+function sanitizeDeep(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return sanitizeInput(value)
+  }
+  if (Array.isArray(value)) {
+    return value.map(sanitizeDeep)
+  }
+  if (value !== null && typeof value === 'object') {
+    const result: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value)) {
+      result[k] = sanitizeDeep(v)
+    }
+    return result
+  }
+  return value // numbers, booleans, null pass through
+}
 
 type Bindings = {
   DB: D1Database
@@ -538,6 +562,10 @@ publicFormsRoutes.post('/:identifier/submit', async (c) => {
       }
     }
 
+    // Sanitize all string values in submission data to prevent stored XSS.
+    // HTML-encodes entities (e.g., < becomes &lt;) before storage.
+    const sanitizedData = sanitizeDeep(body.data) as Record<string, unknown>
+
     // Create submission
     const submissionId = crypto.randomUUID()
     const now = Date.now()
@@ -550,7 +578,7 @@ publicFormsRoutes.post('/:identifier/submit', async (c) => {
     `).bind(
       submissionId,
       form.id,
-      JSON.stringify(body.data),
+      JSON.stringify(sanitizedData),
       null, // user_id (for authenticated users)
       c.req.header('cf-connecting-ip') || null,
       c.req.header('user-agent') || null,
@@ -560,16 +588,40 @@ publicFormsRoutes.post('/:identifier/submit', async (c) => {
 
     // Update submission count
     await db.prepare(`
-      UPDATE forms 
+      UPDATE forms
       SET submission_count = submission_count + 1,
           updated_at = ?
       WHERE id = ?
     `).bind(now, form.id).run()
 
-    return c.json({ 
-      success: true, 
+    // Dual-write: create content item for this submission
+    let contentId: string | null = null
+    try {
+      contentId = await createContentFromSubmission(
+        db,
+        sanitizedData,
+        { id: form.id as string, name: form.name as string, display_name: form.display_name as string },
+        submissionId,
+        {
+          ipAddress: c.req.header('cf-connecting-ip') || null,
+          userAgent: c.req.header('user-agent') || null,
+          userEmail: sanitizedData?.email as string || null,
+          userId: null // anonymous submission
+        }
+      )
+      if (!contentId) {
+        console.warn('[FormSubmit] Content creation returned null for submission:', submissionId)
+      }
+    } catch (contentError) {
+      // Don't fail the submission if content creation fails
+      console.error('[FormSubmit] Error creating content from submission:', contentError)
+    }
+
+    return c.json({
+      success: true,
       submissionId,
-      message: 'Form submitted successfully' 
+      contentId,
+      message: 'Form submitted successfully'
     })
   } catch (error: any) {
     console.error('Error submitting form:', error)
