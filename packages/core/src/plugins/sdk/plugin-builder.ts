@@ -8,7 +8,7 @@
 
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { Plugin, PluginBuilderOptions, PluginRoutes, PluginMiddleware, PluginModel, PluginService, PluginAdminPage, PluginComponent, PluginHook, PluginMenuItem } from '../types'
+import { Plugin, PluginBuilderOptions, PluginRoutes, PluginRouteOpenAPI, PluginMiddleware, PluginModel, PluginService, PluginAdminPage, PluginComponent, PluginHook, PluginMenuItem } from '../types'
 
 /**
  * Fluent builder for creating SonicJS plugins.
@@ -88,6 +88,7 @@ export class PluginBuilder {
     requiresAuth?: boolean
     roles?: string[]
     priority?: number
+    openapi?: PluginRouteOpenAPI
   }): PluginBuilder {
     const route: PluginRoutes = {
       path,

@@ -1,7 +1,7 @@
 'use strict';
 
-var chunkMNFY6DWY_cjs = require('./chunk-MNFY6DWY.cjs');
-var chunk6FHNRRJ3_cjs = require('./chunk-6FHNRRJ3.cjs');
+var chunkUICS6VT4_cjs = require('./chunk-UICS6VT4.cjs');
+var chunkQKE5AQHO_cjs = require('./chunk-QKE5AQHO.cjs');
 require('./chunk-KYGRJCZM.cjs');
 require('./chunk-IGJUBJBW.cjs');
 
@@ -9,39 +9,39 @@ require('./chunk-IGJUBJBW.cjs');
 
 Object.defineProperty(exports, "HookSystemImpl", {
   enumerable: true,
-  get: function () { return chunkMNFY6DWY_cjs.HookSystemImpl; }
+  get: function () { return chunkUICS6VT4_cjs.HookSystemImpl; }
 });
 Object.defineProperty(exports, "HookUtils", {
   enumerable: true,
-  get: function () { return chunkMNFY6DWY_cjs.HookUtils; }
+  get: function () { return chunkUICS6VT4_cjs.HookUtils; }
 });
 Object.defineProperty(exports, "PluginManager", {
   enumerable: true,
-  get: function () { return chunkMNFY6DWY_cjs.PluginManager; }
+  get: function () { return chunkUICS6VT4_cjs.PluginManager; }
 });
 Object.defineProperty(exports, "PluginRegistryImpl", {
   enumerable: true,
-  get: function () { return chunkMNFY6DWY_cjs.PluginRegistryImpl; }
+  get: function () { return chunkUICS6VT4_cjs.PluginRegistryImpl; }
 });
 Object.defineProperty(exports, "PluginValidator", {
   enumerable: true,
-  get: function () { return chunkMNFY6DWY_cjs.PluginValidator; }
+  get: function () { return chunkUICS6VT4_cjs.PluginValidator; }
 });
 Object.defineProperty(exports, "ScopedHookSystem", {
   enumerable: true,
-  get: function () { return chunkMNFY6DWY_cjs.ScopedHookSystem; }
+  get: function () { return chunkUICS6VT4_cjs.ScopedHookSystem; }
 });
 Object.defineProperty(exports, "createTurnstileMiddleware", {
   enumerable: true,
-  get: function () { return chunkMNFY6DWY_cjs.createTurnstileMiddleware; }
+  get: function () { return chunkUICS6VT4_cjs.createTurnstileMiddleware; }
 });
 Object.defineProperty(exports, "verifyTurnstile", {
   enumerable: true,
-  get: function () { return chunkMNFY6DWY_cjs.verifyTurnstile; }
+  get: function () { return chunkUICS6VT4_cjs.verifyTurnstile; }
 });
 Object.defineProperty(exports, "TurnstileService", {
   enumerable: true,
-  get: function () { return chunk6FHNRRJ3_cjs.TurnstileService; }
+  get: function () { return chunkQKE5AQHO_cjs.TurnstileService; }
 });
 //# sourceMappingURL=plugins.cjs.map
 //# sourceMappingURL=plugins.cjs.map

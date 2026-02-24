@@ -25,6 +25,7 @@ import {
   adminFormsRoutes,
   publicFormsRoutes,
   adminApiReferenceRoutes,
+  adminApiDocsRoutes,
   adminSearchRoutes,
   adminApiKeyRoutes
 } from './routes'
@@ -43,6 +44,7 @@ import cachePlugin from './plugins/cache'
 import { faviconSvg } from './assets/favicon'
 import { seedDataPlugin } from './plugins/core-plugins/seed-data-plugin'
 import { setAppInstance } from './services/route-metadata'
+import { registerPluginOpenAPI } from './services/openapi-generator'
 
 // ============================================================================
 // Type Definitions
@@ -201,6 +203,7 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
   app.route('/forms', publicFormsRoutes)
   app.route('/api/forms', publicFormsRoutes) // API endpoint for form submissions
   app.route('/admin/api-reference', adminApiReferenceRoutes)
+  app.route('/admin/api-docs', adminApiDocsRoutes)
   app.route('/admin/database-tools', createDatabaseToolsAdminRoutes())
   app.route('/admin/seed-data', createSeedDataAdminRoutes())
   app.route('/admin/content', adminContentRoutes)
@@ -214,6 +217,7 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
     for (const route of aiSearchPlugin.routes) {
       app.route(route.path, route.handler)
     }
+    registerPluginOpenAPI(aiSearchPlugin.name, aiSearchPlugin.routes)
   }
 
   // Plugin routes - Cache (dashboard and management API)
@@ -226,6 +230,7 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
     for (const route of otpLoginPlugin.routes) {
       app.route(route.path, route.handler as any)
     }
+    registerPluginOpenAPI(otpLoginPlugin.name, otpLoginPlugin.routes as any)
   }
 
   app.route('/admin/plugins', adminPluginRoutes)
@@ -241,6 +246,7 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
     for (const route of emailPlugin.routes) {
       app.route(route.path, route.handler as any)
     }
+    registerPluginOpenAPI(emailPlugin.name, emailPlugin.routes as any)
   }
 
   // Plugin routes - Magic Link Auth (passwordless authentication via email links)
@@ -249,6 +255,7 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
     for (const route of magicLinkPlugin.routes) {
       app.route(route.path, route.handler as any)
     }
+    registerPluginOpenAPI(magicLinkPlugin.name, magicLinkPlugin.routes as any)
   }
 
   // Serve favicon
@@ -266,6 +273,7 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
     for (const route of seedDataPlugin.routes) {
       app.route(route.path, route.handler)
     }
+    registerPluginOpenAPI(seedDataPlugin.name, seedDataPlugin.routes)
   }
 
   // Serve files from R2 storage (public file access)

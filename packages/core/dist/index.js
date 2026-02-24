@@ -1,17 +1,17 @@
-import { AISearchService, IndexManager, FTS5Service, renderSearchDashboard, BENCHMARK_DATASETS, RankingPipelineService, SynonymService, QueryRulesService, RelatedSearchService, FacetService, BenchmarkService, EmbeddingService, ChunkingService, TrendingSearchService, renderConfirmationDialog, getConfirmationDialogScript, api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminFormsRoutes, adminSettingsRoutes, public_forms_default, router2, admin_content_default, adminMediaRoutes, adminSearchRoutes, adminApiKeyRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-K4XFHVHU.js';
-export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-K4XFHVHU.js';
-import { SettingsService, setAppInstance, schema_exports } from './chunk-TG233QC4.js';
-export { Logger, apiTokens, collections, content, contentVersions, getLogger, initLogger, insertCollectionSchema, insertContentSchema, insertLogConfigSchema, insertMediaSchema, insertPluginActivityLogSchema, insertPluginAssetSchema, insertPluginHookSchema, insertPluginRouteSchema, insertPluginSchema, insertSystemLogSchema, insertUserSchema, insertWorkflowHistorySchema, logConfig, media, pluginActivityLog, pluginAssets, pluginHooks, pluginRoutes, plugins, selectCollectionSchema, selectContentSchema, selectLogConfigSchema, selectMediaSchema, selectPluginActivityLogSchema, selectPluginAssetSchema, selectPluginHookSchema, selectPluginRouteSchema, selectPluginSchema, selectSystemLogSchema, selectUserSchema, selectWorkflowHistorySchema, systemLogs, users, workflowHistory } from './chunk-TG233QC4.js';
-import { requireAuth, optionalAuth, optionalApiKey, AuthManager, metricsMiddleware, bootstrapMiddleware, securityHeadersMiddleware, csrfProtection } from './chunk-NL6JP7AL.js';
-export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeadersMiddleware as securityHeaders, securityLoggingMiddleware } from './chunk-NL6JP7AL.js';
+import { AISearchService, IndexManager, FTS5Service, renderSearchDashboard, BENCHMARK_DATASETS, RankingPipelineService, SynonymService, QueryRulesService, RelatedSearchService, FacetService, BenchmarkService, EmbeddingService, ChunkingService, TrendingSearchService, renderConfirmationDialog, getConfirmationDialogScript, api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminFormsRoutes, adminSettingsRoutes, public_forms_default, router2, router3, admin_content_default, adminMediaRoutes, adminSearchRoutes, adminApiKeyRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-X553XKQX.js';
+export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-X553XKQX.js';
+import { SettingsService, registerPluginOpenAPI, setAppInstance, schema_exports } from './chunk-TJF53S32.js';
+export { Logger, apiTokens, collections, content, contentVersions, getLogger, initLogger, insertCollectionSchema, insertContentSchema, insertLogConfigSchema, insertMediaSchema, insertPluginActivityLogSchema, insertPluginAssetSchema, insertPluginHookSchema, insertPluginRouteSchema, insertPluginSchema, insertSystemLogSchema, insertUserSchema, insertWorkflowHistorySchema, logConfig, media, pluginActivityLog, pluginAssets, pluginHooks, pluginRoutes, plugins, selectCollectionSchema, selectContentSchema, selectLogConfigSchema, selectMediaSchema, selectPluginActivityLogSchema, selectPluginAssetSchema, selectPluginHookSchema, selectPluginRouteSchema, selectPluginSchema, selectSystemLogSchema, selectUserSchema, selectWorkflowHistorySchema, systemLogs, users, workflowHistory } from './chunk-TJF53S32.js';
+import { requireAuth, optionalAuth, optionalApiKey, AuthManager, metricsMiddleware, bootstrapMiddleware, securityHeadersMiddleware, csrfProtection } from './chunk-FAWQP42T.js';
+export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeadersMiddleware as securityHeaders, securityLoggingMiddleware } from './chunk-FAWQP42T.js';
 export { PluginBootstrapService, PluginService as PluginServiceClass, cleanupRemovedCollections, fullCollectionSync, getAvailableCollectionNames, getManagedCollections, isCollectionManaged, loadCollectionConfig, loadCollectionConfigs, registerCollections, syncCollection, syncCollections, validateCollectionConfig } from './chunk-TVIJ7U2H.js';
-export { MigrationService } from './chunk-FSLYHOGH.js';
+export { MigrationService } from './chunk-ZPLI37BK.js';
 export { renderFilterBar } from './chunk-XRAPOKXL.js';
 import { init_admin_layout_catalyst_template, renderAdminLayoutCatalyst, renderAdminLayout } from './chunk-ALNWMXLD.js';
 export { getConfirmationDialogScript, renderAlert, renderConfirmationDialog, renderForm, renderFormField, renderPagination, renderTable } from './chunk-ALNWMXLD.js';
-export { HookSystemImpl, HookUtils, PluginManager as PluginManagerClass, PluginRegistryImpl, PluginValidator as PluginValidatorClass, ScopedHookSystem as ScopedHookSystemClass } from './chunk-CJYFSKH7.js';
-import { PluginBuilder } from './chunk-J5WGMRSU.js';
-export { PluginBuilder, PluginHelpers } from './chunk-J5WGMRSU.js';
+export { HookSystemImpl, HookUtils, PluginManager as PluginManagerClass, PluginRegistryImpl, PluginValidator as PluginValidatorClass, ScopedHookSystem as ScopedHookSystemClass } from './chunk-N7YQ36GO.js';
+import { PluginBuilder } from './chunk-6VOURUYJ.js';
+export { PluginBuilder, PluginHelpers } from './chunk-6VOURUYJ.js';
 import { package_default, getCoreVersion } from './chunk-7DXWBEQP.js';
 export { QueryFilterBuilder, SONICJS_VERSION, TemplateRenderer, buildQuery, escapeHtml, getCoreVersion, renderTemplate, sanitizeInput, sanitizeObject, templateRenderer } from './chunk-7DXWBEQP.js';
 import './chunk-X7ZAEI5S.js';
@@ -562,9 +562,9 @@ function formatCellValue(value) {
 
 // src/plugins/core-plugins/database-tools-plugin/admin-routes.ts
 function createDatabaseToolsAdminRoutes() {
-  const router3 = new Hono();
-  router3.use("*", requireAuth());
-  router3.get("/api/stats", async (c) => {
+  const router4 = new Hono();
+  router4.use("*", requireAuth());
+  router4.get("/api/stats", async (c) => {
     try {
       const user = c.get("user");
       if (!user || user.role !== "admin") {
@@ -588,7 +588,7 @@ function createDatabaseToolsAdminRoutes() {
       }, 500);
     }
   });
-  router3.post("/api/truncate", async (c) => {
+  router4.post("/api/truncate", async (c) => {
     try {
       const user = c.get("user");
       if (!user || user.role !== "admin") {
@@ -625,7 +625,7 @@ function createDatabaseToolsAdminRoutes() {
       }, 500);
     }
   });
-  router3.post("/api/backup", async (c) => {
+  router4.post("/api/backup", async (c) => {
     try {
       const user = c.get("user");
       if (!user || user.role !== "admin") {
@@ -652,7 +652,7 @@ function createDatabaseToolsAdminRoutes() {
       }, 500);
     }
   });
-  router3.get("/api/validate", async (c) => {
+  router4.get("/api/validate", async (c) => {
     try {
       const user = c.get("user");
       if (!user || user.role !== "admin") {
@@ -676,7 +676,7 @@ function createDatabaseToolsAdminRoutes() {
       }, 500);
     }
   });
-  router3.get("/api/tables/:tableName", async (c) => {
+  router4.get("/api/tables/:tableName", async (c) => {
     try {
       const user = c.get("user");
       if (!user || user.role !== "admin") {
@@ -705,7 +705,7 @@ function createDatabaseToolsAdminRoutes() {
       }, 500);
     }
   });
-  router3.get("/tables/:tableName", async (c) => {
+  router4.get("/tables/:tableName", async (c) => {
     try {
       const user = c.get("user");
       if (!user || user.role !== "admin") {
@@ -741,7 +741,7 @@ function createDatabaseToolsAdminRoutes() {
       return c.text(`Error: ${error}`, 500);
     }
   });
-  return router3;
+  return router4;
 }
 
 // src/plugins/core-plugins/seed-data-plugin/services/seed-data-service.ts
@@ -11707,6 +11707,7 @@ function createSonicJSApp(config = {}) {
   app2.route("/forms", public_forms_default);
   app2.route("/api/forms", public_forms_default);
   app2.route("/admin/api-reference", router2);
+  app2.route("/admin/api-docs", router3);
   app2.route("/admin/database-tools", createDatabaseToolsAdminRoutes());
   app2.route("/admin/seed-data", createSeedDataAdminRoutes());
   app2.route("/admin/content", admin_content_default);
@@ -11717,12 +11718,14 @@ function createSonicJSApp(config = {}) {
     for (const route of aiSearchPlugin.routes) {
       app2.route(route.path, route.handler);
     }
+    registerPluginOpenAPI(aiSearchPlugin.name, aiSearchPlugin.routes);
   }
   app2.route("/admin/cache", cache_default.getRoutes());
   if (otpLoginPlugin.routes && otpLoginPlugin.routes.length > 0) {
     for (const route of otpLoginPlugin.routes) {
       app2.route(route.path, route.handler);
     }
+    registerPluginOpenAPI(otpLoginPlugin.name, otpLoginPlugin.routes);
   }
   app2.route("/admin/plugins", adminPluginRoutes);
   app2.route("/admin/logs", adminLogsRoutes);
@@ -11733,12 +11736,14 @@ function createSonicJSApp(config = {}) {
     for (const route of emailPlugin.routes) {
       app2.route(route.path, route.handler);
     }
+    registerPluginOpenAPI(emailPlugin.name, emailPlugin.routes);
   }
   const magicLinkPlugin = createMagicLinkAuthPlugin();
   if (magicLinkPlugin.routes && magicLinkPlugin.routes.length > 0) {
     for (const route of magicLinkPlugin.routes) {
       app2.route(route.path, route.handler);
     }
+    registerPluginOpenAPI(magicLinkPlugin.name, magicLinkPlugin.routes);
   }
   app2.get("/favicon.svg", (c) => {
     return new Response(faviconSvg, {
@@ -11752,6 +11757,7 @@ function createSonicJSApp(config = {}) {
     for (const route of seedDataPlugin.routes) {
       app2.route(route.path, route.handler);
     }
+    registerPluginOpenAPI(seedDataPlugin.name, seedDataPlugin.routes);
   }
   app2.get("/files/*", async (c) => {
     try {

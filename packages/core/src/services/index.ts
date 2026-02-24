@@ -54,8 +54,21 @@ export {
 // Route Metadata (auto-discovery for API reference)
 export {
   buildRouteList,
+  buildOpenAPISpec,
   setAppInstance,
   getAppInstance,
   CATEGORY_INFO
 } from './route-metadata'
 export type { RouteMetadata } from './route-metadata'
+
+// OpenAPI Generator
+export {
+  generateOpenAPISpec,
+  registerPluginOpenAPI,
+  clearPluginOpenAPIRegistry,
+  clearCollectionSchemaCache,
+  fieldConfigToOpenAPISchema,
+  collectionSchemaToOpenAPI,
+  toPascalCase,
+  getCollectionOpenAPIData
+} from './openapi-generator'

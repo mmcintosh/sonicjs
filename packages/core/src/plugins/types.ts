@@ -100,6 +100,20 @@ export interface PluginConfig {
   updatedAt?: number
 }
 
+// OpenAPI metadata for plugin routes
+export interface PluginRouteOpenAPI {
+  /** Component schemas to register in the OpenAPI spec */
+  schemas?: Record<string, any>
+  /** Endpoint details keyed by "METHOD /relative-path" */
+  endpoints?: Record<string, {
+    operationId?: string
+    summary?: string
+    parameters?: Array<{ name: string; in: string; required?: boolean; description?: string; schema: any }>
+    requestBody?: { required?: boolean; description?: string; content: Record<string, { schema: any }> }
+    responses?: Record<string, { description: string; content?: any }>
+  }>
+}
+
 // Route definitions
 export interface PluginRoutes {
   /** Route path prefix */
@@ -114,6 +128,8 @@ export interface PluginRoutes {
   roles?: string[]
   /** Route priority (for ordering) */
   priority?: number
+  /** Optional OpenAPI metadata for this route */
+  openapi?: PluginRouteOpenAPI
 }
 
 // Middleware definitions
