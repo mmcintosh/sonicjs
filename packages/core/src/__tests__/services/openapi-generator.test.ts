@@ -50,7 +50,7 @@ describe('OpenAPI Generator', () => {
       const spec = await generateOpenAPISpec({}, 'https://example.com')
 
       expect(spec.openapi).toBe('3.0.0')
-      expect(spec.info.title).toBe('SonicJS API')
+      expect(spec.info.title).toBe('SonicJS AI API')
       expect(spec.info.version).toBe('1.0.0')
       expect(spec.info.description).toBeTruthy()
       expect(spec.info.contact).toBeDefined()

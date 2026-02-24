@@ -1027,7 +1027,7 @@ export async function generateOpenAPISpec(app: any, serverUrl: string, db?: any)
   return {
     openapi: '3.0.0',
     info: {
-      title: 'SonicJS API',
+      title: 'SonicJS AI API',
       version: '1.0.0',
       description: 'RESTful API for SonicJS headless CMS — a modern, AI-powered content management system built on Cloudflare Workers. Features include content management, media handling, full-text and AI-powered search, workflow management, and more.',
       contact: {
