@@ -145,21 +145,16 @@ If DALL-E generation fails or produces unsuitable results:
 
 ## Environment Setup
 
-**IMPORTANT**: Source the environment file before making API calls:
+**IMPORTANT**: The OPENAI_API_KEY must be available as an environment variable before making API calls.
 
+Check if it's set:
 ```bash
-source /Users/lane/Dropbox/Data/.env
+echo $OPENAI_API_KEY | head -c 10
 ```
 
-This file contains the OPENAI_API_KEY and other credentials needed for image generation.
+If not set, the user needs to export it or source it from their own env file.
 
-For Cloudflare Workers deployment, add to `wrangler.toml`:
-```toml
-[vars]
-OPENAI_API_KEY = "sk-your-api-key-here"
-```
-
-Or use Cloudflare secrets:
+For Cloudflare Workers deployment, use Cloudflare secrets:
 ```bash
 wrangler secret put OPENAI_API_KEY
 ```

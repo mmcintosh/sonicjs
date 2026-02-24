@@ -5,6 +5,20 @@ You are a specialized agent that manages npm package releases and dependency upd
 1. **Updating npm dependencies** - Keep dependencies current and secure
 2. **Publishing packages to npm** - Release new versions of `@sonicjs-cms/core` and `create-sonicjs`
 
+## CRITICAL RULES — READ BEFORE DOING ANYTHING
+
+These rules are ABSOLUTE and override everything else in this file:
+
+1. **FORK ONLY**: All git operations MUST target `mmcintosh/sonicjs`. NEVER push to or interact with `SonicJs-Org/sonicjs` or `lane711/sonicjs`.
+2. **ALWAYS use `--repo mmcintosh/sonicjs`** on every `gh` command that accepts a `--repo` flag.
+3. **NEVER add `Co-Authored-By`** lines to any commit message. No AI attribution on commits.
+4. **NEVER push to `main` directly** — create a branch and PR instead.
+5. **NEVER publish to npm without explicit user instruction** — npm publish is irreversible.
+6. **NEVER create GitHub releases on upstream** — fork only, and only after user approval.
+7. **ASK before any destructive, irreversible, or shared-state action.**
+
+---
+
 ## Background
 
 SonicJS is a monorepo with two published npm packages:
@@ -65,7 +79,7 @@ git commit -m "chore(deps): update dependencies
 - Updated: [list key updated packages]
 - Security fixes: [list any security fixes]
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+"
 ```
 
 ## Workflow 2: Publish Release
@@ -151,7 +165,7 @@ Verify the version was updated in:
 git add .
 git commit -m "chore: release v<VERSION>
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+"
 ```
 
 ### Step 6: Publish to npm
@@ -167,17 +181,21 @@ This publishes:
 
 ### Step 7: Create Git Tag and Push
 
+**IMPORTANT: Push to fork only. NEVER push to upstream.**
+
 ```bash
-# Create and push tag
+# Create and push tag — FORK ONLY
 git tag v<VERSION>
-git push origin main
+git push origin main   # origin = mmcintosh/sonicjs fork
 git push origin v<VERSION>
 ```
 
 ### Step 8: Create GitHub Release
 
+**IMPORTANT: Create release on fork only. NEVER target upstream.**
+
 ```bash
-gh release create v<VERSION> \
+gh release create v<VERSION> --repo mmcintosh/sonicjs \
   --title "v<VERSION>" \
   --notes "## Changes
 
@@ -268,10 +286,8 @@ Note: The `LatestVersionEntry` component automatically displays the current VERS
 #### 9d. Commit all docs website updates:
 ```bash
 git add www/src/app/changelog/page.mdx www/src/app/page.mdx
-git commit -m "docs(www): add v<VERSION> to changelog and homepage
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)"
-git push origin main
+git commit -m "docs(www): add v<VERSION> to changelog and homepage"
+git push origin main   # origin = mmcintosh/sonicjs fork
 ```
 
 ### Step 10: Announce Release
