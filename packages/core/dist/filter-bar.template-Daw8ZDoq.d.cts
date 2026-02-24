@@ -39,6 +39,7 @@ interface FormData {
     title?: string;
     description?: string;
     className?: string;
+    csrfToken?: string;
 }
 declare function renderForm(data: FormData): string;
 declare function renderFormField(field: FormField): string;

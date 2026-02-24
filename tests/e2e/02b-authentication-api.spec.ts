@@ -1,5 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { ADMIN_CREDENTIALS } from './utils/test-helpers';
+import { ADMIN_CREDENTIALS, extractCsrfToken } from './utils/test-helpers';
+
+/**
+ * Check if a registration response indicates registration is disabled
+ * by a concurrent test shard (37-disable-registration.spec.ts).
+ * Returns true if the test should be skipped.
+ */
+function isRegistrationDisabled(status: number, body: any): boolean {
+  if (status !== 403) return false;
+  const msg = body?.error || '';
+  return msg.includes('disabled') || msg.includes('Registration');
+}
 
 test.describe('Authentication API', () => {
   const testUser = {
@@ -55,12 +66,13 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
-      expect(response.status()).toBe(201);
-      
       const data = await response.json();
+      if (isRegistrationDisabled(response.status(), data)) return;
+
+      expect(response.status()).toBe(201);
       expect(data).toHaveProperty('user');
       expect(data).toHaveProperty('token');
-      
+
       // Verify user object
       expect(data.user).toMatchObject({
         email: uniqueUser.email.toLowerCase(),
@@ -69,10 +81,10 @@ test.describe('Authentication API', () => {
         lastName: uniqueUser.lastName,
         role: 'viewer'
       });
-      
+
       // Should have a valid UUID
       expect(data.user.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
-      
+
       // Should have a JWT token
       expect(data.token).toBeTruthy();
       expect(data.token.split('.')).toHaveLength(3); // JWT format
@@ -89,9 +101,10 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
-      expect(response.status()).toBe(201);
-      
       const data = await response.json();
+      if (isRegistrationDisabled(response.status(), data)) return;
+
+      expect(response.status()).toBe(201);
       expect(data.user.email).toBe(uniqueUser.email.toLowerCase());
     });
 
@@ -130,6 +143,8 @@ test.describe('Authentication API', () => {
       const firstResponse = await request.post('/auth/register', {
         data: uniqueUser
       });
+      const firstData = await firstResponse.json();
+      if (isRegistrationDisabled(firstResponse.status(), firstData)) return;
       expect(firstResponse.status()).toBe(201);
 
       // Second registration with same email should fail
@@ -141,7 +156,7 @@ test.describe('Authentication API', () => {
       });
 
       expect(secondResponse.status()).toBe(400);
-      
+
       const data = await secondResponse.json();
       expect(data.error).toContain('already exists');
     });
@@ -157,6 +172,8 @@ test.describe('Authentication API', () => {
       const firstResponse = await request.post('/auth/register', {
         data: uniqueUser
       });
+      const firstData = await firstResponse.json();
+      if (isRegistrationDisabled(firstResponse.status(), firstData)) return;
       expect(firstResponse.status()).toBe(201);
 
       // Second registration with same username should fail
@@ -168,7 +185,7 @@ test.describe('Authentication API', () => {
       });
 
       expect(secondResponse.status()).toBe(400);
-      
+
       const data = await secondResponse.json();
       expect(data.error).toContain('already exists');
     });
@@ -184,8 +201,13 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
+      if (response.status() === 403) {
+        const body = await response.json();
+        if (isRegistrationDisabled(response.status(), body)) return;
+      }
+
       expect(response.status()).toBe(201);
-      
+
       // Check for auth cookie
       const cookies = response.headers()['set-cookie'];
       expect(cookies).toBeTruthy();
@@ -205,9 +227,10 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
-      expect(response.status()).toBe(201);
-      
       const data = await response.json();
+      if (isRegistrationDisabled(response.status(), data)) return;
+
+      expect(response.status()).toBe(201);
       expect(data.user.role).toBe('viewer');
     });
   });
@@ -355,14 +378,16 @@ test.describe('Authentication API', () => {
       });
       expect(loginResponse.status()).toBe(200);
 
-      // Extract auth cookie
+      // Extract auth cookie and CSRF token
       const cookies = loginResponse.headers()['set-cookie'];
       const authCookie = cookies?.split(';')[0] || '';
+      const csrfToken = extractCsrfToken(cookies);
 
       // Logout with the session
       const logoutResponse = await request.post('/auth/logout', {
         headers: {
-          'Cookie': authCookie
+          'Cookie': `${authCookie}; csrf_token=${csrfToken}`,
+          'X-CSRF-Token': csrfToken
         }
       });
 
@@ -458,9 +483,10 @@ test.describe('Authentication API', () => {
       const loginData = await loginResponse.json();
       const originalToken = loginData.token;
 
-      // Extract auth cookie
+      // Extract auth cookie and CSRF token
       const cookies = loginResponse.headers()['set-cookie'];
       const authCookie = cookies?.split(';')[0] || '';
+      const csrfToken = extractCsrfToken(cookies);
 
       // Wait a moment to ensure different timestamp
       await new Promise(resolve => setTimeout(resolve, 1100));
@@ -468,7 +494,8 @@ test.describe('Authentication API', () => {
       // Refresh token
       const refreshResponse = await request.post('/auth/refresh', {
         headers: {
-          'Cookie': authCookie
+          'Cookie': `${authCookie}; csrf_token=${csrfToken}`,
+          'X-CSRF-Token': csrfToken
         }
       });
 
@@ -511,15 +538,16 @@ test.describe('Authentication API', () => {
         data: uniqueUser
       });
 
-      expect(response.status()).toBe(201);
-      
       const data = await response.json();
-      
+      if (isRegistrationDisabled(response.status(), data)) return;
+
+      expect(response.status()).toBe(201);
+
       // Should not expose password or hash
       expect(data.user).not.toHaveProperty('password');
       expect(data.user).not.toHaveProperty('password_hash');
       expect(data.user).not.toHaveProperty('passwordHash');
-      
+
       // Response should not contain the original password
       const responseText = JSON.stringify(data);
       expect(responseText).not.toContain(uniqueUser.password);
@@ -678,11 +706,13 @@ test.describe('Authentication API', () => {
 
       const cookies = loginResponse.headers()['set-cookie'];
       const authCookie = cookies?.split(';')[0] || '';
+      const csrfToken = extractCsrfToken(cookies);
+      const fullCookie = `${authCookie}; csrf_token=${csrfToken}`;
 
       // Make authenticated request
       const meResponse = await request.get('/auth/me', {
         headers: {
-          'Cookie': authCookie
+          'Cookie': fullCookie
         }
       });
       expect(meResponse.status()).toBe(200);
@@ -690,7 +720,8 @@ test.describe('Authentication API', () => {
       // Make another authenticated request
       const refreshResponse = await request.post('/auth/refresh', {
         headers: {
-          'Cookie': authCookie
+          'Cookie': fullCookie,
+          'X-CSRF-Token': csrfToken
         }
       });
       expect(refreshResponse.status()).toBe(200);

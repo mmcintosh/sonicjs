@@ -41,6 +41,7 @@ interface Variables {
         scopes: string[];
         userId: string;
     };
+    csrfToken?: string;
 }
 interface SonicJSConfig {
     collections?: {
