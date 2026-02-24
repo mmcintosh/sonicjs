@@ -92,6 +92,21 @@ export function renderAPIReferencePage(data: APIReferencePageData): string {
         </div>
       </div>
 
+      <!-- Tabs -->
+      <div class="border-b border-zinc-950/10 dark:border-white/10">
+        <nav class="-mb-px flex gap-x-6" aria-label="Tabs">
+          <button id="tab-endpoints" onclick="switchTab('endpoints')" class="tab-btn border-b-2 border-zinc-950 dark:border-white px-1 pb-3 text-sm font-semibold text-zinc-950 dark:text-white">
+            Endpoints
+          </button>
+          <button id="tab-interactive" onclick="switchTab('interactive')" class="tab-btn border-b-2 border-transparent px-1 pb-3 text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-300">
+            Interactive
+          </button>
+        </nav>
+      </div>
+
+      <!-- Endpoints Tab Content -->
+      <div id="content-endpoints">
+
       <!-- Stats -->
       <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div class="rounded-lg bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 px-6 py-5">
@@ -252,6 +267,25 @@ export function renderAPIReferencePage(data: APIReferencePageData): string {
         <h3 class="mt-4 text-base/7 font-semibold text-zinc-950 dark:text-white">No endpoints found</h3>
         <p class="mt-2 text-sm/6 text-zinc-500 dark:text-zinc-400">Try adjusting your search or filter criteria</p>
       </div>
+
+      </div><!-- end content-endpoints -->
+
+      <!-- Interactive Tab Content -->
+      <div id="content-interactive" class="hidden">
+        <div class="rounded-lg bg-white dark:bg-zinc-900 shadow-sm ring-1 ring-zinc-950/5 dark:ring-white/10 overflow-hidden" style="min-height: 600px;">
+          <div id="scalar-loading" class="flex items-center justify-center py-20">
+            <div class="text-center">
+              <svg class="animate-spin h-8 w-8 text-zinc-400 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400">Loading interactive API explorer...</p>
+            </div>
+          </div>
+          <div id="scalar-container"></div>
+        </div>
+      </div>
+
     </div>
 
     <style>
@@ -354,6 +388,66 @@ export function renderAPIReferencePage(data: APIReferencePageData): string {
           });
         }
       });
+
+      // Tab switching
+      let scalarLoaded = false;
+
+      function switchTab(tab) {
+        const endpointsContent = document.getElementById('content-endpoints');
+        const interactiveContent = document.getElementById('content-interactive');
+        const tabEndpoints = document.getElementById('tab-endpoints');
+        const tabInteractive = document.getElementById('tab-interactive');
+
+        const activeClasses = 'border-b-2 border-zinc-950 dark:border-white px-1 pb-3 text-sm font-semibold text-zinc-950 dark:text-white';
+        const inactiveClasses = 'border-b-2 border-transparent px-1 pb-3 text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-300';
+
+        if (tab === 'endpoints') {
+          endpointsContent.classList.remove('hidden');
+          interactiveContent.classList.add('hidden');
+          tabEndpoints.className = 'tab-btn ' + activeClasses;
+          tabInteractive.className = 'tab-btn ' + inactiveClasses;
+        } else {
+          endpointsContent.classList.add('hidden');
+          interactiveContent.classList.remove('hidden');
+          tabEndpoints.className = 'tab-btn ' + inactiveClasses;
+          tabInteractive.className = 'tab-btn ' + activeClasses;
+          if (!scalarLoaded) {
+            loadScalar();
+          }
+        }
+      }
+
+      function loadScalar() {
+        scalarLoaded = true;
+        var container = document.getElementById('scalar-container');
+        var loading = document.getElementById('scalar-loading');
+
+        // Create the api-reference element
+        var el = document.createElement('div');
+        el.id = 'api-reference';
+        el.setAttribute('data-url', '/api');
+        el.setAttribute('data-configuration', JSON.stringify({
+          theme: 'kepler',
+          darkMode: true,
+          hideDownloadButton: false,
+          hiddenClients: [],
+          defaultOpenAllTags: false,
+        }));
+        container.appendChild(el);
+
+        // Load the Scalar script
+        var script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@scalar/api-reference';
+        script.onload = function() {
+          if (loading) loading.style.display = 'none';
+        };
+        script.onerror = function() {
+          if (loading) {
+            loading.innerHTML = '<div class="text-center py-12"><p class="text-sm text-red-500">Failed to load interactive API explorer. Check your network connection.</p><button onclick="loadScalar()" class="mt-4 text-sm text-zinc-500 hover:text-zinc-700 underline">Retry</button></div>';
+          }
+        };
+        document.head.appendChild(script);
+      }
     </script>
   `
 

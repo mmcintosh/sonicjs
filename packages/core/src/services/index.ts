@@ -54,6 +54,7 @@ export {
 // Route Metadata (auto-discovery for API reference)
 export {
   buildRouteList,
+  buildOpenAPISpec,
   setAppInstance,
   getAppInstance,
   CATEGORY_INFO
