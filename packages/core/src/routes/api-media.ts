@@ -1,6 +1,11 @@
 import { Hono } from 'hono'
-import { z } from 'zod'
 import { requireAuth } from '../middleware'
+import {
+  validateUploadedFile,
+  validateFolder,
+  normalizeMimeType,
+  getContentDisposition,
+} from '../utils/file-validation'
 import type { Bindings, Variables } from '../app'
 
 // Helper function to generate short IDs (replacement for nanoid)
@@ -13,29 +18,6 @@ async function emitEvent(eventName: string, data: any) {
   console.log(`[Event] ${eventName}:`, data)
   // TODO: Implement proper event system when plugin architecture is ready
 }
-
-// File validation schema
-const fileValidationSchema = z.object({
-  name: z.string().min(1).max(255),
-  type: z.string().refine(
-    (type) => {
-      const allowedTypes = [
-        // Images
-        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-        // Documents
-        'application/pdf', 'text/plain', 'application/msword', 
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        // Videos
-        'video/mp4', 'video/webm', 'video/ogg', 'video/avi', 'video/mov',
-        // Audio
-        'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a'
-      ]
-      return allowedTypes.includes(type)
-    },
-    { message: 'Unsupported file type' }
-  ),
-  size: z.number().min(1).max(50 * 1024 * 1024) // 50MB max
-})
 
 export const apiMediaRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -54,34 +36,33 @@ apiMediaRoutes.post('/upload', async (c) => {
     }
 
     const file = fileData as File
+    const folder = formData.get('folder') as string || 'uploads'
 
-    // Validate file
-    const validation = fileValidationSchema.safeParse({
-      name: file.name,
-      type: file.type,
-      size: file.size
-    })
+    // Read file content for validation and upload
+    const arrayBuffer = await file.arrayBuffer()
 
-    if (!validation.success) {
-      return c.json({ 
-        error: 'File validation failed', 
-        details: validation.error.issues 
+    // Validate file (schema + magic bytes + extension + folder)
+    const validation = validateUploadedFile(file, arrayBuffer, folder)
+    if (!validation.valid) {
+      return c.json({
+        error: 'File validation failed',
+        details: validation.errors
       }, 400)
     }
+
+    const normalizedType = validation.normalizedMimeType
 
     // Generate unique filename and R2 key
     const fileId = generateId()
     const fileExtension = file.name.split('.').pop() || ''
     const filename = `${fileId}.${fileExtension}`
-    const folder = formData.get('folder') as string || 'uploads'
     const r2Key = `${folder}/${filename}`
 
     // Upload to R2
-    const arrayBuffer = await file.arrayBuffer()
     const uploadResult = await c.env.MEDIA_BUCKET.put(r2Key, arrayBuffer, {
       httpMetadata: {
-        contentType: file.type,
-        contentDisposition: `inline; filename="${file.name}"`
+        contentType: normalizedType,
+        contentDisposition: `${getContentDisposition(normalizedType)}; filename="${file.name}"`
       },
       customMetadata: {
         originalName: file.name,
@@ -102,7 +83,7 @@ apiMediaRoutes.post('/upload', async (c) => {
     let width: number | undefined
     let height: number | undefined
     
-    if (file.type.startsWith('image/') && !file.type.includes('svg')) {
+    if (normalizedType.startsWith('image/') && !normalizedType.includes('svg')) {
       try {
         const dimensions = await getImageDimensions(arrayBuffer)
         width = dimensions.width
@@ -114,7 +95,7 @@ apiMediaRoutes.post('/upload', async (c) => {
 
     // Generate thumbnail URL for images
     let thumbnailUrl: string | undefined
-    if (file.type.startsWith('image/') && c.env.IMAGES_ACCOUNT_ID) {
+    if (normalizedType.startsWith('image/') && c.env.IMAGES_ACCOUNT_ID) {
       thumbnailUrl = `https://imagedelivery.net/${c.env.IMAGES_ACCOUNT_ID}/${r2Key}/thumbnail`
     }
 
@@ -123,7 +104,7 @@ apiMediaRoutes.post('/upload', async (c) => {
       id: fileId,
       filename: filename,
       original_name: file.name,
-      mime_type: file.type,
+      mime_type: normalizedType,
       size: file.size,
       width,
       height,
@@ -206,37 +187,37 @@ apiMediaRoutes.post('/upload-multiple', async (c) => {
     const uploadResults = []
     const errors = []
 
+    const folder = formData.get('folder') as string || 'uploads'
+
     for (const file of files) {
       try {
-        // Validate file
-        const validation = fileValidationSchema.safeParse({
-          name: file.name,
-          type: file.type,
-          size: file.size
-        })
+        // Read file content for validation and upload
+        const arrayBuffer = await file.arrayBuffer()
 
-        if (!validation.success) {
+        // Validate file (schema + magic bytes + extension + folder)
+        const validation = validateUploadedFile(file, arrayBuffer, folder)
+        if (!validation.valid) {
           errors.push({
             filename: file.name,
             error: 'Validation failed',
-            details: validation.error.issues
+            details: validation.errors
           })
           continue
         }
+
+        const normalizedType = validation.normalizedMimeType
 
         // Generate unique filename and R2 key
         const fileId = generateId()
         const fileExtension = file.name.split('.').pop() || ''
         const filename = `${fileId}.${fileExtension}`
-        const folder = formData.get('folder') as string || 'uploads'
         const r2Key = `${folder}/${filename}`
 
         // Upload to R2
-        const arrayBuffer = await file.arrayBuffer()
         const uploadResult = await c.env.MEDIA_BUCKET.put(r2Key, arrayBuffer, {
           httpMetadata: {
-            contentType: file.type,
-            contentDisposition: `inline; filename="${file.name}"`
+            contentType: normalizedType,
+            contentDisposition: `${getContentDisposition(normalizedType)}; filename="${file.name}"`
           },
           customMetadata: {
             originalName: file.name,
@@ -261,7 +242,7 @@ apiMediaRoutes.post('/upload-multiple', async (c) => {
         let width: number | undefined
         let height: number | undefined
         
-        if (file.type.startsWith('image/') && !file.type.includes('svg')) {
+        if (normalizedType.startsWith('image/') && !normalizedType.includes('svg')) {
           try {
             const dimensions = await getImageDimensions(arrayBuffer)
             width = dimensions.width
@@ -273,7 +254,7 @@ apiMediaRoutes.post('/upload-multiple', async (c) => {
 
         // Generate thumbnail URL for images
         let thumbnailUrl: string | undefined
-        if (file.type.startsWith('image/') && c.env.IMAGES_ACCOUNT_ID) {
+        if (normalizedType.startsWith('image/') && c.env.IMAGES_ACCOUNT_ID) {
           thumbnailUrl = `https://imagedelivery.net/${c.env.IMAGES_ACCOUNT_ID}/${r2Key}/thumbnail`
         }
 
@@ -282,7 +263,7 @@ apiMediaRoutes.post('/upload-multiple', async (c) => {
           id: fileId,
           filename: filename,
           original_name: file.name,
-          mime_type: file.type,
+          mime_type: normalizedType,
           size: file.size,
           width,
           height,
@@ -466,11 +447,10 @@ apiMediaRoutes.post('/create-folder', async (c) => {
     }
 
     // Validate folder name format
-    const folderPattern = /^[a-z0-9-_]+$/
-    if (!folderPattern.test(folderName)) {
+    if (!validateFolder(folderName)) {
       return c.json({
         success: false,
-        error: 'Folder name can only contain lowercase letters, numbers, hyphens, and underscores'
+        error: 'Folder name can only contain lowercase letters, numbers, hyphens, and underscores (max 64 chars, must start with alphanumeric)'
       }, 400)
     }
 
@@ -513,6 +493,10 @@ apiMediaRoutes.post('/bulk-move', async (c) => {
 
     if (!targetFolder || typeof targetFolder !== 'string') {
       return c.json({ error: 'No target folder provided' }, 400)
+    }
+
+    if (!validateFolder(targetFolder)) {
+      return c.json({ error: 'Invalid target folder name' }, 400)
     }
 
     // Limit bulk operations to prevent abuse

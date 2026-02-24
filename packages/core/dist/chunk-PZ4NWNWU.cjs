@@ -1,3 +1,7 @@
+'use strict';
+
+var zod = require('zod');
+
 // src/utils/sanitize.ts
 function escapeHtml(text) {
   if (typeof text !== "string") {
@@ -602,7 +606,287 @@ function parseBlocksValue(value, config) {
   }).filter((item) => item !== null);
   return { value: normalized, errors };
 }
+var MAX_FILE_SIZE = 50 * 1024 * 1024;
+var ALLOWED_MIME_TYPES = [
+  // Images
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml",
+  // Documents
+  "application/pdf",
+  "text/plain",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  // Videos
+  "video/mp4",
+  "video/webm",
+  "video/ogg",
+  "video/avi",
+  "video/quicktime",
+  // Audio
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/mp4"
+];
+var MIME_TO_EXTENSIONS = {
+  "image/jpeg": ["jpg", "jpeg"],
+  "image/png": ["png"],
+  "image/gif": ["gif"],
+  "image/webp": ["webp"],
+  "image/svg+xml": ["svg"],
+  "application/pdf": ["pdf"],
+  "text/plain": ["txt", "text", "log", "csv", "md"],
+  "application/msword": ["doc"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["docx"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["xlsx"],
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": ["pptx"],
+  "video/mp4": ["mp4", "m4v"],
+  "video/webm": ["webm"],
+  "video/ogg": ["ogv", "ogg"],
+  "video/avi": ["avi"],
+  "video/quicktime": ["mov", "qt"],
+  "audio/mpeg": ["mp3"],
+  "audio/wav": ["wav"],
+  "audio/ogg": ["ogg", "oga"],
+  "audio/mp4": ["m4a", "mp4"]
+};
+var MIME_ALIASES = {
+  "image/jpg": "image/jpeg",
+  "audio/mp3": "audio/mpeg",
+  "audio/m4a": "audio/mp4",
+  "video/mov": "video/quicktime"
+};
+function normalizeMimeType(type) {
+  return MIME_ALIASES[type] || type;
+}
+var MAGIC_SIGNATURES = {
+  "image/jpeg": [
+    { bytes: [255, 216, 255] }
+  ],
+  "image/png": [
+    { bytes: [137, 80, 78, 71, 13, 10, 26, 10] }
+  ],
+  "image/gif": [
+    { bytes: [71, 73, 70, 56, 55, 97] },
+    // GIF87a
+    { bytes: [71, 73, 70, 56, 57, 97] }
+    // GIF89a
+  ],
+  "image/webp": [
+    // RIFF....WEBP
+    { bytes: [82, 73, 70, 70], sub: { bytes: [87, 69, 66, 80], offset: 8 } }
+  ],
+  "application/pdf": [
+    { bytes: [37, 80, 68, 70, 45] }
+    // %PDF-
+  ],
+  "application/msword": [
+    { bytes: [208, 207, 17, 224, 161, 177, 26, 225] }
+    // OLE2 compound
+  ],
+  // Office Open XML — all are PK/ZIP
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+    { bytes: [80, 75, 3, 4] }
+  ],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+    { bytes: [80, 75, 3, 4] }
+  ],
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": [
+    { bytes: [80, 75, 3, 4] }
+  ],
+  // ftyp container — shared by MP4, M4A, MOV
+  "video/mp4": [
+    { bytes: [102, 116, 121, 112], offset: 4 }
+    // ftyp at offset 4
+  ],
+  "audio/mp4": [
+    { bytes: [102, 116, 121, 112], offset: 4 }
+  ],
+  "video/quicktime": [
+    { bytes: [102, 116, 121, 112], offset: 4 }
+  ],
+  "video/webm": [
+    { bytes: [26, 69, 223, 163] }
+    // EBML header
+  ],
+  // OggS container — shared by audio/ogg and video/ogg
+  "video/ogg": [
+    { bytes: [79, 103, 103, 83] }
+    // OggS
+  ],
+  "audio/ogg": [
+    { bytes: [79, 103, 103, 83] }
+  ],
+  "video/avi": [
+    // RIFF....AVI
+    { bytes: [82, 73, 70, 70], sub: { bytes: [65, 86, 73, 32], offset: 8 } }
+  ],
+  "audio/wav": [
+    // RIFF....WAVE
+    { bytes: [82, 73, 70, 70], sub: { bytes: [87, 65, 86, 69], offset: 8 } }
+  ],
+  "audio/mpeg": [
+    { bytes: [255, 251] },
+    // MPEG Audio Layer 3 sync
+    { bytes: [255, 243] },
+    { bytes: [255, 242] },
+    { bytes: [73, 68, 51] }
+    // ID3 tag
+  ]
+};
+function matchesSignature(view, sig) {
+  const offset = sig.offset || 0;
+  if (view.length < offset + sig.bytes.length) return false;
+  for (let i = 0; i < sig.bytes.length; i++) {
+    if (view[offset + i] !== sig.bytes[i]) return false;
+  }
+  if (sig.sub) {
+    if (view.length < sig.sub.offset + sig.sub.bytes.length) return false;
+    for (let i = 0; i < sig.sub.bytes.length; i++) {
+      if (view[sig.sub.offset + i] !== sig.sub.bytes[i]) return false;
+    }
+  }
+  return true;
+}
+function looksLikeSvg(view) {
+  const maxBytes = Math.min(view.length, 1024);
+  let start = 0;
+  if (view.length >= 3 && view[0] === 239 && view[1] === 187 && view[2] === 191) {
+    start = 3;
+  }
+  const decoder = new TextDecoder();
+  const text = decoder.decode(view.slice(start, maxBytes)).trimStart();
+  const lower = text.toLowerCase();
+  return lower.startsWith("<svg") || lower.startsWith("<?xml");
+}
+function looksLikeText(view) {
+  const maxBytes = Math.min(view.length, 1024);
+  for (let i = 0; i < maxBytes; i++) {
+    if (view[i] === 0) return false;
+  }
+  return true;
+}
+function validateMagicBytes(buffer, claimedType) {
+  const view = new Uint8Array(buffer);
+  if (view.length === 0) {
+    return { valid: false, error: "File is empty" };
+  }
+  const normalized = normalizeMimeType(claimedType);
+  if (normalized === "image/svg+xml") {
+    if (looksLikeSvg(view)) {
+      return { valid: true, detectedType: "image/svg+xml" };
+    }
+    return { valid: false, error: "File content does not look like SVG" };
+  }
+  if (normalized === "text/plain") {
+    if (looksLikeText(view)) {
+      return { valid: true, detectedType: "text/plain" };
+    }
+    return { valid: false, error: "File contains binary data, not plain text" };
+  }
+  const signatures = MAGIC_SIGNATURES[normalized];
+  if (!signatures) {
+    return { valid: true };
+  }
+  for (const sig of signatures) {
+    if (matchesSignature(view, sig)) {
+      return { valid: true, detectedType: normalized };
+    }
+  }
+  return {
+    valid: false,
+    error: `Magic bytes do not match claimed type "${claimedType}"`
+  };
+}
+function validateFileExtension(filename, mimeType) {
+  const normalized = normalizeMimeType(mimeType);
+  const extensions = MIME_TO_EXTENSIONS[normalized];
+  if (!extensions) return true;
+  const ext = filename.split(".").pop()?.toLowerCase();
+  if (!ext) return false;
+  return extensions.includes(ext);
+}
+var FOLDER_PATTERN = /^[a-z0-9][a-z0-9_-]{0,63}$/;
+function validateFolder(folder) {
+  if (folder === void 0 || folder === null || folder === "") return true;
+  if (folder.includes("..") || folder.includes("/") || folder.includes("\\")) return false;
+  return FOLDER_PATTERN.test(folder);
+}
+var fileValidationSchema = zod.z.object({
+  name: zod.z.string().min(1, "Filename is required").max(255, "Filename too long"),
+  type: zod.z.string().refine(
+    (type) => {
+      const normalized = normalizeMimeType(type);
+      return ALLOWED_MIME_TYPES.includes(normalized);
+    },
+    { message: "Unsupported file type" }
+  ),
+  size: zod.z.number().min(1, "File is empty").max(MAX_FILE_SIZE, "File exceeds 50MB limit")
+});
+function getContentDisposition(mimeType) {
+  const normalized = normalizeMimeType(mimeType);
+  if (normalized === "image/svg+xml") return "attachment";
+  if (ALLOWED_MIME_TYPES.includes(normalized)) return "inline";
+  return "attachment";
+}
+function validateUploadedFile(file, buffer, folder) {
+  const errors = [];
+  const normalizedMimeType = normalizeMimeType(file.type);
+  const schemaResult = fileValidationSchema.safeParse({
+    name: file.name,
+    type: file.type,
+    size: file.size
+  });
+  if (!schemaResult.success) {
+    for (const issue of schemaResult.error.issues) {
+      errors.push(issue.message);
+    }
+  }
+  const magicResult = validateMagicBytes(buffer, file.type);
+  if (!magicResult.valid && magicResult.error) {
+    errors.push(magicResult.error);
+  }
+  if (!validateFileExtension(file.name, file.type)) {
+    errors.push(`File extension does not match MIME type "${normalizedMimeType}"`);
+  }
+  if (folder !== void 0 && folder !== null && !validateFolder(folder)) {
+    errors.push("Invalid folder name");
+  }
+  return {
+    valid: errors.length === 0,
+    errors,
+    normalizedMimeType
+  };
+}
 
-export { QueryFilterBuilder, SONICJS_VERSION, TemplateRenderer, buildQuery, escapeHtml, generateSlug, getBlocksFieldConfig, getCoreVersion, package_default, parseBlocksValue, renderTemplate, sanitizeInput, sanitizeObject, templateRenderer };
-//# sourceMappingURL=chunk-7DXWBEQP.js.map
-//# sourceMappingURL=chunk-7DXWBEQP.js.map
+exports.ALLOWED_MIME_TYPES = ALLOWED_MIME_TYPES;
+exports.MAX_FILE_SIZE = MAX_FILE_SIZE;
+exports.MIME_TO_EXTENSIONS = MIME_TO_EXTENSIONS;
+exports.QueryFilterBuilder = QueryFilterBuilder;
+exports.SONICJS_VERSION = SONICJS_VERSION;
+exports.TemplateRenderer = TemplateRenderer;
+exports.buildQuery = buildQuery;
+exports.escapeHtml = escapeHtml;
+exports.fileValidationSchema = fileValidationSchema;
+exports.generateSlug = generateSlug;
+exports.getBlocksFieldConfig = getBlocksFieldConfig;
+exports.getContentDisposition = getContentDisposition;
+exports.getCoreVersion = getCoreVersion;
+exports.normalizeMimeType = normalizeMimeType;
+exports.package_default = package_default;
+exports.parseBlocksValue = parseBlocksValue;
+exports.renderTemplate = renderTemplate;
+exports.sanitizeInput = sanitizeInput;
+exports.sanitizeObject = sanitizeObject;
+exports.templateRenderer = templateRenderer;
+exports.validateFileExtension = validateFileExtension;
+exports.validateFolder = validateFolder;
+exports.validateMagicBytes = validateMagicBytes;
+exports.validateUploadedFile = validateUploadedFile;
+//# sourceMappingURL=chunk-PZ4NWNWU.cjs.map
+//# sourceMappingURL=chunk-PZ4NWNWU.cjs.map

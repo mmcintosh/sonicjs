@@ -1,35 +1,16 @@
 import { Hono } from 'hono'
 import { html, raw } from 'hono/html'
-import { z } from 'zod'
 import type { D1Database, KVNamespace, R2Bucket } from '@cloudflare/workers-types'
 import { requireAuth, requireRole } from '../middleware'
 import { renderMediaLibraryPage, MediaLibraryPageData, FolderStats, TypeStats } from '../templates/pages/admin-media-library.template'
 import { renderMediaFileDetails, MediaFileDetailsData } from '../templates/components/media-file-details.template'
 import { MediaFile, renderMediaFileCard } from '../templates/components/media-grid.template'
+import {
+  validateUploadedFile,
+  normalizeMimeType,
+  getContentDisposition,
+} from '../utils/file-validation'
 import type { Bindings, Variables } from '../app'
-
-// File validation schema
-const fileValidationSchema = z.object({
-  name: z.string().min(1).max(255),
-  type: z.string().refine(
-    (type) => {
-      const allowedTypes = [
-        // Images
-        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-        // Documents
-        'application/pdf', 'text/plain', 'application/msword', 
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        // Videos
-        'video/mp4', 'video/webm', 'video/ogg', 'video/avi', 'video/mov',
-        // Audio
-        'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a'
-      ]
-      return allowedTypes.includes(type)
-    },
-    { message: 'Unsupported file type' }
-  ),
-  size: z.number().min(1).max(50 * 1024 * 1024) // 50MB max
-})
 
 const adminMediaRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -449,36 +430,36 @@ adminMediaRoutes.post('/upload', async (c) => {
       `)
     }
 
+    const folder = formData.get('folder') as string || 'uploads'
+
     for (const file of files) {
       try {
-        // Validate file
-        const validation = fileValidationSchema.safeParse({
-          name: file.name,
-          type: file.type,
-          size: file.size
-        })
+        // Read file content for validation and upload
+        const arrayBuffer = await file.arrayBuffer()
 
-        if (!validation.success) {
+        // Validate file (schema + magic bytes + extension + folder)
+        const validation = validateUploadedFile(file, arrayBuffer, folder)
+        if (!validation.valid) {
           errors.push({
             filename: file.name,
-            error: validation.error.issues[0]?.message || 'Validation failed'
+            error: validation.errors[0] || 'Validation failed'
           })
           continue
         }
+
+        const normalizedType = validation.normalizedMimeType
 
         // Generate unique filename and R2 key
         const fileId = crypto.randomUUID()
         const fileExtension = file.name.split('.').pop() || ''
         const filename = `${fileId}.${fileExtension}`
-        const folder = formData.get('folder') as string || 'uploads'
         const r2Key = `${folder}/${filename}`
 
         // Upload to R2
-        const arrayBuffer = await file.arrayBuffer()
         const uploadResult = await c.env.MEDIA_BUCKET.put(r2Key, arrayBuffer, {
           httpMetadata: {
-            contentType: file.type,
-            contentDisposition: `inline; filename="${file.name}"`
+            contentType: normalizedType,
+            contentDisposition: `${getContentDisposition(normalizedType)}; filename="${file.name}"`
           },
           customMetadata: {
             originalName: file.name,
@@ -498,8 +479,8 @@ adminMediaRoutes.post('/upload', async (c) => {
         // Extract image dimensions if it's an image
         let width: number | undefined
         let height: number | undefined
-        
-        if (file.type.startsWith('image/') && !file.type.includes('svg')) {
+
+        if (normalizedType.startsWith('image/') && !normalizedType.includes('svg')) {
           try {
             const dimensions = await getImageDimensions(arrayBuffer)
             width = dimensions.width
@@ -511,21 +492,21 @@ adminMediaRoutes.post('/upload', async (c) => {
 
         // Generate URLs - use public serving route
         const publicUrl = `/files/${r2Key}`
-        const thumbnailUrl = file.type.startsWith('image/') ? publicUrl : undefined
+        const thumbnailUrl = normalizedType.startsWith('image/') ? publicUrl : undefined
 
         // Save to database
         const stmt = c.env.DB.prepare(`
           INSERT INTO media (
-            id, filename, original_name, mime_type, size, width, height, 
+            id, filename, original_name, mime_type, size, width, height,
             folder, r2_key, public_url, thumbnail_url, uploaded_by, uploaded_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `)
-        
+
         await stmt.bind(
           fileId,
           filename,
           file.name,
-          file.type,
+          normalizedType,
           file.size,
           width,
           height,
@@ -541,7 +522,7 @@ adminMediaRoutes.post('/upload', async (c) => {
           id: fileId,
           filename: filename,
           originalName: file.name,
-          mimeType: file.type,
+          mimeType: normalizedType,
           size: file.size,
           publicUrl: publicUrl
         })
@@ -644,11 +625,13 @@ adminMediaRoutes.get('/file/*', async (c) => {
     }
 
     // Set appropriate headers
+    const contentType = object.httpMetadata?.contentType || 'application/octet-stream'
     const headers = new Headers()
-    object.httpMetadata?.contentType && headers.set('Content-Type', object.httpMetadata.contentType)
-    object.httpMetadata?.contentDisposition && headers.set('Content-Disposition', object.httpMetadata.contentDisposition)
+    headers.set('Content-Type', contentType)
+    headers.set('Content-Disposition', `${getContentDisposition(contentType)}; filename="${r2Key.split('/').pop()}"`)
+    headers.set('X-Content-Type-Options', 'nosniff')
     headers.set('Cache-Control', 'public, max-age=31536000') // 1 year cache
-    
+
     return new Response(object.body as any, {
       headers
     })
