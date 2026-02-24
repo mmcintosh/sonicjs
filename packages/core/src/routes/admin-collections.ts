@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { html } from 'hono/html'
 import { requireAuth } from '../middleware'
 import { isPluginActive } from '../middleware/plugin-middleware'
+import { clearCollectionSchemaCache } from '../services/openapi-generator'
 import { renderCollectionsListPage } from '../templates/pages/admin-collections-list.template'
 import { renderCollectionFormPage } from '../templates/pages/admin-collections-form.template'
 
@@ -723,6 +724,7 @@ adminCollectionsRoutes.post('/:id/fields', async (c) => {
       await updateSchemaStmt.bind(JSON.stringify(schema), Date.now(), collectionId).run()
 
       console.log('[Add Field] Added field to schema:', fieldName, fieldConfig)
+      clearCollectionSchemaCache()
 
       return c.json({ success: true, fieldId: `schema-${fieldName}` })
     }
@@ -900,6 +902,7 @@ adminCollectionsRoutes.put('/:collectionId/fields/:fieldId', async (c) => {
         success: result.success,
         changes: result.meta?.changes
       })
+      clearCollectionSchemaCache()
 
       return c.json({ success: true })
     }
@@ -981,6 +984,7 @@ adminCollectionsRoutes.delete('/:collectionId/fields/:fieldId', async (c) => {
         await updateCollectionStmt.bind(JSON.stringify(schema), Date.now(), collectionId).run()
 
         console.log('[Delete Field] Removed field from schema:', fieldName)
+        clearCollectionSchemaCache()
 
         return c.json({ success: true })
       } else {

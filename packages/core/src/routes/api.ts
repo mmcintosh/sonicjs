@@ -61,11 +61,11 @@ function addTimingMeta(c: any, meta: any = {}, executionStartTime?: number) {
 }
 
 // Root endpoint - Auto-generated OpenAPI 3.0.0 specification
-apiRoutes.get('/', (c) => {
+apiRoutes.get('/', async (c) => {
   const baseUrl = new URL(c.req.url)
   const serverUrl = `${baseUrl.protocol}//${baseUrl.host}`
   const app = getAppInstance()
-  const spec = generateOpenAPISpec(app, serverUrl)
+  const spec = await generateOpenAPISpec(app, serverUrl, c.env.DB)
   return c.json(spec)
 })
 

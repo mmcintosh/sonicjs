@@ -11,6 +11,8 @@ import {
   CATEGORY_INFO,
   type RouteMetadata
 } from './route-metadata'
+import type { FieldConfig } from '../types/collection-config'
+import type { PluginRoutes } from '../plugins/types'
 
 // ============================================================================
 // OpenAPI Types
@@ -480,6 +482,335 @@ const ENDPOINT_DETAILS: Record<string, EndpointDetail> = {
 }
 
 // ============================================================================
+// FieldConfig → OpenAPI Type Mapper
+// ============================================================================
+
+/**
+ * Convert a collection name to PascalCase for use as a schema name.
+ * e.g., 'blog_posts' → 'BlogPosts', 'news' → 'News'
+ */
+export function toPascalCase(name: string): string {
+  return name
+    .split(/[_\-\s]+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join('')
+}
+
+/**
+ * Map a single FieldConfig to an OpenAPI schema object.
+ */
+export function fieldConfigToOpenAPISchema(field: FieldConfig): Record<string, any> {
+  const schema: Record<string, any> = {}
+
+  switch (field.type) {
+    case 'string':
+    case 'textarea':
+    case 'slug':
+      schema.type = 'string'
+      break
+    case 'color':
+      schema.type = 'string'
+      schema.pattern = '^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'
+      break
+    case 'file':
+      schema.type = 'string'
+      schema.description = field.title || 'File path or URL'
+      break
+    case 'number':
+      schema.type = 'number'
+      break
+    case 'boolean':
+    case 'checkbox':
+      schema.type = 'boolean'
+      break
+    case 'date':
+      schema.type = 'string'
+      schema.format = 'date'
+      break
+    case 'datetime':
+      schema.type = 'string'
+      schema.format = 'date-time'
+      break
+    case 'email':
+      schema.type = 'string'
+      schema.format = 'email'
+      break
+    case 'url':
+      schema.type = 'string'
+      schema.format = 'uri'
+      break
+    case 'select':
+    case 'radio':
+      schema.type = 'string'
+      if (field.enum && field.enum.length > 0) {
+        schema.enum = field.enum
+      }
+      break
+    case 'multiselect':
+      schema.type = 'array'
+      schema.items = { type: 'string' }
+      if (field.enum && field.enum.length > 0) {
+        schema.items.enum = field.enum
+      }
+      break
+    case 'richtext':
+      schema.type = 'string'
+      schema.description = field.title || 'Rich text HTML content'
+      break
+    case 'markdown':
+      schema.type = 'string'
+      schema.description = field.title || 'Markdown content'
+      break
+    case 'media':
+      schema.type = 'string'
+      schema.description = field.title || 'Media file reference (ID or path)'
+      break
+    case 'reference':
+      schema.type = 'string'
+      schema.description = field.title || 'Reference to another content item (ID)'
+      break
+    case 'json':
+    case 'object':
+      schema.type = 'object'
+      if (field.properties) {
+        schema.properties = {}
+        for (const [propName, propConfig] of Object.entries(field.properties)) {
+          schema.properties[propName] = fieldConfigToOpenAPISchema(propConfig)
+        }
+      }
+      break
+    case 'array':
+      schema.type = 'array'
+      if (field.items) {
+        schema.items = fieldConfigToOpenAPISchema(field.items)
+      } else {
+        schema.items = { type: 'object' }
+      }
+      break
+    default:
+      schema.type = 'string'
+  }
+
+  // Carry forward common constraints
+  if (field.title && !schema.description) {
+    schema.description = field.title
+  }
+  if (field.default !== undefined) {
+    schema.default = field.default
+  }
+  if (field.minLength !== undefined) {
+    schema.minLength = field.minLength
+  }
+  if (field.maxLength !== undefined) {
+    schema.maxLength = field.maxLength
+  }
+  if (field.min !== undefined) {
+    schema.minimum = field.min
+  }
+  if (field.max !== undefined) {
+    schema.maximum = field.max
+  }
+  if (field.pattern && !schema.pattern) {
+    schema.pattern = field.pattern
+  }
+
+  return schema
+}
+
+// ============================================================================
+// Collection Schema Generator
+// ============================================================================
+
+/**
+ * Generate 3 OpenAPI component schemas for a single collection:
+ *   - {PascalName}Data — the `data` field properties
+ *   - {PascalName}Content — full content object with $ref to Data
+ *   - {PascalName}Input — creation payload with $ref to Data
+ */
+export function collectionSchemaToOpenAPI(
+  collectionName: string,
+  displayName: string,
+  schema: { properties?: Record<string, FieldConfig>; required?: string[] }
+): Record<string, any> {
+  const pascal = toPascalCase(collectionName)
+  const schemas: Record<string, any> = {}
+
+  // Build data properties from the collection schema
+  const dataProperties: Record<string, any> = {}
+  const requiredFields: string[] = []
+
+  if (schema.properties) {
+    for (const [fieldName, fieldConfig] of Object.entries(schema.properties)) {
+      dataProperties[fieldName] = fieldConfigToOpenAPISchema(fieldConfig)
+      if (schema.required?.includes(fieldName)) {
+        requiredFields.push(fieldName)
+      }
+    }
+  }
+
+  // {PascalName}Data
+  const dataSchema: Record<string, any> = {
+    type: 'object',
+    description: `Data fields for ${displayName || collectionName} content`,
+    properties: dataProperties
+  }
+  if (requiredFields.length > 0) {
+    dataSchema.required = requiredFields
+  }
+  schemas[`${pascal}Data`] = dataSchema
+
+  // {PascalName}Content
+  schemas[`${pascal}Content`] = {
+    type: 'object',
+    description: `${displayName || collectionName} content item`,
+    properties: {
+      id: { type: 'string', format: 'uuid', description: 'Unique content identifier' },
+      title: { type: 'string', description: 'Content title' },
+      slug: { type: 'string', description: 'URL-friendly slug' },
+      status: { type: 'string', enum: ['draft', 'published', 'archived'], description: 'Publication status' },
+      collectionId: { type: 'string', format: 'uuid', description: 'Parent collection ID' },
+      data: { $ref: `#/components/schemas/${pascal}Data` },
+      created_at: { type: 'integer', description: 'Unix timestamp of creation' },
+      updated_at: { type: 'integer', description: 'Unix timestamp of last update' }
+    }
+  }
+
+  // {PascalName}Input
+  schemas[`${pascal}Input`] = {
+    type: 'object',
+    required: ['title'],
+    description: `Input for creating/updating ${displayName || collectionName} content`,
+    properties: {
+      title: { type: 'string', description: 'Content title' },
+      slug: { type: 'string', description: 'URL-friendly slug (auto-generated if omitted)' },
+      status: { type: 'string', enum: ['draft', 'published', 'archived'], default: 'draft' },
+      data: { $ref: `#/components/schemas/${pascal}Data` }
+    }
+  }
+
+  return schemas
+}
+
+// ============================================================================
+// Collection Schema Cache (60s TTL)
+// ============================================================================
+
+let _collectionSchemaCache: { data: Record<string, any>; timestamp: number } | null = null
+const COLLECTION_SCHEMA_CACHE_TTL = 60_000 // 60 seconds
+
+/**
+ * Clear the in-memory collection schema cache.
+ * Call this after collection or field mutations.
+ */
+export function clearCollectionSchemaCache(): void {
+  _collectionSchemaCache = null
+}
+
+/**
+ * Fetch collection schemas from D1 and convert to OpenAPI component schemas.
+ * Results are cached in-memory for 60 seconds.
+ */
+export async function getCollectionOpenAPIData(db: any): Promise<Record<string, any>> {
+  // Check cache
+  if (_collectionSchemaCache && (Date.now() - _collectionSchemaCache.timestamp) < COLLECTION_SCHEMA_CACHE_TTL) {
+    return _collectionSchemaCache.data
+  }
+
+  try {
+    const stmt = db.prepare('SELECT name, display_name, schema FROM collections WHERE is_active = 1')
+    const { results } = await stmt.all()
+
+    const allSchemas: Record<string, any> = {}
+
+    for (const row of results as any[]) {
+      if (!row.schema) continue
+
+      let parsedSchema: any
+      try {
+        parsedSchema = typeof row.schema === 'string' ? JSON.parse(row.schema) : row.schema
+      } catch {
+        continue // Skip collections with invalid schema JSON
+      }
+
+      if (!parsedSchema.properties || Object.keys(parsedSchema.properties).length === 0) {
+        continue // Skip collections with no fields defined
+      }
+
+      const schemas = collectionSchemaToOpenAPI(
+        row.name,
+        row.display_name || row.name,
+        parsedSchema
+      )
+
+      Object.assign(allSchemas, schemas)
+    }
+
+    // Cache the result
+    _collectionSchemaCache = { data: allSchemas, timestamp: Date.now() }
+    return allSchemas
+  } catch (error) {
+    console.error('Error fetching collection schemas for OpenAPI:', error)
+    return {} // Graceful fallback — spec still works without collection schemas
+  }
+}
+
+// ============================================================================
+// Plugin OpenAPI Registry
+// ============================================================================
+
+const _pluginOpenAPISchemas: Record<string, any> = {}
+const _pluginEndpointDetails: Record<string, EndpointDetail> = {}
+
+/**
+ * Register OpenAPI metadata from a plugin's routes.
+ * Called during app bootstrap for each plugin that has routes.
+ */
+export function registerPluginOpenAPI(pluginName: string, routes: PluginRoutes[]): void {
+  for (const route of routes) {
+    const openapi = (route as any).openapi
+    if (!openapi) continue
+
+    // Merge component schemas
+    if (openapi.schemas) {
+      Object.assign(_pluginOpenAPISchemas, openapi.schemas)
+    }
+
+    // Merge endpoint details
+    if (openapi.endpoints) {
+      for (const [key, detail] of Object.entries(openapi.endpoints)) {
+        _pluginEndpointDetails[key] = detail as EndpointDetail
+      }
+    }
+  }
+}
+
+/**
+ * Get all registered plugin OpenAPI schemas.
+ */
+export function getPluginOpenAPISchemas(): Record<string, any> {
+  return { ..._pluginOpenAPISchemas }
+}
+
+/**
+ * Get plugin endpoint detail for a given method+path key.
+ */
+function getPluginEndpointDetail(key: string): EndpointDetail | undefined {
+  return _pluginEndpointDetails[key]
+}
+
+/**
+ * Clear all registered plugin OpenAPI data. Used in tests.
+ */
+export function clearPluginOpenAPIRegistry(): void {
+  for (const key of Object.keys(_pluginOpenAPISchemas)) {
+    delete _pluginOpenAPISchemas[key]
+  }
+  for (const key of Object.keys(_pluginEndpointDetails)) {
+    delete _pluginEndpointDetails[key]
+  }
+}
+
+// ============================================================================
 // Generator Functions
 // ============================================================================
 
@@ -543,7 +874,7 @@ function buildTags(routes: RouteMetadata[]): Array<{ name: string; description: 
  */
 function buildOperation(route: RouteMetadata): Record<string, any> {
   const key = `${route.method} ${route.path}`
-  const detail = ENDPOINT_DETAILS[key]
+  const detail = ENDPOINT_DETAILS[key] || getPluginEndpointDetail(key)
 
   const operation: Record<string, any> = {
     operationId: detail?.operationId || generateOperationId(route.method, route.path),
@@ -643,8 +974,9 @@ function buildDefaultResponses(route: RouteMetadata): Record<string, any> {
  *
  * @param app - Hono app instance for route introspection
  * @param serverUrl - Base server URL (e.g., https://my-app.workers.dev)
+ * @param db - Optional D1 database instance for collection schema enrichment
  */
-export function generateOpenAPISpec(app: any, serverUrl: string): OpenAPISpec {
+export async function generateOpenAPISpec(app: any, serverUrl: string, db?: any): Promise<OpenAPISpec> {
   const routes = buildRouteList(app)
   const tags = buildTags(routes)
 
@@ -663,6 +995,33 @@ export function generateOpenAPISpec(app: any, serverUrl: string): OpenAPISpec {
 
     const method = route.method.toLowerCase()
     paths[normalizedPath][method] = buildOperation(route)
+  }
+
+  // Start with base component schemas
+  const schemas: Record<string, any> = { ...COMPONENT_SCHEMAS }
+
+  // Merge plugin OpenAPI schemas
+  const pluginSchemas = getPluginOpenAPISchemas()
+  Object.assign(schemas, pluginSchemas)
+
+  // Merge collection schemas from D1 (when db is available)
+  if (db) {
+    const collectionSchemas = await getCollectionOpenAPIData(db)
+    Object.assign(schemas, collectionSchemas)
+
+    // If no collection schemas were generated, add a helpful description to the generic Content.data
+    if (Object.keys(collectionSchemas).length === 0) {
+      schemas.Content = {
+        ...schemas.Content,
+        properties: {
+          ...schemas.Content.properties,
+          data: {
+            type: 'object',
+            description: 'Schema varies by collection. Create collections with typed fields to see collection-specific schemas (e.g., BlogPostsData, NewsData) appear here automatically.'
+          }
+        }
+      }
+    }
   }
 
   return {
@@ -697,7 +1056,7 @@ export function generateOpenAPISpec(app: any, serverUrl: string): OpenAPISpec {
           description: 'JWT authentication token. Obtain via POST /auth/login'
         }
       },
-      schemas: COMPONENT_SCHEMAS
+      schemas
     },
     tags
   }

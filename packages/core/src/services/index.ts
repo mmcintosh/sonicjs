@@ -60,3 +60,15 @@ export {
   CATEGORY_INFO
 } from './route-metadata'
 export type { RouteMetadata } from './route-metadata'
+
+// OpenAPI Generator
+export {
+  generateOpenAPISpec,
+  registerPluginOpenAPI,
+  clearPluginOpenAPIRegistry,
+  clearCollectionSchemaCache,
+  fieldConfigToOpenAPISchema,
+  collectionSchemaToOpenAPI,
+  toPascalCase,
+  getCollectionOpenAPIData
+} from './openapi-generator'

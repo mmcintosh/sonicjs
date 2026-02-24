@@ -10,6 +10,7 @@ import { z } from 'zod'
 // import { zValidator } from '@hono/zod-validator'
 import { requireAuth, requireRole } from '../middleware'
 import type { Bindings, Variables } from '../app'
+import { clearCollectionSchemaCache } from '../services/openapi-generator'
 
 export const adminApiRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -537,6 +538,7 @@ adminApiRoutes.post('/collections', async (c) => {
       } catch (e) {
         console.error('Error clearing cache:', e)
       }
+      clearCollectionSchemaCache()
 
       return c.json({
         id: collectionId,
@@ -616,6 +618,7 @@ adminApiRoutes.patch('/collections/:id', async (c) => {
       } catch (e) {
         console.error('Error clearing cache:', e)
       }
+      clearCollectionSchemaCache()
 
       return c.json({ message: 'Collection updated successfully' })
     } catch (error) {
@@ -666,6 +669,7 @@ adminApiRoutes.delete('/collections/:id', async (c) => {
     } catch (e) {
       console.error('Error clearing cache:', e)
     }
+    clearCollectionSchemaCache()
 
     return c.json({ message: 'Collection deleted successfully' })
   } catch (error) {

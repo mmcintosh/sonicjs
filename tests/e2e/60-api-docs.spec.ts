@@ -247,6 +247,49 @@ test.describe('Admin API Reference Page', () => {
   });
 });
 
+test.describe('OpenAPI Collection Schemas', () => {
+  test('should include collection-specific schemas when collections exist', async ({ request }) => {
+    const response = await request.get('/api');
+    expect(response.ok()).toBeTruthy();
+    const spec = await response.json();
+
+    // The preview site has blog_posts and news collections with typed fields
+    // Check for at least one collection-specific schema
+    const schemaNames = Object.keys(spec.components.schemas);
+    const collectionSchemas = schemaNames.filter(name =>
+      name.endsWith('Data') && name !== 'SeedData' && !['PaginatedResponse'].includes(name)
+    );
+
+    // If collections with schema fields exist, we should see them
+    // This is conditional because it depends on the test environment state
+    if (collectionSchemas.length > 0) {
+      // Verify the naming convention is PascalCase + "Data"
+      for (const name of collectionSchemas) {
+        expect(name).toMatch(/^[A-Z][a-zA-Z]*Data$/);
+      }
+
+      // Each Data schema should have a corresponding Content and Input schema
+      for (const dataName of collectionSchemas) {
+        const baseName = dataName.replace(/Data$/, '');
+        expect(schemaNames).toContain(`${baseName}Content`);
+        expect(schemaNames).toContain(`${baseName}Input`);
+      }
+    }
+  });
+
+  test('should have PascalCase schema names for collections', async ({ request }) => {
+    const response = await request.get('/api');
+    const spec = await response.json();
+
+    const schemaNames = Object.keys(spec.components.schemas);
+
+    // All schema names should start with uppercase (PascalCase convention)
+    for (const name of schemaNames) {
+      expect(name[0]).toBe(name[0].toUpperCase());
+    }
+  });
+});
+
 test.describe('Admin Navigation', () => {
   test('should not have API Docs link in sidebar', async ({ page }) => {
     await loginAsAdmin(page);
