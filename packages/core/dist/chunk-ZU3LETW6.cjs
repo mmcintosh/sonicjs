@@ -1,8 +1,10 @@
-import { syncCollections, PluginBootstrapService } from './chunk-TVIJ7U2H.js';
-import { MigrationService } from './chunk-MKRWMQFX.js';
-import { metricsTracker } from './chunk-FICTAGD4.js';
-import { sign, verify } from 'hono/jwt';
-import { setCookie, getCookie } from 'hono/cookie';
+'use strict';
+
+var chunkXEITDGR3_cjs = require('./chunk-XEITDGR3.cjs');
+var chunk7TJMJFVN_cjs = require('./chunk-7TJMJFVN.cjs');
+var chunkRCQ2HIQD_cjs = require('./chunk-RCQ2HIQD.cjs');
+var jwt = require('hono/jwt');
+var cookie = require('hono/cookie');
 
 // src/services/form-collection-sync.ts
 var SYSTEM_FORM_USER_ID = "system-form-submission";
@@ -403,11 +405,11 @@ function bootstrapMiddleware(config = {}) {
     try {
       console.log("[Bootstrap] Starting system initialization...");
       console.log("[Bootstrap] Running database migrations...");
-      const migrationService = new MigrationService(c.env.DB);
+      const migrationService = new chunk7TJMJFVN_cjs.MigrationService(c.env.DB);
       await migrationService.runPendingMigrations();
       console.log("[Bootstrap] Syncing collection configurations...");
       try {
-        await syncCollections(c.env.DB);
+        await chunkXEITDGR3_cjs.syncCollections(c.env.DB);
       } catch (error) {
         console.error("[Bootstrap] Error syncing collections:", error);
       }
@@ -419,7 +421,7 @@ function bootstrapMiddleware(config = {}) {
       }
       if (!config.plugins?.disableAll) {
         console.log("[Bootstrap] Bootstrapping core plugins...");
-        const bootstrapService = new PluginBootstrapService(c.env.DB);
+        const bootstrapService = new chunkXEITDGR3_cjs.PluginBootstrapService(c.env.DB);
         const needsBootstrap = await bootstrapService.isBootstrapNeeded();
         if (needsBootstrap) {
           await bootstrapService.bootstrapCorePlugins();
@@ -447,11 +449,11 @@ var AuthManager = class {
       // 24 hours
       iat: Math.floor(Date.now() / 1e3)
     };
-    return await sign(payload, secret || JWT_SECRET_FALLBACK, "HS256");
+    return await jwt.sign(payload, secret || JWT_SECRET_FALLBACK, "HS256");
   }
   static async verifyToken(token, secret) {
     try {
-      const payload = await verify(token, secret || JWT_SECRET_FALLBACK, "HS256");
+      const payload = await jwt.verify(token, secret || JWT_SECRET_FALLBACK, "HS256");
       if (payload.exp < Math.floor(Date.now() / 1e3)) {
         return null;
       }
@@ -549,7 +551,7 @@ var AuthManager = class {
    * @param options - Optional cookie configuration
    */
   static setAuthCookie(c, token, options) {
-    setCookie(c, "auth_token", token, {
+    cookie.setCookie(c, "auth_token", token, {
       httpOnly: options?.httpOnly ?? true,
       secure: options?.secure ?? true,
       sameSite: options?.sameSite ?? "Strict",
@@ -563,7 +565,7 @@ var requireAuth = () => {
     try {
       let token = c.req.header("Authorization")?.replace("Bearer ", "");
       if (!token) {
-        token = getCookie(c, "auth_token");
+        token = cookie.getCookie(c, "auth_token");
       }
       if (!token) {
         const acceptHeader = c.req.header("Accept") || "";
@@ -634,7 +636,7 @@ var optionalAuth = () => {
     try {
       let token = c.req.header("Authorization")?.replace("Bearer ", "");
       if (!token) {
-        token = getCookie(c, "auth_token");
+        token = cookie.getCookie(c, "auth_token");
       }
       if (token) {
         const jwtSecret = c.env?.JWT_SECRET;
@@ -750,7 +752,7 @@ var metricsMiddleware = () => {
   return async (c, next) => {
     const path = new URL(c.req.url).pathname;
     if (path !== "/admin/dashboard/api/metrics") {
-      metricsTracker.recordRequest();
+      chunkRCQ2HIQD_cjs.metricsTracker.recordRequest();
     }
     await next();
   };
@@ -889,12 +891,12 @@ function csrfProtection(options = {}) {
       await next();
       return;
     }
-    const authCookie = getCookie(c, "auth_token");
+    const authCookie = cookie.getCookie(c, "auth_token");
     if (!authCookie) {
       await next();
       return;
     }
-    const cookieToken = getCookie(c, "csrf_token");
+    const cookieToken = cookie.getCookie(c, "csrf_token");
     let headerToken = c.req.header("X-CSRF-Token");
     if (!headerToken) {
       const contentType = c.req.header("Content-Type") || "";
@@ -920,7 +922,7 @@ function csrfProtection(options = {}) {
   };
 }
 async function ensureCsrfCookie(c, secret) {
-  const existing = getCookie(c, "csrf_token");
+  const existing = cookie.getCookie(c, "csrf_token");
   if (existing) {
     const isValid = await validateCsrfToken(existing, secret);
     if (isValid) {
@@ -931,7 +933,7 @@ async function ensureCsrfCookie(c, secret) {
   const token = await generateCsrfToken(secret);
   c.set("csrfToken", token);
   const isDev = c.env?.ENVIRONMENT === "development" || !c.env?.ENVIRONMENT;
-  setCookie(c, "csrf_token", token, {
+  cookie.setCookie(c, "csrf_token", token, {
     httpOnly: false,
     // JS must read this cookie
     secure: !isDev,
@@ -984,6 +986,37 @@ var requireActivePlugins = () => async (_c, next) => await next();
 var getActivePlugins = () => [];
 var isPluginActive = () => false;
 
-export { AuthManager, PermissionManager, VALID_SCOPES, bootstrapMiddleware, cacheHeaders, compressionMiddleware, createContentFromSubmission, csrfProtection, detailedLoggingMiddleware, generateCsrfToken, getActivePlugins, hashApiKey, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeadersMiddleware, securityLoggingMiddleware, syncFormCollection, validateCsrfToken, verifySecurityConfig };
-//# sourceMappingURL=chunk-WT5EO2A3.js.map
-//# sourceMappingURL=chunk-WT5EO2A3.js.map
+exports.AuthManager = AuthManager;
+exports.PermissionManager = PermissionManager;
+exports.VALID_SCOPES = VALID_SCOPES;
+exports.bootstrapMiddleware = bootstrapMiddleware;
+exports.cacheHeaders = cacheHeaders;
+exports.compressionMiddleware = compressionMiddleware;
+exports.createContentFromSubmission = createContentFromSubmission;
+exports.csrfProtection = csrfProtection;
+exports.detailedLoggingMiddleware = detailedLoggingMiddleware;
+exports.generateCsrfToken = generateCsrfToken;
+exports.getActivePlugins = getActivePlugins;
+exports.hashApiKey = hashApiKey;
+exports.isPluginActive = isPluginActive;
+exports.logActivity = logActivity;
+exports.loggingMiddleware = loggingMiddleware;
+exports.metricsMiddleware = metricsMiddleware;
+exports.optionalApiKey = optionalApiKey;
+exports.optionalAuth = optionalAuth;
+exports.performanceLoggingMiddleware = performanceLoggingMiddleware;
+exports.rateLimit = rateLimit;
+exports.requireActivePlugin = requireActivePlugin;
+exports.requireActivePlugins = requireActivePlugins;
+exports.requireAnyPermission = requireAnyPermission;
+exports.requireApiKey = requireApiKey;
+exports.requireAuth = requireAuth;
+exports.requirePermission = requirePermission;
+exports.requireRole = requireRole;
+exports.securityHeadersMiddleware = securityHeadersMiddleware;
+exports.securityLoggingMiddleware = securityLoggingMiddleware;
+exports.syncFormCollection = syncFormCollection;
+exports.validateCsrfToken = validateCsrfToken;
+exports.verifySecurityConfig = verifySecurityConfig;
+//# sourceMappingURL=chunk-ZU3LETW6.cjs.map
+//# sourceMappingURL=chunk-ZU3LETW6.cjs.map

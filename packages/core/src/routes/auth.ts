@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { setCookie } from 'hono/cookie'
 import { html } from 'hono/html'
 import { AuthManager, requireAuth, rateLimit, generateCsrfToken } from '../middleware'
-import { escapeHtml } from '../utils/sanitize'
+import { sanitizeInput } from '../utils/sanitize'
 import { renderLoginPage, LoginPageData } from '../templates/pages/auth-login.template'
 import { renderRegisterPage, RegisterPageData } from '../templates/pages/auth-register.template'
 import { getCacheService, CACHE_CONFIGS } from '../services'
@@ -139,13 +139,13 @@ authRoutes.post('/register',
       // Extract fields with defaults for optional ones
       const email = validatedData.email
       const password = validatedData.password
-      const username = validatedData.username || authValidationService.generateDefaultValue('username', validatedData)
-      const firstName = validatedData.firstName || authValidationService.generateDefaultValue('firstName', validatedData)
-      const lastName = validatedData.lastName || authValidationService.generateDefaultValue('lastName', validatedData)
+      const username = sanitizeInput(validatedData.username || authValidationService.generateDefaultValue('username', validatedData))
+      const firstName = sanitizeInput(validatedData.firstName || authValidationService.generateDefaultValue('firstName', validatedData))
+      const lastName = sanitizeInput(validatedData.lastName || authValidationService.generateDefaultValue('lastName', validatedData))
 
       // Normalize email to lowercase
       const normalizedEmail = email.toLowerCase()
-      
+
       // Check if user already exists
       const existingUser = await db.prepare('SELECT id FROM users WHERE email = ? OR username = ?')
         .bind(normalizedEmail, username)
@@ -445,10 +445,10 @@ authRoutes.post('/register/form',
     // Extract fields with defaults for optional ones
     // const email = validatedData.email
     const password = validatedData.password
-    const username = validatedData.username || authValidationService.generateDefaultValue('username', validatedData)
-    const firstName = validatedData.firstName || authValidationService.generateDefaultValue('firstName', validatedData)
-    const lastName = validatedData.lastName || authValidationService.generateDefaultValue('lastName', validatedData)
-    
+    const username = sanitizeInput(validatedData.username || authValidationService.generateDefaultValue('username', validatedData))
+    const firstName = sanitizeInput(validatedData.firstName || authValidationService.generateDefaultValue('firstName', validatedData))
+    const lastName = sanitizeInput(validatedData.lastName || authValidationService.generateDefaultValue('lastName', validatedData))
+
     // Check if user already exists
     const existingUser = await db.prepare('SELECT id FROM users WHERE email = ? OR username = ?')
       .bind(normalizedEmail, username)
@@ -808,9 +808,9 @@ authRoutes.get('/accept-invitation', async (c) => {
               <h2 class="text-3xl font-bold">Accept Invitation</h2>
               <p class="mt-2 text-gray-400">Complete your account setup</p>
               <p class="mt-4 text-sm">
-                You've been invited as <strong>${escapeHtml(String(invitedUser.first_name))} ${escapeHtml(String(invitedUser.last_name))}</strong><br>
-                <span class="text-gray-400">${escapeHtml(String(invitedUser.email))}</span><br>
-                <span class="text-blue-400 capitalize">${escapeHtml(String(invitedUser.role))}</span>
+                You've been invited as <strong>${invitedUser.first_name} ${invitedUser.last_name}</strong><br>
+                <span class="text-gray-400">${invitedUser.email}</span><br>
+                <span class="text-blue-400 capitalize">${invitedUser.role}</span>
               </p>
             </div>
 
@@ -886,11 +886,11 @@ authRoutes.post('/accept-invitation', async (c) => {
   try {
     const formData = await c.req.formData()
     const token = formData.get('token')?.toString()
-    const username = formData.get('username')?.toString()?.trim()
+    const rawUsername = formData.get('username')?.toString()?.trim()
     const password = formData.get('password')?.toString()
     const confirmPassword = formData.get('confirm_password')?.toString()
 
-    if (!token || !username || !password || !confirmPassword) {
+    if (!token || !rawUsername || !password || !confirmPassword) {
       return c.json({ error: 'All fields are required' }, 400)
     }
 
@@ -902,6 +902,7 @@ authRoutes.post('/accept-invitation', async (c) => {
       return c.json({ error: 'Password must be at least 8 characters long' }, 400)
     }
 
+    const username = sanitizeInput(rawUsername)
     const db = c.env.DB
 
     // Check if invitation token is valid
@@ -1141,8 +1142,8 @@ authRoutes.get('/reset-password', async (c) => {
               <h2 class="text-3xl font-bold">Reset Password</h2>
               <p class="mt-2 text-gray-400">Choose a new password for your account</p>
               <p class="mt-4 text-sm">
-                Reset password for <strong>${escapeHtml(String(user.first_name))} ${escapeHtml(String(user.last_name))}</strong><br>
-                <span class="text-gray-400">${escapeHtml(String(user.email))}</span>
+                Reset password for <strong>${user.first_name} ${user.last_name}</strong><br>
+                <span class="text-gray-400">${user.email}</span>
               </p>
             </div>
 

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { requireAuth, requireRole } from '@sonicjs-cms/core';
+import { requireAuth, requireRole, sanitizeInput } from '@sonicjs-cms/core';
 import { createEmailManagementService } from './services/email-management';
 // import { createEmailService } from './services/email';
 import { EmailTemplateRenderer } from './services/email-renderer';
@@ -697,7 +697,7 @@ emailRoutes.post('/templates', zValidator('form', z.object({
       themeId: data.themeId,
       name: data.name,
       slug: data.slug,
-      subject: data.subject,
+      subject: sanitizeInput(data.subject),
       markdownContent: data.markdownContent,
       variables: null,
       metadata: '{}',
