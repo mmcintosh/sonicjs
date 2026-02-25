@@ -45,6 +45,7 @@ import { faviconSvg } from './assets/favicon'
 import { seedDataPlugin } from './plugins/core-plugins/seed-data-plugin'
 import { setAppInstance } from './services/route-metadata'
 import { registerPluginOpenAPI } from './services/openapi-generator'
+import { getLogger } from './services/logger'
 
 // ============================================================================
 // Type Definitions
@@ -170,9 +171,15 @@ export function createSonicJSApp(config: SonicJSConfig = {}): SonicJSApp {
     }
   }
 
-  // Logging middleware
-  app.use('*', async (_c, next) => {
-    // Logging logic here
+  // Logging middleware — initialize Logger singleton on first request
+  app.use('*', async (c, next) => {
+    try {
+      if (c.env?.DB) {
+        getLogger(c.env.DB)
+      }
+    } catch {
+      // Logger init failure is non-fatal — requests proceed without logging
+    }
     await next()
   })
 
