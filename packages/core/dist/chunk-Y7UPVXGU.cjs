@@ -1,34 +1,6 @@
-import { z } from 'zod';
+'use strict';
 
-// src/utils/sanitize.ts
-function escapeHtml(text) {
-  if (typeof text !== "string") {
-    return "";
-  }
-  const map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  };
-  return text.replace(/[&<>"']/g, (char) => map[char] || char);
-}
-function sanitizeInput(input) {
-  if (!input) {
-    return "";
-  }
-  return escapeHtml(String(input).trim());
-}
-function sanitizeObject(obj, fields) {
-  const sanitized = { ...obj };
-  for (const field of fields) {
-    if (typeof obj[field] === "string") {
-      sanitized[field] = sanitizeInput(obj[field]);
-    }
-  }
-  return sanitized;
-}
+var zod = require('zod');
 
 // src/utils/slug-utils.ts
 function generateSlug(text) {
@@ -815,16 +787,16 @@ function validateFolder(folder) {
   if (folder.includes("..") || folder.includes("/") || folder.includes("\\")) return false;
   return FOLDER_PATTERN.test(folder);
 }
-var fileValidationSchema = z.object({
-  name: z.string().min(1, "Filename is required").max(255, "Filename too long"),
-  type: z.string().refine(
+var fileValidationSchema = zod.z.object({
+  name: zod.z.string().min(1, "Filename is required").max(255, "Filename too long"),
+  type: zod.z.string().refine(
     (type) => {
       const normalized = normalizeMimeType(type);
       return ALLOWED_MIME_TYPES.includes(normalized);
     },
     { message: "Unsupported file type" }
   ),
-  size: z.number().min(1, "File is empty").max(MAX_FILE_SIZE, "File exceeds 50MB limit")
+  size: zod.z.number().min(1, "File is empty").max(MAX_FILE_SIZE, "File exceeds 50MB limit")
 });
 function getContentDisposition(mimeType) {
   const normalized = normalizeMimeType(mimeType);
@@ -862,6 +834,26 @@ function validateUploadedFile(file, buffer, folder) {
   };
 }
 
-export { ALLOWED_MIME_TYPES, MAX_FILE_SIZE, MIME_TO_EXTENSIONS, QueryFilterBuilder, SONICJS_VERSION, TemplateRenderer, buildQuery, escapeHtml, fileValidationSchema, generateSlug, getBlocksFieldConfig, getContentDisposition, getCoreVersion, normalizeMimeType, package_default, parseBlocksValue, renderTemplate, sanitizeInput, sanitizeObject, templateRenderer, validateFileExtension, validateFolder, validateMagicBytes, validateUploadedFile };
-//# sourceMappingURL=chunk-K33ILDZW.js.map
-//# sourceMappingURL=chunk-K33ILDZW.js.map
+exports.ALLOWED_MIME_TYPES = ALLOWED_MIME_TYPES;
+exports.MAX_FILE_SIZE = MAX_FILE_SIZE;
+exports.MIME_TO_EXTENSIONS = MIME_TO_EXTENSIONS;
+exports.QueryFilterBuilder = QueryFilterBuilder;
+exports.SONICJS_VERSION = SONICJS_VERSION;
+exports.TemplateRenderer = TemplateRenderer;
+exports.buildQuery = buildQuery;
+exports.fileValidationSchema = fileValidationSchema;
+exports.generateSlug = generateSlug;
+exports.getBlocksFieldConfig = getBlocksFieldConfig;
+exports.getContentDisposition = getContentDisposition;
+exports.getCoreVersion = getCoreVersion;
+exports.normalizeMimeType = normalizeMimeType;
+exports.package_default = package_default;
+exports.parseBlocksValue = parseBlocksValue;
+exports.renderTemplate = renderTemplate;
+exports.templateRenderer = templateRenderer;
+exports.validateFileExtension = validateFileExtension;
+exports.validateFolder = validateFolder;
+exports.validateMagicBytes = validateMagicBytes;
+exports.validateUploadedFile = validateUploadedFile;
+//# sourceMappingURL=chunk-Y7UPVXGU.cjs.map
+//# sourceMappingURL=chunk-Y7UPVXGU.cjs.map

@@ -2,6 +2,7 @@ import { renderAdminLayoutCatalyst, AdminLayoutCatalystData } from '../layouts/a
 import { renderPagination } from '../pagination.template'
 import { renderAlert } from '../alert.template'
 import { renderTable } from '../table.template'
+import { escapeHtml } from '../../utils/sanitize'
 
 interface Testimonial {
   id: number
@@ -164,16 +165,16 @@ export function renderTestimonialsList(data: TestimonialsListData): string {
               id: testimonial.id,
               author: `
                 <div class="flex flex-col">
-                  <div class="font-medium text-zinc-950 dark:text-white">${testimonial.author_name}</div>
+                  <div class="font-medium text-zinc-950 dark:text-white">${escapeHtml(testimonial.author_name)}</div>
                   ${testimonial.author_title || testimonial.author_company ? `
                     <div class="text-xs text-zinc-500 dark:text-zinc-400">
-                      ${[testimonial.author_title, testimonial.author_company].filter(Boolean).join(' · ')}
+                      ${([testimonial.author_title, testimonial.author_company].filter(Boolean) as string[]).map((s) => escapeHtml(s)).join(' · ')}
                     </div>
                   ` : ''}
                   ${rating ? `<div class="text-xs mt-1">${rating}</div>` : ''}
                 </div>
               `,
-              testimonial: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${truncated}</div>`,
+              testimonial: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${escapeHtml(truncated)}</div>`,
               status: testimonial.isPublished
                 ? '<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/20">Published</span>'
                 : '<span class="inline-flex items-center rounded-md bg-zinc-50 dark:bg-zinc-500/10 px-2 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/20 dark:ring-zinc-500/20">Draft</span>',

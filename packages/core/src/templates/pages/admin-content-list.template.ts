@@ -1,6 +1,7 @@
 import { renderAdminLayoutCatalyst, AdminLayoutCatalystData } from '../layouts/admin-layout-catalyst.template'
 import { renderPagination, PaginationData } from '../pagination.template'
 import { renderTable, TableData, TableColumn } from '../table.template'
+import { escapeHtml } from '../../utils/sanitize'
 import type { FilterBarData } from '../filter-bar.template'
 import { renderConfirmationDialog, getConfirmationDialogScript } from '../confirmation-dialog.template'
 
@@ -110,9 +111,9 @@ export function renderContentListPage(data: ContentListPageData): string {
         <div class="flex items-center">
           <div>
             <div class="text-sm font-medium text-zinc-950 dark:text-white">
-              <a href="/admin/content/${row.id}/edit${currentParams ? `?ref=${encodeURIComponent(currentParams)}` : ''}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">${row.title}</a>
+              <a href="/admin/content/${row.id}/edit${currentParams ? `?ref=${encodeURIComponent(currentParams)}` : ''}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">${escapeHtml(row.title)}</a>
             </div>
-            <div class="text-sm text-zinc-500 dark:text-zinc-400">${row.slug}</div>
+            <div class="text-sm text-zinc-500 dark:text-zinc-400">${escapeHtml(row.slug)}</div>
           </div>
         </div>
       `
@@ -304,7 +305,7 @@ export function renderContentListPage(data: ContentListPageData): string {
                         type="text"
                         name="search"
                         id="content-search-input"
-                        value="${data.search || ''}"
+                        value="${escapeHtml(data.search || '')}"
                         oninput="toggleContentClearButton()"
                         placeholder="Search content..."
                         class="w-full rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm px-4 py-2.5 pl-11 pr-10 text-sm text-zinc-950 dark:text-white border-2 border-cyan-200/50 dark:border-cyan-700/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-800 focus:shadow-lg focus:shadow-cyan-500/20 dark:focus:shadow-cyan-400/20 transition-all duration-300"

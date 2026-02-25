@@ -1,5 +1,6 @@
 import { renderAdminLayout, AdminLayoutData } from '../layouts/admin-layout-v2.template'
 import { renderAlert } from '../alert.template'
+import { escapeHtml } from '../../utils/sanitize'
 
 interface CodeExample {
   id?: number
@@ -199,7 +200,7 @@ export function renderCodeExamplesForm(data: CodeExamplesFormData): string {
                           rows="20"
                           required
                           class="backdrop-blur-sm bg-gray-800/90 border border-white/20 rounded-xl px-3 py-2 text-white placeholder-gray-300 focus:border-purple-400 focus:outline-none transition-colors w-full font-mono text-sm"
-                          placeholder="Paste your code here...">${codeExample?.code || ''}</textarea>
+                          placeholder="Paste your code here...">${escapeHtml(codeExample?.code || '')}</textarea>
                 <p class="mt-1 text-sm text-gray-300">
                   <span id="code-count">0</span> characters
                 </p>
@@ -320,13 +321,4 @@ export function renderCodeExamplesForm(data: CodeExamplesFormData): string {
   }
 
   return renderAdminLayout(layoutData)
-}
-
-function escapeHtml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;")
 }

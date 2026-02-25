@@ -1,29 +1,7 @@
 import { Hono } from 'hono'
 import { TurnstileService } from '../plugins/core-plugins/turnstile-plugin/services/turnstile'
 import { createContentFromSubmission } from '../services/form-collection-sync'
-import { sanitizeInput } from '../utils/sanitize'
-
-/**
- * Recursively sanitize all string values in arbitrary JSON data.
- * HTML-encodes entities (e.g., < becomes &lt;) to prevent stored XSS
- * when form submission data is rendered in admin templates.
- */
-function sanitizeDeep(value: unknown): unknown {
-  if (typeof value === 'string') {
-    return sanitizeInput(value)
-  }
-  if (Array.isArray(value)) {
-    return value.map(sanitizeDeep)
-  }
-  if (value !== null && typeof value === 'object') {
-    const result: Record<string, unknown> = {}
-    for (const [k, v] of Object.entries(value)) {
-      result[k] = sanitizeDeep(v)
-    }
-    return result
-  }
-  return value // numbers, booleans, null pass through
-}
+import { sanitizeDeep } from '../utils/sanitize'
 
 type Bindings = {
   DB: D1Database

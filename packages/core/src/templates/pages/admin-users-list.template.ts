@@ -3,6 +3,7 @@ import { renderPagination, PaginationData } from '../pagination.template'
 import { renderAlert } from '../alert.template'
 import { renderTable, TableColumn, TableData } from '../table.template'
 import { renderConfirmationDialog, getConfirmationDialogScript } from '../components/confirmation-dialog.template'
+import { escapeHtml } from '../../utils/sanitize'
 
 export interface User {
   id: string
@@ -64,14 +65,6 @@ export function renderUsersListPage(data: UsersListPageData): string {
       sortable: true,
       sortType: 'string',
       render: (_value: any, row: User) => {
-        const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (char) => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
-        }[char] || char))
-        
         const truncatedFirstName = row.firstName.length > 25 ? row.firstName.substring(0, 25) + '...' : row.firstName
         const truncatedLastName = row.lastName.length > 25 ? row.lastName.substring(0, 25) + '...' : row.lastName
         const fullName = escapeHtml(`${truncatedFirstName} ${truncatedLastName}`)
@@ -94,13 +87,6 @@ export function renderUsersListPage(data: UsersListPageData): string {
       sortable: true,
       sortType: 'string',
       render: (value: string) => {
-        const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (char) => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
-        }[char] || char))
         const escapedEmail = escapeHtml(value)
         return `<a href="mailto:${escapedEmail}" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors">${escapedEmail}</a>`
       }
@@ -284,7 +270,7 @@ export function renderUsersListPage(data: UsersListPageData): string {
                     type="text"
                     name="search"
                     id="user-search-input"
-                    value="${data.searchFilter || ''}"
+                    value="${escapeHtml(data.searchFilter || '')}"
                     placeholder="Search users..."
                     class="rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm px-4 py-2.5 pl-11 text-sm w-full text-zinc-950 dark:text-white border-2 border-purple-200/50 dark:border-purple-700/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-zinc-800 focus:shadow-lg focus:shadow-purple-500/20 dark:focus:shadow-purple-400/20 transition-all duration-300"
                     hx-get="/admin/users"

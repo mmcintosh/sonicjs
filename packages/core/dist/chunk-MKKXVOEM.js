@@ -1,6 +1,4 @@
-'use strict';
-
-var chunkDF2K6SBU_cjs = require('./chunk-DF2K6SBU.cjs');
+import { init_admin_layout_catalyst_template, init_logo_template, renderAdminLayoutCatalyst } from './chunk-X2TVCZGS.js';
 
 // src/templates/filter-bar.template.ts
 function renderFilterBar(data) {
@@ -68,11 +66,11 @@ function renderFilterBar(data) {
 }
 
 // src/templates/index.ts
-chunkDF2K6SBU_cjs.init_admin_layout_catalyst_template();
-chunkDF2K6SBU_cjs.init_logo_template();
+init_admin_layout_catalyst_template();
+init_logo_template();
 
 // src/templates/pages/admin-forms-docs.template.ts
-chunkDF2K6SBU_cjs.init_admin_layout_catalyst_template();
+init_admin_layout_catalyst_template();
 function renderFormsDocsPage(data) {
   const pageContent = `
     <style>
@@ -1353,11 +1351,11 @@ function MyForm() {
     user: data.user,
     version: data.version
   };
-  return chunkDF2K6SBU_cjs.renderAdminLayoutCatalyst(layoutData);
+  return renderAdminLayoutCatalyst(layoutData);
 }
 
 // src/templates/pages/admin-forms-examples.template.ts
-chunkDF2K6SBU_cjs.init_admin_layout_catalyst_template();
+init_admin_layout_catalyst_template();
 function renderFormsExamplesPage(data) {
   const pageContent = `
     <link rel="stylesheet" href="https://cdn.form.io/formiojs/formio.full.min.css">
@@ -3227,11 +3225,9 @@ function renderFormsExamplesPage(data) {
     user: data.user,
     version: data.version
   };
-  return chunkDF2K6SBU_cjs.renderAdminLayoutCatalyst(layoutData);
+  return renderAdminLayoutCatalyst(layoutData);
 }
 
-exports.renderFilterBar = renderFilterBar;
-exports.renderFormsDocsPage = renderFormsDocsPage;
-exports.renderFormsExamplesPage = renderFormsExamplesPage;
-//# sourceMappingURL=chunk-YJJMVDH2.cjs.map
-//# sourceMappingURL=chunk-YJJMVDH2.cjs.map
+export { renderFilterBar, renderFormsDocsPage, renderFormsExamplesPage };
+//# sourceMappingURL=chunk-MKKXVOEM.js.map
+//# sourceMappingURL=chunk-MKKXVOEM.js.map

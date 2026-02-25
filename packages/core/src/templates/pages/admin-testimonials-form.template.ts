@@ -1,5 +1,6 @@
 import { renderAdminLayout, AdminLayoutData } from '../layouts/admin-layout-v2.template'
 import { renderAlert } from '../alert.template'
+import { escapeHtml } from '../../utils/sanitize'
 
 interface Testimonial {
   id?: number
@@ -278,13 +279,4 @@ export function renderTestimonialsForm(data: TestimonialsFormData): string {
   }
 
   return renderAdminLayout(layoutData)
-}
-
-function escapeHtml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;")
 }

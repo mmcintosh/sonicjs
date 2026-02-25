@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../utils/sanitize'
+
 export interface FormField {
   name: string
   label: string
@@ -52,8 +54,8 @@ export function renderForm(data: FormData): string {
       ${data.csrfToken ? `<input type="hidden" name="_csrf" value="${data.csrfToken}">` : ''}
       ${data.title ? `
         <div class="mb-6">
-          <h2 class="text-lg font-medium text-gray-1">${data.title}</h2>
-          ${data.description ? `<p class="mt-1 text-sm text-gray-4">${data.description}</p>` : ''}
+          <h2 class="text-lg font-medium text-gray-1">${escapeHtml(data.title!)}</h2>
+          ${data.description ? `<p class="mt-1 text-sm text-gray-4">${escapeHtml(data.description)}</p>` : ''}
         </div>
       ` : ''}
 
@@ -84,7 +86,7 @@ export function renderFormField(field: FormField): string {
   const fieldId = `field-${field.name}`
   const required = field.required ? 'required' : ''
   const readonly = field.readonly ? 'readonly' : ''
-  const placeholder = field.placeholder ? `placeholder="${field.placeholder}"` : ''
+  const placeholder = field.placeholder ? `placeholder="${escapeHtml(field.placeholder)}"` : ''
 
   let fieldHTML = ''
 
@@ -98,7 +100,7 @@ export function renderFormField(field: FormField): string {
           type="${field.type === 'date' ? 'datetime-local' : field.type}"
           id="${fieldId}"
           name="${field.name}"
-          value="${field.value || ''}"
+          value="${escapeHtml(String(field.value ?? ''))}"
           class="form-input ${field.className || ''}"
           ${placeholder}
           ${required}
@@ -109,17 +111,17 @@ export function renderFormField(field: FormField): string {
         >
       `
       break
-      
+
     case 'textarea':
       fieldHTML = `
-        <textarea 
+        <textarea
           id="${fieldId}"
-          name="${field.name}" 
-          class="form-textarea ${field.className || ''}" 
+          name="${field.name}"
+          class="form-textarea ${field.className || ''}"
           rows="${field.rows || 4}"
           ${placeholder}
           ${required}
-        >${field.value || ''}</textarea>
+        >${escapeHtml(String(field.value ?? ''))}</textarea>
       `
       break
       
@@ -160,26 +162,26 @@ export function renderFormField(field: FormField): string {
           ${required}
         >
           ${field.options ? field.options.map(option => `
-            <option value="${option.value}" ${option.selected || field.value === option.value ? 'selected' : ''}>
-              ${option.label}
+            <option value="${escapeHtml(option.value)}" ${option.selected || field.value === option.value ? 'selected' : ''}>
+              ${escapeHtml(option.label)}
             </option>
           `).join('') : ''}
         </select>
       `
       break
-      
+
     case 'multi_select':
       fieldHTML = `
-        <select 
+        <select
           id="${fieldId}"
-          name="${field.name}" 
-          class="form-input ${field.className || ''}" 
-          multiple 
+          name="${field.name}"
+          class="form-input ${field.className || ''}"
+          multiple
           ${required}
         >
           ${field.options ? field.options.map(option => `
-            <option value="${option.value}" ${option.selected ? 'selected' : ''}>
-              ${option.label}
+            <option value="${escapeHtml(option.value)}" ${option.selected ? 'selected' : ''}>
+              ${escapeHtml(option.label)}
             </option>
           `).join('') : ''}
         </select>
@@ -203,11 +205,11 @@ export function renderFormField(field: FormField): string {
       
     default:
       fieldHTML = `
-        <input 
-          type="text" 
+        <input
+          type="text"
           id="${fieldId}"
-          name="${field.name}" 
-          value="${field.value || ''}"
+          name="${field.name}"
+          value="${escapeHtml(String(field.value ?? ''))}"
           class="form-input ${field.className || ''}" 
           ${placeholder} 
           ${required}
@@ -223,7 +225,7 @@ export function renderFormField(field: FormField): string {
         <div class="flex items-center">
           ${fieldHTML}
         </div>
-        ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1 ml-6">${field.helpText}</p>` : ''}
+        ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1 ml-6">${escapeHtml(field.helpText)}</p>` : ''}
       </div>
     `
   }
@@ -234,7 +236,7 @@ export function renderFormField(field: FormField): string {
         ${field.label}${field.required ? ' *' : ''}
       </label>
       ${fieldHTML}
-      ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">${field.helpText}</p>` : ''}
+      ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">${escapeHtml(field.helpText)}</p>` : ''}
     </div>
   `
 }
