@@ -1,6 +1,6 @@
 'use strict';
 
-var chunkFQWGKFDK_cjs = require('./chunk-FQWGKFDK.cjs');
+var chunkNKU4TCRP_cjs = require('./chunk-NKU4TCRP.cjs');
 
 // src/templates/filter-bar.template.ts
 function renderFilterBar(data) {
@@ -68,11 +68,11 @@ function renderFilterBar(data) {
 }
 
 // src/templates/index.ts
-chunkFQWGKFDK_cjs.init_admin_layout_catalyst_template();
-chunkFQWGKFDK_cjs.init_logo_template();
+chunkNKU4TCRP_cjs.init_admin_layout_catalyst_template();
+chunkNKU4TCRP_cjs.init_logo_template();
 
 // src/templates/pages/admin-forms-docs.template.ts
-chunkFQWGKFDK_cjs.init_admin_layout_catalyst_template();
+chunkNKU4TCRP_cjs.init_admin_layout_catalyst_template();
 function renderFormsDocsPage(data) {
   const pageContent = `
     <style>
@@ -1353,11 +1353,11 @@ function MyForm() {
     user: data.user,
     version: data.version
   };
-  return chunkFQWGKFDK_cjs.renderAdminLayoutCatalyst(layoutData);
+  return chunkNKU4TCRP_cjs.renderAdminLayoutCatalyst(layoutData);
 }
 
 // src/templates/pages/admin-forms-examples.template.ts
-chunkFQWGKFDK_cjs.init_admin_layout_catalyst_template();
+chunkNKU4TCRP_cjs.init_admin_layout_catalyst_template();
 function renderFormsExamplesPage(data) {
   const pageContent = `
     <link rel="stylesheet" href="https://cdn.form.io/formiojs/formio.full.min.css">
@@ -3227,11 +3227,11 @@ function renderFormsExamplesPage(data) {
     user: data.user,
     version: data.version
   };
-  return chunkFQWGKFDK_cjs.renderAdminLayoutCatalyst(layoutData);
+  return chunkNKU4TCRP_cjs.renderAdminLayoutCatalyst(layoutData);
 }
 
 exports.renderFilterBar = renderFilterBar;
 exports.renderFormsDocsPage = renderFormsDocsPage;
 exports.renderFormsExamplesPage = renderFormsExamplesPage;
-//# sourceMappingURL=chunk-AXG5XWCW.cjs.map
-//# sourceMappingURL=chunk-AXG5XWCW.cjs.map
+//# sourceMappingURL=chunk-FNXZ47XR.cjs.map
+//# sourceMappingURL=chunk-FNXZ47XR.cjs.map

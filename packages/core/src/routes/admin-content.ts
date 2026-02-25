@@ -10,6 +10,7 @@ import { getCacheService, CACHE_CONFIGS } from '../services/cache'
 import type { Bindings, Variables } from '../app'
 import { PluginService } from '../services/plugin-service'
 import { getBlocksFieldConfig, parseBlocksValue } from '../utils/blocks'
+import { escapeHtml } from '../utils/sanitize'
 import { FTS5Service } from '../plugins/core-plugins/ai-search-plugin/services/fts5.service'
 import { SearchCacheService } from '../plugins/core-plugins/ai-search-plugin/services/search-cache.service'
 
@@ -500,8 +501,8 @@ adminContentRoutes.get('/new', async (c) => {
                 ${collections.map(collection => `
                   <a href="/admin/content/new?collection=${collection.id}" 
                      class="block p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700">
-                    <h3 class="text-xl font-semibold mb-2">${collection.display_name}</h3>
-                    <p class="text-gray-400">${collection.description || 'No description'}</p>
+                    <h3 class="text-xl font-semibold mb-2">${escapeHtml(collection.display_name)}</h3>
+                    <p class="text-gray-400">${escapeHtml(collection.description || 'No description')}</p>
                   </a>
                 `).join('')}
               </div>
@@ -1132,7 +1133,7 @@ adminContentRoutes.post('/preview', async (c) => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Preview: ${data.title || 'Untitled'}</title>
+        <title>Preview: ${escapeHtml(data.title || 'Untitled')}</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
           h1 { color: #333; }
@@ -1141,23 +1142,23 @@ adminContentRoutes.post('/preview', async (c) => {
         </style>
       </head>
       <body>
-        <h1>${data.title || 'Untitled'}</h1>
+        <h1>${escapeHtml(data.title || 'Untitled')}</h1>
         <div class="meta">
-          <strong>Collection:</strong> ${collection.display_name}<br>
-          <strong>Status:</strong> ${formData.get('status') || 'draft'}<br>
-          ${data.meta_description ? `<strong>Description:</strong> ${data.meta_description}<br>` : ''}
+          <strong>Collection:</strong> ${escapeHtml(collection.display_name)}<br>
+          <strong>Status:</strong> ${escapeHtml(String(formData.get('status') || 'draft'))}<br>
+          ${data.meta_description ? `<strong>Description:</strong> ${escapeHtml(data.meta_description)}<br>` : ''}
         </div>
         <div class="content">
           ${data.content || '<p>No content provided.</p>'}
         </div>
-        
+
         <h3>All Fields:</h3>
         <table border="1" style="border-collapse: collapse; width: 100%;">
           <tr><th>Field</th><th>Value</th></tr>
           ${fields.map(field => `
             <tr>
-              <td><strong>${field.field_label}</strong></td>
-              <td>${data[field.field_name] || '<em>empty</em>'}</td>
+              <td><strong>${escapeHtml(field.field_label)}</strong></td>
+              <td>${field.field_type === 'rich_text' ? (data[field.field_name] || '<em>empty</em>') : escapeHtml(data[field.field_name] || '') || '<em>empty</em>'}</td>
             </tr>
           `).join('')}
         </table>

@@ -27,23 +27,7 @@ function sanitizeObject(obj, fields) {
   }
   return sanitized;
 }
-function sanitizeDeep(value) {
-  if (typeof value === "string") {
-    return sanitizeInput(value);
-  }
-  if (Array.isArray(value)) {
-    return value.map(sanitizeDeep);
-  }
-  if (value !== null && typeof value === "object") {
-    const result = {};
-    for (const [k, v] of Object.entries(value)) {
-      result[k] = sanitizeDeep(v);
-    }
-    return result;
-  }
-  return value;
-}
 
-export { escapeHtml, sanitizeDeep, sanitizeInput, sanitizeObject };
-//# sourceMappingURL=chunk-RQKJ6NEX.js.map
-//# sourceMappingURL=chunk-RQKJ6NEX.js.map
+export { escapeHtml, sanitizeInput, sanitizeObject };
+//# sourceMappingURL=chunk-USI3FQPO.js.map
+//# sourceMappingURL=chunk-USI3FQPO.js.map

@@ -1,4 +1,4 @@
-import { escapeHtml } from './chunk-RQKJ6NEX.js';
+import { escapeHtml } from './chunk-USI3FQPO.js';
 import { __esm, __export, __toCommonJS } from './chunk-V4OQ3NZ2.js';
 
 // src/templates/components/logo.template.ts
@@ -3611,5 +3611,5 @@ function renderFormField(field) {
 }
 
 export { adminLayoutV2, getConfirmationDialogScript, init_admin_layout_catalyst_template, init_logo_template, renderAdminLayout, renderAdminLayoutCatalyst, renderAlert, renderCheckboxPage, renderCodeExamplesList, renderConfirmationDialog, renderDesignPage, renderForm, renderFormField, renderLogo, renderPagination, renderTable, renderTestimonialsList };
-//# sourceMappingURL=chunk-X2TVCZGS.js.map
-//# sourceMappingURL=chunk-X2TVCZGS.js.map
+//# sourceMappingURL=chunk-WPXW6VHE.js.map
+//# sourceMappingURL=chunk-WPXW6VHE.js.map

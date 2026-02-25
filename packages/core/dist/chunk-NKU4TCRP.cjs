@@ -1,6 +1,6 @@
 'use strict';
 
-var chunk5BNAAGEK_cjs = require('./chunk-5BNAAGEK.cjs');
+var chunkW5PB2VOK_cjs = require('./chunk-W5PB2VOK.cjs');
 var chunkIGJUBJBW_cjs = require('./chunk-IGJUBJBW.cjs');
 
 // src/templates/components/logo.template.ts
@@ -1005,7 +1005,7 @@ function renderTable(data) {
           <svg class="mx-auto h-12 w-12 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">${chunk5BNAAGEK_cjs.escapeHtml(data.emptyMessage || "No data available")}</p>
+          <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">${chunkW5PB2VOK_cjs.escapeHtml(data.emptyMessage || "No data available")}</p>
         </div>
       </div>
     `;
@@ -1014,7 +1014,7 @@ function renderTable(data) {
     <div class="${data.className || ""}" id="${tableId}">
       ${data.title ? `
         <div class="px-4 sm:px-0 mb-4">
-          <h3 class="text-base font-semibold text-zinc-950 dark:text-white">${chunk5BNAAGEK_cjs.escapeHtml(data.title)}</h3>
+          <h3 class="text-base font-semibold text-zinc-950 dark:text-white">${chunkW5PB2VOK_cjs.escapeHtml(data.title)}</h3>
         </div>
       ` : ""}
       <div class="overflow-x-auto">
@@ -3168,16 +3168,16 @@ function renderTestimonialsList(data) {
         id: testimonial.id,
         author: `
                 <div class="flex flex-col">
-                  <div class="font-medium text-zinc-950 dark:text-white">${chunk5BNAAGEK_cjs.escapeHtml(testimonial.author_name)}</div>
+                  <div class="font-medium text-zinc-950 dark:text-white">${chunkW5PB2VOK_cjs.escapeHtml(testimonial.author_name)}</div>
                   ${testimonial.author_title || testimonial.author_company ? `
                     <div class="text-xs text-zinc-500 dark:text-zinc-400">
-                      ${[testimonial.author_title, testimonial.author_company].filter(Boolean).map((s) => chunk5BNAAGEK_cjs.escapeHtml(s)).join(" \xB7 ")}
+                      ${[testimonial.author_title, testimonial.author_company].filter(Boolean).map((s) => chunkW5PB2VOK_cjs.escapeHtml(s)).join(" \xB7 ")}
                     </div>
                   ` : ""}
                   ${rating ? `<div class="text-xs mt-1">${rating}</div>` : ""}
                 </div>
               `,
-        testimonial: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${chunk5BNAAGEK_cjs.escapeHtml(truncated)}</div>`,
+        testimonial: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${chunkW5PB2VOK_cjs.escapeHtml(truncated)}</div>`,
         status: testimonial.isPublished ? '<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/20">Published</span>' : '<span class="inline-flex items-center rounded-md bg-zinc-50 dark:bg-zinc-500/10 px-2 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/20 dark:ring-zinc-500/20">Draft</span>',
         sortOrder: testimonial.sortOrder.toString(),
         created_at: new Date(testimonial.created_at * 1e3).toLocaleDateString()
@@ -3375,9 +3375,9 @@ function renderCodeExamplesList(data) {
       const langColor = languageColors[example.language.toLowerCase()] || "bg-zinc-100 dark:bg-zinc-500/10 text-zinc-700 dark:text-zinc-400 ring-zinc-600/20 dark:ring-zinc-500/20";
       return {
         id: example.id,
-        title: `<div class="font-medium text-zinc-950 dark:text-white">${chunk5BNAAGEK_cjs.escapeHtml(example.title)}</div>`,
-        language: `<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${langColor}">${chunk5BNAAGEK_cjs.escapeHtml(example.language)}</span>`,
-        description: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${chunk5BNAAGEK_cjs.escapeHtml(truncatedDesc)}</div>`,
+        title: `<div class="font-medium text-zinc-950 dark:text-white">${chunkW5PB2VOK_cjs.escapeHtml(example.title)}</div>`,
+        language: `<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${langColor}">${chunkW5PB2VOK_cjs.escapeHtml(example.language)}</span>`,
+        description: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${chunkW5PB2VOK_cjs.escapeHtml(truncatedDesc)}</div>`,
         status: example.isPublished ? '<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/20">Published</span>' : '<span class="inline-flex items-center rounded-md bg-zinc-50 dark:bg-zinc-500/10 px-2 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/20 dark:ring-zinc-500/20">Draft</span>',
         sortOrder: example.sortOrder.toString(),
         created_at: new Date(example.created_at * 1e3).toLocaleDateString()
@@ -3437,8 +3437,8 @@ function renderForm(data) {
       ${data.csrfToken ? `<input type="hidden" name="_csrf" value="${data.csrfToken}">` : ""}
       ${data.title ? `
         <div class="mb-6">
-          <h2 class="text-lg font-medium text-gray-1">${chunk5BNAAGEK_cjs.escapeHtml(data.title)}</h2>
-          ${data.description ? `<p class="mt-1 text-sm text-gray-4">${chunk5BNAAGEK_cjs.escapeHtml(data.description)}</p>` : ""}
+          <h2 class="text-lg font-medium text-gray-1">${chunkW5PB2VOK_cjs.escapeHtml(data.title)}</h2>
+          ${data.description ? `<p class="mt-1 text-sm text-gray-4">${chunkW5PB2VOK_cjs.escapeHtml(data.description)}</p>` : ""}
         </div>
       ` : ""}
 
@@ -3468,7 +3468,7 @@ function renderFormField(field) {
   const fieldId = `field-${field.name}`;
   const required = field.required ? "required" : "";
   const readonly = field.readonly ? "readonly" : "";
-  const placeholder = field.placeholder ? `placeholder="${chunk5BNAAGEK_cjs.escapeHtml(field.placeholder)}"` : "";
+  const placeholder = field.placeholder ? `placeholder="${chunkW5PB2VOK_cjs.escapeHtml(field.placeholder)}"` : "";
   let fieldHTML = "";
   switch (field.type) {
     case "text":
@@ -3480,7 +3480,7 @@ function renderFormField(field) {
           type="${field.type === "date" ? "datetime-local" : field.type}"
           id="${fieldId}"
           name="${field.name}"
-          value="${chunk5BNAAGEK_cjs.escapeHtml(String(field.value ?? ""))}"
+          value="${chunkW5PB2VOK_cjs.escapeHtml(String(field.value ?? ""))}"
           class="form-input ${field.className || ""}"
           ${placeholder}
           ${required}
@@ -3500,7 +3500,7 @@ function renderFormField(field) {
           rows="${field.rows || 4}"
           ${placeholder}
           ${required}
-        >${chunk5BNAAGEK_cjs.escapeHtml(String(field.value ?? ""))}</textarea>
+        >${chunkW5PB2VOK_cjs.escapeHtml(String(field.value ?? ""))}</textarea>
       `;
       break;
     case "rich_text":
@@ -3539,8 +3539,8 @@ function renderFormField(field) {
           ${required}
         >
           ${field.options ? field.options.map((option) => `
-            <option value="${chunk5BNAAGEK_cjs.escapeHtml(option.value)}" ${option.selected || field.value === option.value ? "selected" : ""}>
-              ${chunk5BNAAGEK_cjs.escapeHtml(option.label)}
+            <option value="${chunkW5PB2VOK_cjs.escapeHtml(option.value)}" ${option.selected || field.value === option.value ? "selected" : ""}>
+              ${chunkW5PB2VOK_cjs.escapeHtml(option.label)}
             </option>
           `).join("") : ""}
         </select>
@@ -3556,8 +3556,8 @@ function renderFormField(field) {
           ${required}
         >
           ${field.options ? field.options.map((option) => `
-            <option value="${chunk5BNAAGEK_cjs.escapeHtml(option.value)}" ${option.selected ? "selected" : ""}>
-              ${chunk5BNAAGEK_cjs.escapeHtml(option.label)}
+            <option value="${chunkW5PB2VOK_cjs.escapeHtml(option.value)}" ${option.selected ? "selected" : ""}>
+              ${chunkW5PB2VOK_cjs.escapeHtml(option.label)}
             </option>
           `).join("") : ""}
         </select>
@@ -3583,7 +3583,7 @@ function renderFormField(field) {
           type="text"
           id="${fieldId}"
           name="${field.name}"
-          value="${chunk5BNAAGEK_cjs.escapeHtml(String(field.value ?? ""))}"
+          value="${chunkW5PB2VOK_cjs.escapeHtml(String(field.value ?? ""))}"
           class="form-input ${field.className || ""}" 
           ${placeholder} 
           ${required}
@@ -3597,7 +3597,7 @@ function renderFormField(field) {
         <div class="flex items-center">
           ${fieldHTML}
         </div>
-        ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1 ml-6">${chunk5BNAAGEK_cjs.escapeHtml(field.helpText)}</p>` : ""}
+        ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1 ml-6">${chunkW5PB2VOK_cjs.escapeHtml(field.helpText)}</p>` : ""}
       </div>
     `;
   }
@@ -3607,7 +3607,7 @@ function renderFormField(field) {
         ${field.label}${field.required ? " *" : ""}
       </label>
       ${fieldHTML}
-      ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">${chunk5BNAAGEK_cjs.escapeHtml(field.helpText)}</p>` : ""}
+      ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">${chunkW5PB2VOK_cjs.escapeHtml(field.helpText)}</p>` : ""}
     </div>
   `;
 }
@@ -3629,5 +3629,5 @@ exports.renderLogo = renderLogo;
 exports.renderPagination = renderPagination;
 exports.renderTable = renderTable;
 exports.renderTestimonialsList = renderTestimonialsList;
-//# sourceMappingURL=chunk-FQWGKFDK.cjs.map
-//# sourceMappingURL=chunk-FQWGKFDK.cjs.map
+//# sourceMappingURL=chunk-NKU4TCRP.cjs.map
+//# sourceMappingURL=chunk-NKU4TCRP.cjs.map
