@@ -130,7 +130,7 @@ class MemoryCache {
    */
   invalidatePattern(pattern: string): number {
     const regex = new RegExp(
-      '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
+      '^' + pattern.replace(/[.+|()[\]{}^$\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
     )
 
     let count = 0
@@ -369,7 +369,7 @@ export class CacheService {
     if (this.config.kvEnabled && this.kvNamespace) {
       try {
         const regex = new RegExp(
-          '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
+          '^' + pattern.replace(/[.+|()[\]{}^$\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
         )
 
         // List all keys with the namespace prefix

@@ -599,10 +599,10 @@ test.describe('Authentication API', () => {
 
       if (response.status() === 201) {
         const data = await response.json();
-        
-        // Names should be stored as-is (not executed)
-        expect(data.user.firstName).toBe(xssPayload.firstName);
-        expect(data.user.lastName).toBe(xssPayload.lastName);
+
+        // Names should be sanitized (HTML-escaped) to prevent XSS
+        expect(data.user.firstName).toBe('&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;');
+        expect(data.user.lastName).toBe('&quot;&gt;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;');
       }
     });
 
