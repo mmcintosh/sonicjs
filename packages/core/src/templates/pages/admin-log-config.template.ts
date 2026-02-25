@@ -20,9 +20,13 @@ export function renderLogConfigPage(data: LogConfigPageData) {
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-          <nav class="mb-4">
+          <nav class="mb-4 flex items-center space-x-4">
+            <a href="/admin/settings/logging" class="text-indigo-600 hover:text-indigo-900">
+              ← Logging Settings
+            </a>
+            <span class="text-gray-300">|</span>
             <a href="/admin/logs" class="text-indigo-600 hover:text-indigo-900">
-              ← Back to Logs
+              System Logs
             </a>
           </nav>
           <h1 class="text-2xl font-semibold text-gray-900">Log Configuration</h1>

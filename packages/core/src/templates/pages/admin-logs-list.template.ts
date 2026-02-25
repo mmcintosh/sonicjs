@@ -58,6 +58,12 @@ export function renderLogsListPage(data: LogsListPageData) {
 
   const content = `
     <div>
+      <div class="mb-4">
+        <a href="/admin/settings/logging" class="inline-flex items-center text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors no-underline">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Back to Logging Settings
+        </a>
+      </div>
       <div class="sm:flex sm:items-center sm:justify-between mb-6">
         <div class="sm:flex-auto">
           <h1 class="text-2xl/8 font-semibold text-zinc-950 dark:text-white sm:text-xl/8">System Logs</h1>
