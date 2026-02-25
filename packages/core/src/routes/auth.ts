@@ -3,8 +3,9 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { setCookie } from 'hono/cookie'
 import { html } from 'hono/html'
-import { AuthManager, requireAuth, rateLimit, generateCsrfToken } from '../middleware'
-import { sanitizeInput } from '../utils/sanitize'
+import { AuthManager, requireAuth, rateLimit, generateCsrfToken, logActivityFromContext } from '../middleware'
+import { sanitizeInput, escapeHtml } from '../utils/sanitize'
+import { getLogger } from '../services/logger'
 import { renderLoginPage, LoginPageData } from '../templates/pages/auth-login.template'
 import { renderRegisterPage, RegisterPageData } from '../templates/pages/auth-register.template'
 import { getCacheService, CACHE_CONFIGS } from '../services'
@@ -192,6 +193,9 @@ authRoutes.post('/register',
       // Set CSRF cookie for browser sessions
       await setCsrfCookie(c)
 
+      // Log registration
+      c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.register', 'user', userId, { email: normalizedEmail, role: 'viewer' }))
+
       return c.json({
         user: {
           id: userId,
@@ -205,6 +209,7 @@ authRoutes.post('/register',
       }, 201)
     } catch (error) {
       console.error('Registration error:', error)
+      try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Registration error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
       // Return validation errors as 400, other errors as 500
       if (error instanceof Error && error.message.includes('validation')) {
         return c.json({ error: error.message }, 400)
@@ -250,12 +255,14 @@ authRoutes.post('/login',
       }
 
       if (!user) {
+        try { const logger = getLogger(db); await logger.logAuth('login', undefined, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, email: normalizedEmail, reason: 'user-not-found' } as any) } catch {}
         return c.json({ error: 'Invalid email or password' }, 401)
       }
-      
+
       // Verify password
       const isValidPassword = await AuthManager.verifyPassword(password, user.password_hash)
       if (!isValidPassword) {
+        try { const logger = getLogger(db); await logger.logAuth('login', user.id, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, email: normalizedEmail, reason: 'bad-password' } as any) } catch {}
         return c.json({ error: 'Invalid email or password' }, 401)
       }
 
@@ -294,6 +301,9 @@ authRoutes.post('/login',
       await cache.delete(cache.generateKey('user', user.id))
       await cache.delete(cache.generateKey('user', `email:${normalizedEmail}`))
 
+      // Log login success
+      c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.login', 'user', user.id, { email: user.email }))
+
       return c.json({
         user: {
           id: user.id,
@@ -307,6 +317,7 @@ authRoutes.post('/login',
       })
     } catch (error) {
       console.error('Login error:', error)
+      try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Login error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
       return c.json({ error: 'Login failed' }, 500)
     }
 })
@@ -322,6 +333,8 @@ authRoutes.post('/logout', (c) => {
   })
   clearCsrfCookie(c)
 
+  c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.logout'))
+
   return c.json({ message: 'Logged out successfully' })
 })
 
@@ -334,6 +347,8 @@ authRoutes.get('/logout', (c) => {
     maxAge: 0 // Expire immediately
   })
   clearCsrfCookie(c)
+
+  c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.logout'))
 
   return c.redirect('/auth/login?message=You have been logged out successfully')
 })
@@ -360,6 +375,7 @@ authRoutes.get('/me', requireAuth(), async (c) => {
     return c.json({ user: userData })
   } catch (error) {
     console.error('Get user error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Get user error', error) } catch {}
     return c.json({ error: 'Failed to get user' }, 500)
   }
 })
@@ -387,6 +403,7 @@ authRoutes.post('/refresh', requireAuth(), async (c) => {
     return c.json({ token })
   } catch (error) {
     console.error('Token refresh error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Token refresh error', error) } catch {}
     return c.json({ error: 'Token refresh failed' }, 500)
   }
 })
@@ -502,6 +519,9 @@ authRoutes.post('/register/form',
     // Set CSRF cookie for browser sessions
     await setCsrfCookie(c)
 
+    // Log registration
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.register', 'user', userId, { email: normalizedEmail, role }))
+
     // Redirect based on role
     const redirectUrl = role === 'admin' ? '/admin/dashboard' : '/admin/dashboard'
 
@@ -517,6 +537,7 @@ authRoutes.post('/register/form',
     `)
   } catch (error) {
     console.error('Registration error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Form registration error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
     return c.html(html`
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
         Registration failed. Please try again.
@@ -556,16 +577,18 @@ authRoutes.post('/login/form',
       .first() as any
     
     if (!user) {
+      try { const logger = getLogger(db); await logger.logAuth('login', undefined, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, email: normalizedEmail, reason: 'user-not-found' } as any) } catch {}
       return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           Invalid email or password
         </div>
       `)
     }
-    
+
     // Verify password
     const isValidPassword = await AuthManager.verifyPassword(password, user.password_hash)
     if (!isValidPassword) {
+      try { const logger = getLogger(db); await logger.logAuth('login', user.id, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, email: normalizedEmail, reason: 'bad-password' } as any) } catch {}
       return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           Invalid email or password
@@ -604,6 +627,9 @@ authRoutes.post('/login/form',
       .bind(new Date().getTime(), user.id)
       .run()
 
+    // Log login success
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.login', 'user', user.id, { email: user.email }))
+
     return c.html(html`
       <div id="form-response">
         <div class="rounded-lg bg-green-100 dark:bg-lime-500/10 p-4 ring-1 ring-green-400 dark:ring-lime-500/20">
@@ -625,6 +651,7 @@ authRoutes.post('/login/form',
     `)
   } catch (error) {
     console.error('Login error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Form login error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
     return c.html(html`
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
         Login failed. Please try again.
@@ -670,6 +697,8 @@ authRoutes.post('/seed-admin',
         .bind(passwordHash, Date.now(), existingAdmin.id)
         .run()
 
+      try { const logger = getLogger(db); await logger.logSecurity('seed-admin-reset', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, existingId: existingAdmin.id } as any) } catch {}
+
       return c.json({
         message: 'Admin user already exists (password updated)',
         user: {
@@ -683,12 +712,12 @@ authRoutes.post('/seed-admin',
 
     // Hash password
     const passwordHash = await AuthManager.hashPassword('sonicjs!')
-    
+
     // Create admin user
     const userId = 'admin-user-id'
     const now = Date.now()
     const adminEmail = 'admin@sonicjs.com'.toLowerCase()
-    
+
     await db.prepare(`
       INSERT INTO users (id, email, username, first_name, last_name, password_hash, role, is_active, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -704,8 +733,10 @@ authRoutes.post('/seed-admin',
       now,
       now
     ).run()
-    
-    return c.json({ 
+
+    try { const logger = getLogger(db); await logger.logSecurity('seed-admin-created', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId } as any) } catch {}
+
+    return c.json({
       message: 'Admin user created successfully',
       user: {
         id: userId,
@@ -717,6 +748,7 @@ authRoutes.post('/seed-admin',
     })
   } catch (error) {
     console.error('Seed admin error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Seed admin error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
     return c.json({ error: 'Failed to create admin user', details: error instanceof Error ? error.message : String(error) }, 500)
   }
 })
@@ -808,9 +840,9 @@ authRoutes.get('/accept-invitation', async (c) => {
               <h2 class="text-3xl font-bold">Accept Invitation</h2>
               <p class="mt-2 text-gray-400">Complete your account setup</p>
               <p class="mt-4 text-sm">
-                You've been invited as <strong>${invitedUser.first_name} ${invitedUser.last_name}</strong><br>
-                <span class="text-gray-400">${invitedUser.email}</span><br>
-                <span class="text-blue-400 capitalize">${invitedUser.role}</span>
+                You've been invited as <strong>${escapeHtml(invitedUser.first_name || '')} ${escapeHtml(invitedUser.last_name || '')}</strong><br>
+                <span class="text-gray-400">${escapeHtml(invitedUser.email || '')}</span><br>
+                <span class="text-blue-400 capitalize">${escapeHtml(invitedUser.role || '')}</span>
               </p>
             </div>
 
@@ -868,6 +900,7 @@ authRoutes.get('/accept-invitation', async (c) => {
 
   } catch (error) {
     console.error('Accept invitation page error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Accept invitation page error', error) } catch {}
     return c.html(`
       <html>
         <head><title>Error</title></head>
@@ -973,14 +1006,15 @@ authRoutes.post('/accept-invitation', async (c) => {
     // Set CSRF cookie for browser sessions
     await setCsrfCookie(c)
 
-    // Log the activity (TODO: implement activity logging)
-    // Activity logging is deferred until utils/log-activity is implemented
+    // Log invitation acceptance
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.invitation_accepted', 'user', invitedUser.id, { email: invitedUser.email, role: invitedUser.role }))
 
     // Redirect to admin dashboard
     return c.redirect('/admin/dashboard?welcome=true')
 
   } catch (error) {
     console.error('Accept invitation error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Accept invitation error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
     return c.json({ error: 'Failed to accept invitation' }, 500)
   }
 })
@@ -1040,8 +1074,8 @@ authRoutes.post('/request-password-reset',
       user.id
     ).run()
 
-    // Log the activity (TODO: implement activity logging)
-    // Activity logging is deferred until utils/log-activity is implemented
+    // Log password reset request (security event — awaited)
+    try { const logger = getLogger(db); await logger.logSecurity('password-reset-requested', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.id, email } as any) } catch {}
 
     // In a real implementation, you would send an email here
     // For now, we'll return the reset link for development
@@ -1055,6 +1089,7 @@ authRoutes.post('/request-password-reset',
 
   } catch (error) {
     console.error('Password reset request error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Password reset request error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
     return c.json({ error: 'Failed to process password reset request' }, 500)
   }
 })
@@ -1142,8 +1177,8 @@ authRoutes.get('/reset-password', async (c) => {
               <h2 class="text-3xl font-bold">Reset Password</h2>
               <p class="mt-2 text-gray-400">Choose a new password for your account</p>
               <p class="mt-4 text-sm">
-                Reset password for <strong>${user.first_name} ${user.last_name}</strong><br>
-                <span class="text-gray-400">${user.email}</span>
+                Reset password for <strong>${escapeHtml(user.first_name || '')} ${escapeHtml(user.last_name || '')}</strong><br>
+                <span class="text-gray-400">${escapeHtml(user.email || '')}</span>
               </p>
             </div>
 
@@ -1196,6 +1231,7 @@ authRoutes.get('/reset-password', async (c) => {
 
   } catch (error) {
     console.error('Password reset page error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Password reset page error', error) } catch {}
     return c.html(`
       <html>
         <head><title>Error</title></head>
@@ -1284,14 +1320,16 @@ authRoutes.post('/reset-password', async (c) => {
       user.id
     ).run()
 
-    // Log the activity (TODO: implement activity logging)
-    // Activity logging is deferred until utils/log-activity is implemented
+    // Log password reset completion (both security + activity)
+    try { const logger = getLogger(db); await logger.logSecurity('password-reset-completed', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.id, email: user.email } as any) } catch {}
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.password_reset', 'user', user.id, { email: user.email }))
 
     // Redirect to login with success message
     return c.redirect('/auth/login?message=Password reset successfully. Please log in with your new password.')
 
   } catch (error) {
     console.error('Password reset error:', error)
+    try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Password reset error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
     return c.json({ error: 'Failed to reset password' }, 500)
   }
 })

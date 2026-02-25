@@ -5,7 +5,7 @@
  */
 
 import { Hono } from 'hono'
-import { createSonicJSApp, registerCollections, ExperimentService } from '@sonicjs-cms/core'
+import { createSonicJSApp, registerCollections, ExperimentService, getLogger } from '@sonicjs-cms/core'
 import type { SonicJSConfig } from '@sonicjs-cms/core'
 
 // Import custom collections
@@ -66,6 +66,7 @@ app.route('/', coreApp)
 export default {
   fetch: app.fetch,
   async scheduled(event: ScheduledEvent, env: any, ctx: ExecutionContext) {
+    // Evaluate active A/B test experiments
     const expService = new ExperimentService(env.DB, env.CACHE_KV, env.SEARCH_EXPERIMENTS)
     const active = await expService.getActiveExperiment()
     if (active) {
@@ -73,6 +74,18 @@ export default {
       if (result?.auto_completed) {
         console.log('[Cron] Experiment ' + active.id + ' auto-completed: winner=' + result.winner)
       }
+    }
+
+    // Clean up old logs (respects retention settings in log_config)
+    try {
+      const logger = getLogger(env.DB)
+      await logger.cleanupByRetention()
+
+      // Clean up activity logs older than 90 days
+      const cutoff = Date.now() - (90 * 24 * 60 * 60 * 1000)
+      await env.DB.prepare('DELETE FROM activity_logs WHERE created_at < ?').bind(cutoff).run()
+    } catch (e) {
+      console.error('[Cron] Log cleanup failed:', e)
     }
   }
 }

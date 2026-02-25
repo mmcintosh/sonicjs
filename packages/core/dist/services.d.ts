@@ -1,5 +1,5 @@
-import { b as PluginRoutes } from './types-DGBmHlef.js';
-export { G as CorePlugin, D as LogCategory, E as LogEntry, F as LogFilter, C as LogLevel, L as Logger, A as Migration, M as MigrationService, B as MigrationStatus, z as PluginBootstrapService, y as PluginService, t as cleanupRemovedCollections, u as fullCollectionSync, m as getAvailableCollectionNames, w as getLogger, q as getManagedCollections, x as initLogger, p as isCollectionManaged, k as loadCollectionConfig, l as loadCollectionConfigs, r as registerCollections, o as syncCollection, n as syncCollections, v as validateCollectionConfig } from './types-DGBmHlef.js';
+import { b as PluginRoutes } from './types-DX0DfPdl.js';
+export { G as CorePlugin, D as LogCategory, E as LogEntry, F as LogFilter, C as LogLevel, L as Logger, A as Migration, M as MigrationService, B as MigrationStatus, z as PluginBootstrapService, y as PluginService, t as cleanupRemovedCollections, u as fullCollectionSync, m as getAvailableCollectionNames, w as getLogger, q as getManagedCollections, x as initLogger, p as isCollectionManaged, k as loadCollectionConfig, l as loadCollectionConfigs, r as registerCollections, o as syncCollection, n as syncCollections, v as validateCollectionConfig } from './types-DX0DfPdl.js';
 import { b as TelemetryConfig, c as TelemetryIdentity, T as TelemetryEvent, a as TelemetryProperties } from './telemetry-UiD1i9GS.js';
 import { a as FieldConfig } from './collection-config-BF95LgQb.js';
 import '@cloudflare/workers-types';

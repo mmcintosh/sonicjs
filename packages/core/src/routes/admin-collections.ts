@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { html } from 'hono/html'
-import { requireAuth } from '../middleware'
+import { requireAuth, logActivityFromContext } from '../middleware'
 import { isPluginActive } from '../middleware/plugin-middleware'
 import { clearCollectionSchemaCache } from '../services/openapi-generator'
 import { renderCollectionsListPage } from '../templates/pages/admin-collections-list.template'
@@ -317,6 +317,9 @@ adminCollectionsRoutes.post('/', async (c) => {
       now
     ).run()
 
+    // Log collection creation
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'collection.create', 'collection', collectionId, { name, displayName }))
+
     // Clear cache (only if CACHE_KV is available)
     if (c.env.CACHE_KV) {
       try {
@@ -561,6 +564,9 @@ adminCollectionsRoutes.put('/:id', async (c) => {
 
     await updateStmt.bind(displayName, description || null, Date.now(), id).run()
 
+    // Log collection update
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'collection.update', 'collection', id, { displayName }))
+
     return c.html(html`
       <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
         Collection updated successfully!
@@ -601,6 +607,9 @@ adminCollectionsRoutes.delete('/:id', async (c) => {
     // Delete collection
     const deleteStmt = db.prepare('DELETE FROM collections WHERE id = ?')
     await deleteStmt.bind(id).run()
+
+    // Log collection deletion
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'collection.delete', 'collection', id))
 
     return c.html(html`
       <script>
@@ -725,6 +734,7 @@ adminCollectionsRoutes.post('/:id/fields', async (c) => {
       await updateSchemaStmt.bind(JSON.stringify(schema), Date.now(), collectionId).run()
 
       console.log('[Add Field] Added field to schema:', fieldName, fieldConfig)
+      c.executionCtx?.waitUntil(logActivityFromContext(c, 'collection.field_add', 'collection', collectionId, { fieldName, fieldType }))
       clearCollectionSchemaCache()
 
       return c.json({ success: true, fieldId: `schema-${fieldName}` })
@@ -761,6 +771,8 @@ adminCollectionsRoutes.post('/:id/fields', async (c) => {
       now,
       now
     ).run()
+
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'collection.field_add', 'collection', collectionId, { fieldName, fieldType }))
 
     return c.json({ success: true, fieldId })
   } catch (error) {
@@ -899,6 +911,8 @@ adminCollectionsRoutes.put('/:collectionId/fields/:fieldId', async (c) => {
 
       const result = await updateCollectionStmt.bind(JSON.stringify(schema), Date.now(), collectionId).run()
 
+      c.executionCtx?.waitUntil(logActivityFromContext(c, 'collection.field_update', 'collection', collectionId, { fieldName: fieldId.replace('schema-', ''), fieldType }))
+
       console.log('[Field Update] Schema update result:', {
         success: result.success,
         changes: result.meta?.changes
@@ -916,6 +930,8 @@ adminCollectionsRoutes.put('/:collectionId/fields/:fieldId', async (c) => {
     `)
 
     const result = await updateStmt.bind(fieldLabel, fieldType, fieldOptions, isRequired ? 1 : 0, isSearchable ? 1 : 0, Date.now(), fieldId).run()
+
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'collection.field_update', 'collection', collectionId, { fieldId, fieldType }))
 
     console.log('[Field Update] Update result:', {
       success: result.success,

@@ -1,6 +1,7 @@
 import { sign, verify } from 'hono/jwt'
 import { Context, Next } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
+import { getLogger } from '../services/logger'
 
 type JWTPayload = {
   userId: string
@@ -176,6 +177,7 @@ export const requireAuth = () => {
       }
 
       if (!token) {
+        try { const logger = getLogger(c.env?.DB); await logger.warn('auth', 'No auth token provided', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', url: c.req.url }) } catch {}
         // Check if this is a browser request (HTML accept header)
         const acceptHeader = c.req.header('Accept') || ''
         if (acceptHeader.includes('text/html')) {
@@ -209,6 +211,7 @@ export const requireAuth = () => {
       }
 
       if (!payload) {
+        try { const logger = getLogger(c.env?.DB); await logger.logAuth('token-verification', undefined, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }) } catch {}
         // Check if this is a browser request (HTML accept header)
         const acceptHeader = c.req.header('Accept') || ''
         if (acceptHeader.includes('text/html')) {
@@ -223,6 +226,7 @@ export const requireAuth = () => {
       return await next()
     } catch (error) {
       console.error('Auth middleware error:', error)
+      try { const logger = getLogger(c.env?.DB); await logger.error('auth', 'Auth middleware error', error, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '' }) } catch {}
       // Check if this is a browser request (HTML accept header)
       const acceptHeader = c.req.header('Accept') || ''
       if (acceptHeader.includes('text/html')) {
@@ -250,6 +254,7 @@ export const requireRole = (requiredRole: string | string[]) => {
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
     
     if (!roles.includes(user.role)) {
+      try { const logger = getLogger(c.env?.DB); await logger.logSecurity('insufficient-role', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.userId } as any) } catch {}
       // Check if this is a browser request (HTML accept header)
       const acceptHeader = c.req.header('Accept') || ''
       if (acceptHeader.includes('text/html')) {
@@ -284,6 +289,7 @@ export const optionalAuth = () => {
     } catch (error) {
       // Don't block on auth errors in optional auth
       console.error('Optional auth error:', error)
+      try { const logger = getLogger(c.env?.DB); await logger.warn('auth', 'Optional auth error', { error: error instanceof Error ? error.message : String(error) }) } catch {}
       return await next()
     }
   }

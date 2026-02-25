@@ -216,6 +216,23 @@ export class Logger {
   }
 
   /**
+   * Get a single log entry by ID
+   */
+  async getLogById(id: string): Promise<any | null> {
+    try {
+      const results = await this.db
+        .select()
+        .from(systemLogs)
+        .where(eq(systemLogs.id, id))
+        .limit(1)
+      return results[0] || null
+    } catch (error) {
+      console.error('Error getting log by ID:', error)
+      return null
+    }
+  }
+
+  /**
    * Get logs with filtering and pagination
    */
   async getLogs(filter: LogFilter = {}): Promise<{ logs: any[], total: number }> {

@@ -17,6 +17,7 @@
 
 import type { Context, Next } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
+import { getLogger } from '../services/logger'
 
 // Fallback secret — mirrors auth.ts behavior for local dev without wrangler secret
 const JWT_SECRET_FALLBACK = 'your-super-secret-jwt-key-change-in-production'
@@ -174,12 +175,10 @@ export function csrfProtection(options: CsrfOptions = {}) {
     const path = new URL(c.req.url).pathname
     const secret = c.env?.JWT_SECRET || JWT_SECRET_FALLBACK
 
-    // Warn if using fallback secret in production
+    // Log if using fallback secret in production
     if (c.env?.ENVIRONMENT === 'production' && !c.env?.JWT_SECRET) {
-      console.warn(
-        '[CSRF] WARNING: JWT_SECRET is not set in production. ' +
-        'CSRF tokens are signed with the fallback key, which is insecure.'
-      )
+      console.warn('[CSRF] WARNING: JWT_SECRET is not set in production.')
+      try { const logger = getLogger(c.env?.DB); await logger.logSecurity('csrf-fallback-secret', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method }) } catch {}
     }
 
     // Safe methods — just ensure cookie, then pass through
@@ -220,15 +219,18 @@ export function csrfProtection(options: CsrfOptions = {}) {
     }
 
     if (!cookieToken || !headerToken) {
+      try { const logger = getLogger(c.env?.DB); await logger.logSecurity('csrf-token-missing', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method }) } catch {}
       return csrfError(c, 'CSRF token missing')
     }
 
     if (cookieToken !== headerToken) {
+      try { const logger = getLogger(c.env?.DB); await logger.logSecurity('csrf-token-mismatch', 'high', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method }) } catch {}
       return csrfError(c, 'CSRF token mismatch')
     }
 
     const isValid = await validateCsrfToken(cookieToken, secret)
     if (!isValid) {
+      try { const logger = getLogger(c.env?.DB); await logger.logSecurity('csrf-token-invalid', 'high', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method }) } catch {}
       return csrfError(c, 'CSRF token invalid')
     }
 

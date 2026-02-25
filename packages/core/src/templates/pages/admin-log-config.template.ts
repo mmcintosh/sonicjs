@@ -1,5 +1,5 @@
 import { html } from 'hono/html'
-import { adminLayoutV2 } from '../layouts/admin-layout-v2.template'
+import { renderAdminLayoutCatalyst, AdminLayoutCatalystData } from '../layouts/admin-layout-catalyst.template'
 import type { LogConfig } from '../../db/schema'
 
 interface BaseUser {
@@ -20,9 +20,13 @@ export function renderLogConfigPage(data: LogConfigPageData) {
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-          <nav class="mb-4">
+          <nav class="mb-4 flex items-center space-x-4">
+            <a href="/admin/settings/logging" class="text-indigo-600 hover:text-indigo-900">
+              ← Logging Settings
+            </a>
+            <span class="text-gray-300">|</span>
             <a href="/admin/logs" class="text-indigo-600 hover:text-indigo-900">
-              ← Back to Logs
+              System Logs
             </a>
           </nav>
           <h1 class="text-2xl font-semibold text-gray-900">Log Configuration</h1>
@@ -201,7 +205,7 @@ export function renderLogConfigPage(data: LogConfigPageData) {
               </div>
             </div>
           </div>
-        `).join('')}
+        `)}
       </div>
 
       <!-- Global Settings -->
@@ -252,9 +256,13 @@ export function renderLogConfigPage(data: LogConfigPageData) {
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
   `
 
-  return adminLayoutV2({
+  const layoutData: AdminLayoutCatalystData = {
     title: 'Log Configuration',
+    pageTitle: 'Log Configuration',
+    currentPath: '/admin/logs',
     user,
     content: content as string
-  })
+  }
+
+  return renderAdminLayoutCatalyst(layoutData)
 }
