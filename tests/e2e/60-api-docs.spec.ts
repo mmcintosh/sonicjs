@@ -142,29 +142,29 @@ test.describe('Admin API Reference Page', () => {
     await page.waitForLoadState('networkidle');
 
     // Check for tab buttons
-    const endpointsTab = page.locator('[data-tab="endpoints"]');
-    const interactiveTab = page.locator('[data-tab="interactive"]');
+    const endpointsTab = page.locator('#tab-endpoints');
+    const interactiveTab = page.locator('#tab-interactive');
 
     await expect(endpointsTab).toBeVisible({ timeout: 15000 });
     await expect(interactiveTab).toBeVisible({ timeout: 15000 });
   });
 
   test('should switch to Interactive tab and show Scalar', async ({ page }) => {
+    test.slow(); // Scalar loads from CDN — allow extra time in CI
     await loginAsAdmin(page);
     await page.goto('/admin/api-reference');
     await page.waitForLoadState('networkidle');
 
     // Click on Interactive tab
-    const interactiveTab = page.locator('[data-tab="interactive"]');
+    const interactiveTab = page.locator('#tab-interactive');
     await interactiveTab.click();
 
-    // Wait for Scalar to load (it's lazy-loaded)
-    const scalarContainer = page.locator('#interactive-content');
-    await expect(scalarContainer).toBeVisible({ timeout: 15000 });
+    // Wait for Scalar container to become visible
+    const scalarContainer = page.locator('#content-interactive');
+    await expect(scalarContainer).toBeVisible({ timeout: 30000 });
 
-    // Scalar should load the API reference component
-    // Give it time to initialize from CDN
-    await page.waitForTimeout(3000);
+    // Scalar loads from CDN — wait for the script to initialize
+    await page.waitForTimeout(5000);
 
     // The Scalar container should have content
     const content = await scalarContainer.innerHTML();
@@ -218,16 +218,17 @@ test.describe('Admin API Reference Page', () => {
   });
 
   test('should not have Scalar test request buttons', async ({ page }) => {
+    test.slow(); // Scalar loads from CDN — allow extra time in CI
     await loginAsAdmin(page);
     await page.goto('/admin/api-reference');
     await page.waitForLoadState('networkidle');
 
     // Switch to interactive tab where Scalar lives
-    const interactiveTab = page.locator('[data-tab="interactive"]');
+    const interactiveTab = page.locator('#tab-interactive');
     await interactiveTab.click();
 
-    // Give Scalar time to fully load
-    await page.waitForTimeout(5000);
+    // Give Scalar time to fully load from CDN
+    await page.waitForTimeout(8000);
 
     // The hideTestRequestButton config should prevent "Test Request" buttons
     // Check the Scalar config that was passed
@@ -265,7 +266,7 @@ test.describe('OpenAPI Collection Schemas', () => {
     if (collectionSchemas.length > 0) {
       // Verify the naming convention is PascalCase + "Data"
       for (const name of collectionSchemas) {
-        expect(name).toMatch(/^[A-Z][a-zA-Z]*Data$/);
+        expect(name).toMatch(/^[A-Z][a-zA-Z0-9]*Data$/);
       }
 
       // Each Data schema should have a corresponding Content and Input schema

@@ -370,7 +370,9 @@ test.describe('Forms as Content - Submissions', () => {
     await page.goto(`/admin/content?model=form_${contactFormName}&status=published`);
     await page.waitForLoadState('networkidle');
 
+    // Wait for table rows to appear (HTMX may still be loading content)
     const rows = page.locator('tbody tr');
+    await expect(rows.first()).toBeVisible({ timeout: 10000 });
     const rowCount = await rows.count();
     expect(rowCount).toBeGreaterThanOrEqual(1);
   });
