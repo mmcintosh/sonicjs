@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 // import { html } from 'hono/html'
-import { requireAuth } from '../middleware'
+import { requireAuth, logActivityFromContext } from '../middleware'
+import { getLogger } from '../services/logger'
 import { renderSettingsPage, SettingsPageData } from '../templates/pages/admin-settings.template'
 import { MigrationService } from '../services/migrations'
 import { SettingsService } from '../services/settings'
@@ -457,6 +458,11 @@ adminSettingsRoutes.post('/api/database-tools/truncate', async (c) => {
       }
     }
 
+    // Log database truncate (security event — awaited)
+    const truncatedTables = results.filter(r => r.success).map(r => r.table)
+    try { const logger = getLogger(db); await logger.logSecurity('database-truncate', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: (c.get('user') as any)?.userId }, { tables: truncatedTables, count: truncatedTables.length }) } catch {}
+    try { c.executionCtx?.waitUntil(logActivityFromContext(c, 'settings.truncate', 'settings', undefined, { tables: truncatedTables, count: truncatedTables.length })) } catch {}
+
     return c.json({
       success: true,
       message: `Truncated ${results.filter(r => r.success).length} of ${tablesToTruncate.length} tables`,
@@ -509,6 +515,7 @@ adminSettingsRoutes.post('/general', async (c) => {
     const success = await settingsService.saveGeneralSettings(settings)
 
     if (success) {
+      try { c.executionCtx?.waitUntil(logActivityFromContext(c, 'settings.update', 'settings')) } catch {}
       return c.json({
         success: true,
         message: 'General settings saved successfully!'

@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { html } from 'hono/html'
 import type { D1Database, KVNamespace } from '@cloudflare/workers-types'
-import { requireAuth } from '../middleware'
+import { requireAuth, logActivityFromContext } from '../middleware'
 import { renderContentFormPage, ContentFormData } from '../templates/pages/admin-content-form.template'
 import { renderContentListPage, ContentListPageData } from '../templates/pages/admin-content-list.template'
 import { renderVersionHistory, VersionHistoryData, ContentVersion } from '../templates/components/version-history.template'
@@ -839,6 +839,9 @@ adminContentRoutes.post('/', async (c) => {
       now
     ).run()
 
+    // Log content creation
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.create', 'content', contentId, { collectionId, title: data.title || 'Untitled', status }))
+
     // Invalidate collection content list cache
     const cache = getCacheService(CACHE_CONFIGS.content!)
     await cache.invalidate(`content:list:${collectionId}:*`)
@@ -1016,6 +1019,9 @@ adminContentRoutes.put('/:id', async (c) => {
       now,
       id
     ).run()
+
+    // Log content update
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.update', 'content', id, { collectionId: existingContent.collection_id, title: data.title || 'Untitled' }))
 
     // Invalidate content cache
     const cache = getCacheService(CACHE_CONFIGS.content!)
@@ -1221,7 +1227,10 @@ adminContentRoutes.post('/duplicate', async (c) => {
       now,
       now
     ).run()
-    
+
+    // Log content duplication
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.duplicate', 'content', newId, { sourceId: originalId, collectionId: original.collection_id }))
+
     return c.json({ success: true, id: newId })
   } catch (error) {
     console.error('Error duplicating content:', error)
@@ -1345,6 +1354,7 @@ adminContentRoutes.post('/bulk-action', async (c) => {
         WHERE id IN (${placeholders})
       `)
       await stmt.bind(now, ...ids).run()
+      c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.bulk_action', 'content', undefined, { action: 'delete', count: ids.length, ids }))
     } else if (action === 'publish' || action === 'draft') {
       // Update status
       const placeholders = ids.map(() => '?').join(',')
@@ -1355,6 +1365,7 @@ adminContentRoutes.post('/bulk-action', async (c) => {
         WHERE id IN (${placeholders})
       `)
       await stmt.bind(action, publishedAt, now, ...ids).run()
+      c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.bulk_action', 'content', undefined, { action, count: ids.length, ids }))
     } else {
       return c.json({ success: false, error: 'Invalid action' })
     }
@@ -1397,6 +1408,9 @@ adminContentRoutes.delete('/:id', async (c) => {
       WHERE id = ?
     `)
     await deleteStmt.bind(now, id).run()
+
+    // Log content deletion
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.delete', 'content', id, { collectionId: content.collection_id, title: content.title }))
 
     // Remove from FTS5 index (non-blocking)
     const fts5Service = new FTS5Service(db)
@@ -1531,7 +1545,10 @@ adminContentRoutes.post('/:id/restore/:version', async (c) => {
       now,
       id
     ).run()
-    
+
+    // Log version restore
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.version_restore', 'content', id, { versionNumber: version, title: restoredData.title || 'Untitled' }))
+
     // Create new version for the restoration
     const nextVersionStmt = db.prepare('SELECT MAX(version) as max_version FROM content_versions WHERE content_id = ?')
     const nextVersionResult = await nextVersionStmt.bind(id).first() as any

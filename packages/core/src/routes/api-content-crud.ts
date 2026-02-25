@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { requireAuth } from '../middleware'
+import { requireAuth, logActivityFromContext } from '../middleware'
 import { getCacheService, CACHE_CONFIGS } from '../services'
 import type { Bindings, Variables } from '../app'
 import { FTS5Service } from '../plugins/core-plugins/ai-search-plugin/services/fts5.service'
@@ -143,6 +143,9 @@ apiContentCrudRoutes.post('/', requireAuth(), async (c) => {
       now
     ).run()
 
+    // Log API content creation
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.api_create', 'content', contentId, { collectionId, title, status: status || 'draft' }))
+
     // Invalidate cache
     const cache = getCacheService(CACHE_CONFIGS.api!)
     await cache.invalidate(`content:list:${collectionId}:*`)
@@ -252,6 +255,9 @@ apiContentCrudRoutes.put('/:id', requireAuth(), async (c) => {
     await cache.delete(cache.generateKey('content', id))
     await cache.invalidate(`content:list:${existing.collection_id}:*`)
     await cache.invalidate('content-filtered:*')
+
+    // Log API content update
+    c.executionCtx?.waitUntil(logActivityFromContext(c, 'content.api_update', 'content', id, { collectionId: existing.collection_id }))
 
     // Sync to FTS5 index (non-blocking)
     const fts5Service = new FTS5Service(db)
