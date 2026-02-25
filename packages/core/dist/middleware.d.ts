@@ -146,6 +146,34 @@ interface CsrfOptions {
  */
 declare function csrfProtection(options?: CsrfOptions): (c: Context, next: Next) => Promise<Response | void>;
 
+declare function setRequestLoggingEnabled(enabled: boolean): void;
+declare function setSecurityLoggingEnabled(enabled: boolean): void;
+/**
+ * Global HTTP request logger.
+ *
+ * Always sets requestId and startTime on context (used by other middleware for
+ * correlation). The actual D1 write is gated by `requestLoggingEnabled` which
+ * defaults to false — enable via `setRequestLoggingEnabled(true)`.
+ */
+declare function loggingMiddleware(): (c: Context, next: Next) => Promise<void>;
+/**
+ * Security response logger — logs 401/403 responses as security events.
+ *
+ * Always mounted in the middleware chain but conditionally writes. Gated by
+ * `securityResponseLoggingEnabled` which defaults to false — enable via
+ * `setSecurityLoggingEnabled(true)`. This is separate from the `security`
+ * category in log_config (which stays enabled for CSRF/rate-limit events).
+ */
+declare function securityLoggingMiddleware(): (c: Context, next: Next) => Promise<void>;
+/**
+ * Performance logger — logs requests that exceed a duration threshold.
+ */
+declare function performanceLoggingMiddleware(thresholdMs?: number): (c: Context, next: Next) => Promise<void>;
+/**
+ * Detailed request/response header logger (debug level).
+ */
+declare function detailedLoggingMiddleware(): (c: Context, next: Next) => Promise<void>;
+
 /**
  * Security headers middleware.
  * Sets standard security headers on every response.
@@ -167,20 +195,19 @@ type UserPermissions = {
     userId: string;
     permissions: Permission[];
 };
-declare const loggingMiddleware: any;
-declare const detailedLoggingMiddleware: any;
-declare const securityLoggingMiddleware: any;
-declare const performanceLoggingMiddleware: any;
+
 declare const cacheHeaders: any;
 declare const compressionMiddleware: any;
 
 declare const PermissionManager: any;
 declare const requirePermission: any;
 declare const requireAnyPermission: any;
-declare const logActivity: any;
 declare const requireActivePlugin: any;
 declare const requireActivePlugins: any;
 declare const getActivePlugins: any;
 declare const isPluginActive: any;
 
-export { AuthManager, type Permission, PermissionManager, type UserPermissions, bootstrapMiddleware, cacheHeaders, compressionMiddleware, csrfProtection, detailedLoggingMiddleware, generateCsrfToken, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeadersMiddleware as securityHeaders, securityLoggingMiddleware, validateCsrfToken, verifySecurityConfig };
+declare function logActivity(db: D1Database, userId: string, action: string, resourceType?: string, resourceId?: string, details?: any, ipAddress?: string, userAgent?: string): Promise<void>;
+declare function logActivityFromContext(c: Context, action: string, resourceType?: string, resourceId?: string, details?: any): Promise<void>;
+
+export { AuthManager, type Permission, PermissionManager, type UserPermissions, bootstrapMiddleware, cacheHeaders, compressionMiddleware, csrfProtection, detailedLoggingMiddleware, generateCsrfToken, getActivePlugins, isPluginActive, logActivity, logActivityFromContext, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeadersMiddleware as securityHeaders, securityLoggingMiddleware, setRequestLoggingEnabled, setSecurityLoggingEnabled, validateCsrfToken, verifySecurityConfig };
