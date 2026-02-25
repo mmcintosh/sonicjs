@@ -1,7 +1,29 @@
 import { Hono } from 'hono'
 import { TurnstileService } from '../plugins/core-plugins/turnstile-plugin/services/turnstile'
 import { createContentFromSubmission } from '../services/form-collection-sync'
-import { sanitizeDeep } from '../utils/sanitize'
+import { escapeHtml, sanitizeInput } from '../utils/sanitize'
+
+/**
+ * Recursively sanitize all string values in arbitrary JSON data.
+ * HTML-encodes entities (e.g., < becomes &lt;) to prevent stored XSS
+ * when form submission data is rendered in admin templates.
+ */
+function sanitizeDeep(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return sanitizeInput(value)
+  }
+  if (Array.isArray(value)) {
+    return value.map(sanitizeDeep)
+  }
+  if (value !== null && typeof value === 'object') {
+    const result: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value)) {
+      result[k] = sanitizeDeep(v)
+    }
+    return result
+  }
+  return value // numbers, booleans, null pass through
+}
 
 type Bindings = {
   DB: D1Database
@@ -133,7 +155,7 @@ publicFormsRoutes.get('/:name', async (c) => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${form.display_name}</title>
+        <title>${escapeHtml(String(form.display_name))}</title>
         <link rel="stylesheet" href="https://cdn.form.io/formiojs/formio.full.min.css">
         
         <!-- Google Maps API will be loaded dynamically per component -->
@@ -188,8 +210,8 @@ publicFormsRoutes.get('/:name', async (c) => {
       </head>
       <body>
         <div class="container">
-          <h1>${form.display_name}</h1>
-          ${form.description ? `<p class="description">${form.description}</p>` : ''}
+          <h1>${escapeHtml(String(form.display_name))}</h1>
+          ${form.description ? `<p class="description">${escapeHtml(String(form.description))}</p>` : ''}
           
           <div id="formio-form"></div>
           
