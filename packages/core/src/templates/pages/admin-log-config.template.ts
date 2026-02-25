@@ -201,7 +201,7 @@ export function renderLogConfigPage(data: LogConfigPageData) {
               </div>
             </div>
           </div>
-        `).join('')}
+        `)}
       </div>
 
       <!-- Global Settings -->

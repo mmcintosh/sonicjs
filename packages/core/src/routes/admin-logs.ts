@@ -358,14 +358,8 @@ adminLogsRoutes.get('/:id', async (c) => {
     const user = c.get('user')
     const logger = getLogger(c.env.DB)
 
-    // Get single log by ID
-    const { logs } = await logger.getLogs({
-      limit: 1,
-      offset: 0,
-      search: id
-    })
-
-    const log = logs.find(l => l.id === id)
+    // Get single log by ID using direct lookup
+    const log = await logger.getLogById(id)
 
     if (!log) {
       return c.html(html`<p>Log entry not found</p>`)
