@@ -33,11 +33,15 @@ export type UserPermissions = {
   permissions: Permission[]
 }
 
-// Middleware stubs - these return pass-through middleware that call next()
-export const loggingMiddleware: any = () => async (_c: any, next: any) => await next()
-export const detailedLoggingMiddleware: any = () => async (_c: any, next: any) => await next()
-export const securityLoggingMiddleware: any = () => async (_c: any, next: any) => await next()
-export const performanceLoggingMiddleware: any = () => async (_c: any, next: any) => await next()
+// Logging middleware
+export {
+  loggingMiddleware,
+  detailedLoggingMiddleware,
+  securityLoggingMiddleware,
+  performanceLoggingMiddleware,
+  setRequestLoggingEnabled,
+  setSecurityLoggingEnabled,
+} from './logging'
 export const cacheHeaders: any = () => async (_c: any, next: any) => await next()
 export const compressionMiddleware: any = async (_c: any, next: any) => await next()
 export { securityHeadersMiddleware as securityHeaders } from './security-headers'

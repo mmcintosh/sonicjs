@@ -1,40 +1,40 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-// TODO: Skip until middleware/logging module exists in core package
-// import {
-//   loggingMiddleware,
-//   detailedLoggingMiddleware,
-//   securityLoggingMiddleware,
-//   performanceLoggingMiddleware
-// } from '../../middleware/logging'
-// import { Context, Next } from 'hono'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import {
+  loggingMiddleware,
+  detailedLoggingMiddleware,
+  securityLoggingMiddleware,
+  performanceLoggingMiddleware,
+  setRequestLoggingEnabled,
+  setSecurityLoggingEnabled,
+} from '../../middleware/logging'
+import type { Context, Next } from 'hono'
 
 // Mock the logger module
+const mockLogRequest = vi.fn()
+const mockWarn = vi.fn()
+const mockError = vi.fn()
+const mockDebug = vi.fn()
+const mockInfo = vi.fn()
+const mockLogSecurity = vi.fn()
+
 vi.mock('../../services/logger', () => ({
   getLogger: vi.fn(() => ({
-    logRequest: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-    info: vi.fn(),
-    logSecurity: vi.fn(),
+    logRequest: mockLogRequest,
+    warn: mockWarn,
+    error: mockError,
+    debug: mockDebug,
+    info: mockInfo,
+    logSecurity: mockLogSecurity,
   }))
 }))
 
-describe.skip('loggingMiddleware', () => {
+describe('loggingMiddleware', () => {
   let mockContext: any
   let mockNext: Next
-  let mockLogger: any
 
   beforeEach(() => {
-    mockLogger = {
-      logRequest: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-    }
-
-    vi.doMock('../../services/logger', () => ({
-      getLogger: vi.fn(() => mockLogger)
-    }))
+    vi.clearAllMocks()
+    setRequestLoggingEnabled(false)
 
     mockNext = vi.fn()
     mockContext = {
@@ -58,9 +58,14 @@ describe.skip('loggingMiddleware', () => {
       set: vi.fn(),
       get: vi.fn((key: string) => {
         if (key === 'user') return { userId: 'user-123' }
+        if (key === 'startTime') return Date.now()
         return undefined
       }),
     }
+  })
+
+  afterEach(() => {
+    setRequestLoggingEnabled(false)
   })
 
   it('should set requestId and startTime on context', async () => {
@@ -79,17 +84,17 @@ describe.skip('loggingMiddleware', () => {
   })
 
   it('should skip logging for metrics endpoints', async () => {
+    setRequestLoggingEnabled(true)
     mockContext.req.url = 'http://example.com/admin/api/metrics'
 
     const middleware = loggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
-    // Just verify that next was called - the mock is complex to verify
     expect(mockNext).toHaveBeenCalled()
+    expect(mockLogRequest).not.toHaveBeenCalled()
   })
 
   it('should extract IP address from different headers', async () => {
-    // Test with x-forwarded-for
     mockContext.req.header = vi.fn((name: string) => {
       if (name === 'x-forwarded-for') return '192.168.1.1'
       return undefined
@@ -110,13 +115,12 @@ describe.skip('loggingMiddleware', () => {
     expect(mockNext).toHaveBeenCalled()
   })
 
-  it('should log errors when status >= 400', async () => {
-    mockContext.res.status = 404
-
+  it('should not call logger when request logging is disabled', async () => {
     const middleware = loggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockLogRequest).not.toHaveBeenCalled()
   })
 
   it('should handle thrown errors', async () => {
@@ -138,11 +142,13 @@ describe.skip('loggingMiddleware', () => {
   })
 })
 
-describe.skip('detailedLoggingMiddleware', () => {
+describe('detailedLoggingMiddleware', () => {
   let mockContext: any
   let mockNext: Next
 
   beforeEach(() => {
+    vi.clearAllMocks()
+
     mockNext = vi.fn()
     mockContext = {
       req: {
@@ -187,20 +193,29 @@ describe.skip('detailedLoggingMiddleware', () => {
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockDebug).toHaveBeenCalledTimes(2) // request + response
   })
 
   it('should include request headers in debug log', async () => {
     const middleware = detailedLoggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
-    expect(mockNext).toHaveBeenCalled()
+    expect(mockDebug).toHaveBeenCalledWith(
+      'api',
+      expect.stringContaining('Request:'),
+      expect.objectContaining({ requestHeaders: expect.any(Object) })
+    )
   })
 
   it('should include response headers in completion log', async () => {
     const middleware = detailedLoggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
-    expect(mockNext).toHaveBeenCalled()
+    expect(mockDebug).toHaveBeenCalledWith(
+      'api',
+      expect.stringContaining('Response:'),
+      expect.objectContaining({ responseHeaders: expect.any(Object) })
+    )
   })
 
   it('should handle errors and rethrow', async () => {
@@ -213,11 +228,14 @@ describe.skip('detailedLoggingMiddleware', () => {
   })
 })
 
-describe.skip('securityLoggingMiddleware', () => {
+describe('securityLoggingMiddleware', () => {
   let mockContext: any
   let mockNext: Next
 
   beforeEach(() => {
+    vi.clearAllMocks()
+    setSecurityLoggingEnabled(false)
+
     mockNext = vi.fn()
     mockContext = {
       req: {
@@ -246,61 +264,71 @@ describe.skip('securityLoggingMiddleware', () => {
     }
   })
 
-  it('should detect suspicious XSS patterns in URL', async () => {
-    mockContext.req.url = 'http://example.com/search?q=<script>alert(1)</script>'
-
-    const middleware = securityLoggingMiddleware()
-    await middleware(mockContext as Context, mockNext)
-
-    expect(mockNext).toHaveBeenCalled()
+  afterEach(() => {
+    setSecurityLoggingEnabled(false)
   })
 
-  it('should detect suspicious SQL injection patterns', async () => {
-    mockContext.req.url = 'http://example.com/api?id=1 UNION SELECT * FROM users'
-
-    const middleware = securityLoggingMiddleware()
-    await middleware(mockContext as Context, mockNext)
-
-    expect(mockNext).toHaveBeenCalled()
-  })
-
-  it('should detect path traversal attempts', async () => {
-    mockContext.req.url = 'http://example.com/../../etc/passwd'
-
-    const middleware = securityLoggingMiddleware()
-    await middleware(mockContext as Context, mockNext)
-
-    expect(mockNext).toHaveBeenCalled()
-  })
-
-  it('should log authentication failures', async () => {
-    mockContext.req.url = 'http://example.com/auth/login'
+  it('should not log when security logging is disabled', async () => {
     mockContext.res.status = 401
 
     const middleware = securityLoggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockLogSecurity).not.toHaveBeenCalled()
   })
 
-  it('should log admin area access', async () => {
-    mockContext.req.url = 'http://example.com/admin/dashboard'
+  it('should log 401 responses when enabled', async () => {
+    setSecurityLoggingEnabled(true)
+    mockContext.res.status = 401
+
+    const middleware = securityLoggingMiddleware()
+    await middleware(mockContext as Context, mockNext)
+
+    expect(mockNext).toHaveBeenCalled()
+    expect(mockLogSecurity).toHaveBeenCalledWith(
+      'auth-failure-response',
+      'medium',
+      expect.objectContaining({ statusCode: 401 })
+    )
+  })
+
+  it('should log 403 responses when enabled', async () => {
+    setSecurityLoggingEnabled(true)
+    mockContext.res.status = 403
+
+    const middleware = securityLoggingMiddleware()
+    await middleware(mockContext as Context, mockNext)
+
+    expect(mockNext).toHaveBeenCalled()
+    expect(mockLogSecurity).toHaveBeenCalledWith(
+      'forbidden-response',
+      'medium',
+      expect.objectContaining({ statusCode: 403 })
+    )
+  })
+
+  it('should not log 200 responses even when enabled', async () => {
+    setSecurityLoggingEnabled(true)
     mockContext.res.status = 200
 
     const middleware = securityLoggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockLogSecurity).not.toHaveBeenCalled()
   })
 
   it('should skip logging for metrics endpoints', async () => {
+    setSecurityLoggingEnabled(true)
     mockContext.req.url = 'http://example.com/admin/api/metrics'
-    mockContext.res.status = 200
+    mockContext.res.status = 401
 
     const middleware = securityLoggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockLogSecurity).not.toHaveBeenCalled()
   })
 
   it('should handle errors gracefully', async () => {
@@ -312,30 +340,53 @@ describe.skip('securityLoggingMiddleware', () => {
     await expect(middleware(mockContext as Context, mockNext)).rejects.toThrow('Test error')
   })
 
-  it('should detect suspicious patterns in user agent', async () => {
-    mockContext.req.header = vi.fn((name: string) => {
-      if (name === 'user-agent') return '<script>alert(1)</script>'
-      if (name === 'cf-connecting-ip') return '127.0.0.1'
-      return undefined
-    })
+  it('should include request context in security log', async () => {
+    setSecurityLoggingEnabled(true)
+    mockContext.res.status = 401
+
+    const middleware = securityLoggingMiddleware()
+    await middleware(mockContext as Context, mockNext)
+
+    expect(mockLogSecurity).toHaveBeenCalledWith(
+      'auth-failure-response',
+      'medium',
+      expect.objectContaining({
+        ipAddress: '127.0.0.1',
+        userAgent: 'test-agent',
+        method: 'GET',
+        requestId: 'req-123',
+      })
+    )
+  })
+
+  it('should pass through for non-auth-failure statuses', async () => {
+    setSecurityLoggingEnabled(true)
+    mockContext.res.status = 404
 
     const middleware = securityLoggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockLogSecurity).not.toHaveBeenCalled()
   })
 })
 
-describe.skip('performanceLoggingMiddleware', () => {
+describe('performanceLoggingMiddleware', () => {
   let mockContext: any
   let mockNext: Next
 
   beforeEach(() => {
+    vi.clearAllMocks()
+
     mockNext = vi.fn()
     mockContext = {
       req: {
         method: 'GET',
         url: 'http://example.com/api/slow',
+        header: vi.fn((name: string) => {
+          if (name === 'cf-connecting-ip') return '127.0.0.1'
+          return undefined
+        }),
       },
       res: {
         status: 200,
@@ -352,25 +403,30 @@ describe.skip('performanceLoggingMiddleware', () => {
   })
 
   it('should not log fast requests', async () => {
-    // Mock a fast request
     mockNext = vi.fn().mockResolvedValue(undefined)
 
     const middleware = performanceLoggingMiddleware(1000)
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockWarn).not.toHaveBeenCalled()
   })
 
   it('should log slow requests', async () => {
-    // Mock a slow request by delaying the next() call
     mockNext = vi.fn(async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
     })
 
-    const middleware = performanceLoggingMiddleware(50) // 50ms threshold
+    const middleware = performanceLoggingMiddleware(50)
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockWarn).toHaveBeenCalledWith(
+      'api',
+      expect.stringContaining('Slow request'),
+      expect.objectContaining({ thresholdMs: 50 }),
+      expect.any(Object)
+    )
   })
 
   it('should use custom threshold', async () => {
@@ -378,10 +434,12 @@ describe.skip('performanceLoggingMiddleware', () => {
       await new Promise(resolve => setTimeout(resolve, 60))
     })
 
-    const middleware = performanceLoggingMiddleware(100) // 100ms threshold
+    const middleware = performanceLoggingMiddleware(100)
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    // 60ms < 100ms threshold, so no warning
+    expect(mockWarn).not.toHaveBeenCalled()
   })
 
   it('should handle errors without logging performance', async () => {
@@ -390,16 +448,16 @@ describe.skip('performanceLoggingMiddleware', () => {
 
     const middleware = performanceLoggingMiddleware(1000)
 
-    // The middleware doesn't catch errors, so they should propagate
     await expect(middleware(mockContext as Context, mockNext)).rejects.toThrow('Test error')
   })
 
   it('should use default threshold of 1000ms', async () => {
     mockNext = vi.fn().mockResolvedValue(undefined)
 
-    const middleware = performanceLoggingMiddleware() // No threshold provided
+    const middleware = performanceLoggingMiddleware()
     await middleware(mockContext as Context, mockNext)
 
     expect(mockNext).toHaveBeenCalled()
+    expect(mockWarn).not.toHaveBeenCalled()
   })
 })
