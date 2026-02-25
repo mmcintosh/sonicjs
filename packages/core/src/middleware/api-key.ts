@@ -7,6 +7,7 @@
  */
 
 import { Context, Next } from 'hono'
+import { getLogger } from '../services/logger'
 
 export type ApiKeyContext = {
   id: string
@@ -144,6 +145,7 @@ export const requireApiKey = (scope: string) => {
     if (apiKey) {
       c.set('apiKey', apiKey)
       if (!apiKey.scopes.includes(scope)) {
+        try { const logger = getLogger((c.env as any)?.DB); await logger.logSecurity('api-key-insufficient-scope', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { keyId: apiKey.id, requiredScope: scope, actualScopes: apiKey.scopes }) } catch {}
         return c.json({ error: `Insufficient scope. Required: ${scope}` }, 403)
       }
       return next()
@@ -151,6 +153,12 @@ export const requireApiKey = (scope: string) => {
 
     // No valid key found
     if (enforce) {
+      const headerPresent = !!c.req.header('X-API-Key')
+      if (headerPresent) {
+        try { const logger = getLogger((c.env as any)?.DB); await logger.logSecurity('api-key-invalid', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }) } catch {}
+      } else {
+        try { const logger = getLogger((c.env as any)?.DB); await logger.logSecurity('api-key-required', 'low', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }) } catch {}
+      }
       return c.json({ error: 'API key required. Pass X-API-Key header.' }, 401)
     }
 
