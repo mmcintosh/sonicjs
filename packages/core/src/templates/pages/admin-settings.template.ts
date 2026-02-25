@@ -116,6 +116,7 @@ export function renderSettingsPage(data: SettingsPageData): string {
             ${renderTabButton('storage', 'Storage', 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12', activeTab)}
             ${renderTabButton('migrations', 'Migrations', 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4', activeTab)}
             ${renderTabButton('database-tools', 'Database Tools', 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01', activeTab)}
+            ${renderTabButton('logging', 'Logging', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', activeTab)}
           </nav>
         </div>
       </div>
@@ -516,6 +517,8 @@ function renderTabContent(activeTab: string, settings?: SettingsPageData['settin
       return renderMigrationSettings(settings?.migrations)
     case 'database-tools':
       return renderDatabaseToolsSettings(settings?.databaseTools)
+    case 'logging':
+      return renderLoggingSettings()
     default:
       return renderGeneralSettings(settings?.general)
   }
@@ -1560,6 +1563,166 @@ function renderDatabaseToolsSettings(settings?: DatabaseToolsSettings): string {
                 </svg>
                 Truncate All Data
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+}
+
+function renderLoggingSettings(): string {
+  return `
+    <div class="space-y-6">
+      <div>
+        <h3 class="text-lg/7 font-semibold text-zinc-950 dark:text-white">Logging & Audit Trail</h3>
+        <p class="mt-1 text-sm/6 text-zinc-500 dark:text-zinc-400">Monitor system activity, security events, and user actions across your application.</p>
+      </div>
+
+      <!-- Two Log Systems Overview -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- System Logs Card -->
+        <div class="rounded-xl ring-1 ring-zinc-950/5 dark:ring-white/10 overflow-hidden">
+          <div class="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 dark:from-cyan-400/20 dark:to-blue-400/20 px-6 py-4 border-b border-zinc-950/5 dark:border-white/10">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-cyan-500/20 dark:bg-cyan-400/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-base/7 font-semibold text-zinc-950 dark:text-white">System Logs</h4>
+                <p class="text-sm/6 text-zinc-500 dark:text-zinc-400">Security events, auth failures, errors</p>
+              </div>
+            </div>
+          </div>
+          <div class="px-6 py-4 space-y-3">
+            <p class="text-sm/6 text-zinc-600 dark:text-zinc-300">
+              Tracks security-critical events: authentication attempts, CSRF violations, rate limiting, API key issues, and system errors. These events are logged synchronously to guarantee capture.
+            </p>
+            <div class="text-sm/6 text-zinc-500 dark:text-zinc-400 space-y-1">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span>8 configurable categories</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span>Per-category log level, retention, and size limits</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span>Export to CSV or JSON</span>
+              </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+              <a href="/admin/logs" class="inline-flex items-center justify-center rounded-lg bg-zinc-950 dark:bg-white px-3.5 py-2 text-sm font-semibold text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors shadow-sm no-underline">
+                View System Logs
+              </a>
+              <a href="/admin/logs/config" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-zinc-800 px-3.5 py-2 text-sm font-semibold text-zinc-950 dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-700 ring-1 ring-inset ring-zinc-950/10 dark:ring-white/10 transition-colors shadow-sm no-underline">
+                Configure Categories
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Logs Card -->
+        <div class="rounded-xl ring-1 ring-zinc-950/5 dark:ring-white/10 overflow-hidden">
+          <div class="bg-gradient-to-r from-purple-500/10 to-pink-500/10 dark:from-purple-400/20 dark:to-pink-400/20 px-6 py-4 border-b border-zinc-950/5 dark:border-white/10">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-purple-500/20 dark:bg-purple-400/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-base/7 font-semibold text-zinc-950 dark:text-white">Activity Logs</h4>
+                <p class="text-sm/6 text-zinc-500 dark:text-zinc-400">User actions and content changes</p>
+              </div>
+            </div>
+          </div>
+          <div class="px-6 py-4 space-y-3">
+            <p class="text-sm/6 text-zinc-600 dark:text-zinc-300">
+              Records user actions: logins, content creation/updates/deletion, collection changes, and settings modifications. Logged asynchronously (fire-and-forget) for zero latency impact.
+            </p>
+            <div class="text-sm/6 text-zinc-500 dark:text-zinc-400 space-y-1">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span>Tracks who did what and when</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span>Filter by action, resource type, and date</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span>90-day retention with automated cleanup</span>
+              </div>
+            </div>
+            <div class="pt-2">
+              <a href="/admin/activity-logs" class="inline-flex items-center justify-center rounded-lg bg-zinc-950 dark:bg-white px-3.5 py-2 text-sm font-semibold text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors shadow-sm no-underline">
+                View Activity Logs
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log Categories Reference -->
+      <div class="rounded-xl ring-1 ring-zinc-950/5 dark:ring-white/10 overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-950/5 dark:border-white/10">
+          <h4 class="text-base/7 font-semibold text-zinc-950 dark:text-white">System Log Categories</h4>
+          <p class="mt-1 text-sm/6 text-zinc-500 dark:text-zinc-400">Each category can be independently enabled, configured with a minimum log level, and assigned retention policies.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b border-zinc-950/5 dark:border-white/5">
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Category</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Description</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Default Level</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Default Retention</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-950/5 dark:divide-white/5">
+              <tr><td class="px-6 py-3 text-sm font-medium text-zinc-950 dark:text-white">auth</td><td class="px-6 py-3 text-sm text-zinc-600 dark:text-zinc-300">Login attempts, token verification, registration</td><td class="px-6 py-3 text-sm"><span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium">info</span></td><td class="px-6 py-3 text-sm text-zinc-500 dark:text-zinc-400">30 days</td></tr>
+              <tr><td class="px-6 py-3 text-sm font-medium text-zinc-950 dark:text-white">security</td><td class="px-6 py-3 text-sm text-zinc-600 dark:text-zinc-300">CSRF violations, rate limiting, API key issues</td><td class="px-6 py-3 text-sm"><span class="px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs font-medium">warn</span></td><td class="px-6 py-3 text-sm text-zinc-500 dark:text-zinc-400">90 days</td></tr>
+              <tr><td class="px-6 py-3 text-sm font-medium text-zinc-950 dark:text-white">api</td><td class="px-6 py-3 text-sm text-zinc-600 dark:text-zinc-300">HTTP request/response logging</td><td class="px-6 py-3 text-sm"><span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium">info</span></td><td class="px-6 py-3 text-sm text-zinc-500 dark:text-zinc-400">7 days</td></tr>
+              <tr><td class="px-6 py-3 text-sm font-medium text-zinc-950 dark:text-white">error</td><td class="px-6 py-3 text-sm text-zinc-600 dark:text-zinc-300">Application errors and exceptions</td><td class="px-6 py-3 text-sm"><span class="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-xs font-medium">error</span></td><td class="px-6 py-3 text-sm text-zinc-500 dark:text-zinc-400">90 days</td></tr>
+              <tr><td class="px-6 py-3 text-sm font-medium text-zinc-950 dark:text-white">system</td><td class="px-6 py-3 text-sm text-zinc-600 dark:text-zinc-300">General system events and diagnostics</td><td class="px-6 py-3 text-sm"><span class="px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs font-medium">warn</span></td><td class="px-6 py-3 text-sm text-zinc-500 dark:text-zinc-400">30 days</td></tr>
+              <tr><td class="px-6 py-3 text-sm font-medium text-zinc-950 dark:text-white">workflow</td><td class="px-6 py-3 text-sm text-zinc-600 dark:text-zinc-300">Content workflow state changes</td><td class="px-6 py-3 text-sm"><span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium">info</span></td><td class="px-6 py-3 text-sm text-zinc-500 dark:text-zinc-400">30 days</td></tr>
+              <tr><td class="px-6 py-3 text-sm font-medium text-zinc-950 dark:text-white">plugin</td><td class="px-6 py-3 text-sm text-zinc-600 dark:text-zinc-300">Plugin-related activities</td><td class="px-6 py-3 text-sm"><span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium">info</span></td><td class="px-6 py-3 text-sm text-zinc-500 dark:text-zinc-400">30 days</td></tr>
+              <tr><td class="px-6 py-3 text-sm font-medium text-zinc-950 dark:text-white">media</td><td class="px-6 py-3 text-sm text-zinc-600 dark:text-zinc-300">File upload and media operations</td><td class="px-6 py-3 text-sm"><span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium">info</span></td><td class="px-6 py-3 text-sm text-zinc-500 dark:text-zinc-400">30 days</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-6 py-3 border-t border-zinc-950/5 dark:border-white/10 bg-zinc-50 dark:bg-zinc-800/50">
+          <a href="/admin/logs/config" class="text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors no-underline">
+            Manage category settings &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Technical Info -->
+      <div class="rounded-xl ring-1 ring-zinc-950/5 dark:ring-white/10 overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-950/5 dark:border-white/10">
+          <h4 class="text-base/7 font-semibold text-zinc-950 dark:text-white">How Logging Works</h4>
+        </div>
+        <div class="px-6 py-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm/6">
+            <div>
+              <h5 class="font-medium text-zinc-950 dark:text-white mb-2">Write Patterns</h5>
+              <ul class="space-y-1 text-zinc-600 dark:text-zinc-300">
+                <li><strong class="text-zinc-950 dark:text-white">Security events</strong> &mdash; Awaited writes (guaranteed capture)</li>
+                <li><strong class="text-zinc-950 dark:text-white">Activity events</strong> &mdash; Fire-and-forget via <code class="text-xs bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded">waitUntil()</code> (zero latency)</li>
+              </ul>
+            </div>
+            <div>
+              <h5 class="font-medium text-zinc-950 dark:text-white mb-2">Storage</h5>
+              <ul class="space-y-1 text-zinc-600 dark:text-zinc-300">
+                <li><strong class="text-zinc-950 dark:text-white">system_logs</strong> &mdash; D1 table with Drizzle ORM</li>
+                <li><strong class="text-zinc-950 dark:text-white">activity_logs</strong> &mdash; D1 table with raw SQL</li>
+                <li><strong class="text-zinc-950 dark:text-white">Estimated usage</strong> &mdash; ~100-150 writes/day</li>
+              </ul>
             </div>
           </div>
         </div>

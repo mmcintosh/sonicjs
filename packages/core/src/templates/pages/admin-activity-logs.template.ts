@@ -73,27 +73,50 @@ export function renderActivityLogsPage(data: ActivityLogsPageData): string {
         <form method="GET" action="/admin/activity-logs" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Action</label>
-            <select name="action" class="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:outline-none focus:bg-white/10 focus:border-white/30">
+            <select name="action" class="w-full px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:bg-gray-700 focus:border-white/30">
               <option value="">All Actions</option>
-              <option value="user.login" ${data.filters.action === 'user.login' ? 'selected' : ''}>User Login</option>
-              <option value="user.logout" ${data.filters.action === 'user.logout' ? 'selected' : ''}>User Logout</option>
-              <option value="user.invite_sent" ${data.filters.action === 'user.invite_sent' ? 'selected' : ''}>User Invited</option>
-              <option value="user.invitation_accepted" ${data.filters.action === 'user.invitation_accepted' ? 'selected' : ''}>Invitation Accepted</option>
-              <option value="profile.update" ${data.filters.action === 'profile.update' ? 'selected' : ''}>Profile Update</option>
-              <option value="profile.password_change" ${data.filters.action === 'profile.password_change' ? 'selected' : ''}>Password Change</option>
-              <option value="content.create" ${data.filters.action === 'content.create' ? 'selected' : ''}>Content Created</option>
-              <option value="content.update" ${data.filters.action === 'content.update' ? 'selected' : ''}>Content Updated</option>
-              <option value="content.delete" ${data.filters.action === 'content.delete' ? 'selected' : ''}>Content Deleted</option>
-              <option value="collection.create" ${data.filters.action === 'collection.create' ? 'selected' : ''}>Collection Created</option>
-              <option value="collection.update" ${data.filters.action === 'collection.update' ? 'selected' : ''}>Collection Updated</option>
+              <optgroup label="Authentication">
+                <option value="user.login" ${data.filters.action === 'user.login' ? 'selected' : ''}>User Login</option>
+                <option value="user.logout" ${data.filters.action === 'user.logout' ? 'selected' : ''}>User Logout</option>
+                <option value="user.register" ${data.filters.action === 'user.register' ? 'selected' : ''}>User Register</option>
+                <option value="user.invite_sent" ${data.filters.action === 'user.invite_sent' ? 'selected' : ''}>User Invited</option>
+                <option value="user.invitation_accepted" ${data.filters.action === 'user.invitation_accepted' ? 'selected' : ''}>Invitation Accepted</option>
+                <option value="user.password_reset" ${data.filters.action === 'user.password_reset' ? 'selected' : ''}>Password Reset</option>
+              </optgroup>
+              <optgroup label="Profile">
+                <option value="profile.update" ${data.filters.action === 'profile.update' ? 'selected' : ''}>Profile Update</option>
+                <option value="profile.password_change" ${data.filters.action === 'profile.password_change' ? 'selected' : ''}>Password Change</option>
+              </optgroup>
+              <optgroup label="Content">
+                <option value="content.create" ${data.filters.action === 'content.create' ? 'selected' : ''}>Content Created</option>
+                <option value="content.update" ${data.filters.action === 'content.update' ? 'selected' : ''}>Content Updated</option>
+                <option value="content.delete" ${data.filters.action === 'content.delete' ? 'selected' : ''}>Content Deleted</option>
+                <option value="content.duplicate" ${data.filters.action === 'content.duplicate' ? 'selected' : ''}>Content Duplicated</option>
+                <option value="content.bulk_action" ${data.filters.action === 'content.bulk_action' ? 'selected' : ''}>Content Bulk Action</option>
+                <option value="content.version_restore" ${data.filters.action === 'content.version_restore' ? 'selected' : ''}>Version Restored</option>
+                <option value="content.api_create" ${data.filters.action === 'content.api_create' ? 'selected' : ''}>API Content Created</option>
+                <option value="content.api_update" ${data.filters.action === 'content.api_update' ? 'selected' : ''}>API Content Updated</option>
+              </optgroup>
+              <optgroup label="Collections">
+                <option value="collection.create" ${data.filters.action === 'collection.create' ? 'selected' : ''}>Collection Created</option>
+                <option value="collection.update" ${data.filters.action === 'collection.update' ? 'selected' : ''}>Collection Updated</option>
+                <option value="collection.delete" ${data.filters.action === 'collection.delete' ? 'selected' : ''}>Collection Deleted</option>
+                <option value="collection.field_add" ${data.filters.action === 'collection.field_add' ? 'selected' : ''}>Field Added</option>
+                <option value="collection.field_update" ${data.filters.action === 'collection.field_update' ? 'selected' : ''}>Field Updated</option>
+              </optgroup>
+              <optgroup label="Settings">
+                <option value="settings.update" ${data.filters.action === 'settings.update' ? 'selected' : ''}>Settings Updated</option>
+                <option value="settings.truncate" ${data.filters.action === 'settings.truncate' ? 'selected' : ''}>Database Truncated</option>
+              </optgroup>
             </select>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Resource Type</label>
-            <select name="resource_type" class="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:outline-none focus:bg-white/10 focus:border-white/30">
+            <select name="resource_type" class="w-full px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:bg-gray-700 focus:border-white/30">
               <option value="">All Resources</option>
               <option value="users" ${data.filters.resource_type === 'users' ? 'selected' : ''}>Users</option>
+              <option value="auth" ${data.filters.resource_type === 'auth' ? 'selected' : ''}>Authentication</option>
               <option value="content" ${data.filters.resource_type === 'content' ? 'selected' : ''}>Content</option>
               <option value="collections" ${data.filters.resource_type === 'collections' ? 'selected' : ''}>Collections</option>
               <option value="media" ${data.filters.resource_type === 'media' ? 'selected' : ''}>Media</option>
@@ -103,21 +126,23 @@ export function renderActivityLogsPage(data: ActivityLogsPageData): string {
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">From Date</label>
-            <input 
-              type="date" 
-              name="date_from" 
+            <input
+              type="date"
+              name="date_from"
               value="${data.filters.date_from || ''}"
-              class="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:outline-none focus:bg-white/10 focus:border-white/30"
+              max="${new Date().toISOString().split('T')[0]}"
+              class="w-full px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:bg-gray-700 focus:border-white/30 [color-scheme:dark]"
             >
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">To Date</label>
-            <input 
-              type="date" 
-              name="date_to" 
+            <input
+              type="date"
+              name="date_to"
               value="${data.filters.date_to || ''}"
-              class="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl text-white focus:outline-none focus:bg-white/10 focus:border-white/30"
+              max="${new Date().toISOString().split('T')[0]}"
+              class="w-full px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:bg-gray-700 focus:border-white/30 [color-scheme:dark]"
             >
           </div>
 

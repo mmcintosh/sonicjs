@@ -207,6 +207,22 @@ adminSettingsRoutes.get('/migrations', (c) => {
   return c.html(renderSettingsPage(pageData))
 })
 
+// Logging settings
+adminSettingsRoutes.get('/logging', (c) => {
+  const user = c.get('user')
+  const pageData: SettingsPageData = {
+    user: user ? {
+      name: user.email,
+      email: user.email,
+      role: user.role
+    } : undefined,
+    settings: getMockSettings(user),
+    activeTab: 'logging',
+    version: c.get('appVersion')
+  }
+  return c.html(renderSettingsPage(pageData))
+})
+
 // Database tools settings
 adminSettingsRoutes.get('/database-tools', (c) => {
   const user = c.get('user')

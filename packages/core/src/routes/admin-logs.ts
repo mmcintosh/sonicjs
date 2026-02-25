@@ -18,10 +18,10 @@ adminLogsRoutes.get('/', async (c) => {
   try {
     const user = c.get('user')
     const logger = getLogger(c.env.DB)
-    
+
     // Use Hono's built-in query method instead of parsing URL
     const query = c.req.query()
-    
+
     // Parse query parameters
     const page = parseInt(query.page || '1')
     const limit = parseInt(query.limit || '50')
@@ -31,7 +31,7 @@ adminLogsRoutes.get('/', async (c) => {
     const startDate = query.start_date
     const endDate = query.end_date
     const source = query.source
-    
+
     // Build filter
     const filter: LogFilter = {
       limit,
@@ -39,47 +39,48 @@ adminLogsRoutes.get('/', async (c) => {
       sortBy: 'created_at',
       sortOrder: 'desc'
     }
-    
+
     if (level) {
       filter.level = level.split(',') as LogLevel[]
     }
-    
+
     if (category) {
       filter.category = category.split(',') as LogCategory[]
     }
-    
+
     if (search) {
       filter.search = search
     }
-    
+
     if (startDate) {
       filter.startDate = new Date(startDate)
     }
-    
+
     if (endDate) {
       filter.endDate = new Date(endDate)
     }
-    
+
     if (source) {
       filter.source = source
     }
-    
+
     // Get logs and total count
     const { logs, total } = await logger.getLogs(filter)
-    
+
     // Format logs for display
+    // Note: log.data is already parsed by Drizzle (mode: 'json'), tags is plain text
     const formattedLogs = logs.map(log => ({
       ...log,
-      data: log.data ? JSON.parse(log.data) : null,
-      tags: log.tags ? JSON.parse(log.tags) : [],
+      data: log.data ?? null,
+      tags: log.tags ? (typeof log.tags === 'string' ? JSON.parse(log.tags) : log.tags) : [],
       formattedDate: new Date(log.createdAt).toLocaleString(),
       formattedDuration: log.duration ? `${log.duration}ms` : null,
       levelClass: getLevelClass(log.level),
       categoryClass: getCategoryClass(log.category)
     }))
-    
+
     const totalPages = Math.ceil(total / limit)
-    
+
     const pageData: LogsListPageData = {
       logs: formattedLogs,
       pagination: {
@@ -105,7 +106,7 @@ adminLogsRoutes.get('/', async (c) => {
         role: user.role
       } : undefined
     }
-    
+
     return c.html(renderLogsListPage(pageData))
   } catch (error) {
     console.error('Error fetching logs:', error)
@@ -113,53 +114,7 @@ adminLogsRoutes.get('/', async (c) => {
   }
 })
 
-// Log details page
-adminLogsRoutes.get('/:id', async (c) => {
-  try {
-    const id = c.req.param('id')
-    const user = c.get('user')
-    const logger = getLogger(c.env.DB)
-    
-    // Get single log by ID
-    const { logs } = await logger.getLogs({ 
-      limit: 1, 
-      offset: 0,
-      search: id // Using search to find by ID - this is a simplification
-    })
-    
-    const log = logs.find(l => l.id === id)
-    
-    if (!log) {
-      return c.html(html`<p>Log entry not found</p>`)
-    }
-    
-    const formattedLog = {
-      ...log,
-      data: log.data ? JSON.parse(log.data) : null,
-      tags: log.tags ? JSON.parse(log.tags) : [],
-      formattedDate: new Date(log.createdAt).toLocaleString(),
-      formattedDuration: log.duration ? `${log.duration}ms` : null,
-      levelClass: getLevelClass(log.level),
-      categoryClass: getCategoryClass(log.category)
-    }
-    
-    const pageData: LogDetailsPageData = {
-      log: formattedLog,
-      user: user ? {
-        name: user.email,
-        email: user.email,
-        role: user.role
-      } : undefined
-    }
-    
-    return c.html(renderLogDetailsPage(pageData))
-  } catch (error) {
-    console.error('Error fetching log details:', error)
-    return c.html(html`<p>Error loading log details: ${error}</p>`)
-  }
-})
-
-// Log configuration page
+// Log configuration page — MUST be before /:id to avoid matching 'config' as an ID
 adminLogsRoutes.get('/config', async (c) => {
   try {
     const user = c.get('user')
@@ -393,6 +348,53 @@ adminLogsRoutes.post('/search', async (c) => {
   } catch (error) {
     console.error('Error searching logs:', error)
     return c.html(html`<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error searching logs</td></tr>`)
+  }
+})
+
+// Log details page — MUST be after all specific routes to avoid catching them as :id
+adminLogsRoutes.get('/:id', async (c) => {
+  try {
+    const id = c.req.param('id')
+    const user = c.get('user')
+    const logger = getLogger(c.env.DB)
+
+    // Get single log by ID
+    const { logs } = await logger.getLogs({
+      limit: 1,
+      offset: 0,
+      search: id
+    })
+
+    const log = logs.find(l => l.id === id)
+
+    if (!log) {
+      return c.html(html`<p>Log entry not found</p>`)
+    }
+
+    // Note: log.data is already parsed by Drizzle (mode: 'json'), tags is plain text
+    const formattedLog = {
+      ...log,
+      data: log.data ?? null,
+      tags: log.tags ? (typeof log.tags === 'string' ? JSON.parse(log.tags) : log.tags) : [],
+      formattedDate: new Date(log.createdAt).toLocaleString(),
+      formattedDuration: log.duration ? `${log.duration}ms` : null,
+      levelClass: getLevelClass(log.level),
+      categoryClass: getCategoryClass(log.category)
+    }
+
+    const pageData: LogDetailsPageData = {
+      log: formattedLog,
+      user: user ? {
+        name: user.email,
+        email: user.email,
+        role: user.role
+      } : undefined
+    }
+
+    return c.html(renderLogDetailsPage(pageData))
+  } catch (error) {
+    console.error('Error fetching log details:', error)
+    return c.html(html`<p>Error loading log details: ${error}</p>`)
   }
 })
 
