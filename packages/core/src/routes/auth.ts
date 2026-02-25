@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { setCookie } from 'hono/cookie'
 import { html } from 'hono/html'
 import { AuthManager, requireAuth, rateLimit, generateCsrfToken, logActivityFromContext } from '../middleware'
-import { sanitizeInput } from '../utils/sanitize'
+import { sanitizeInput, escapeHtml } from '../utils/sanitize'
 import { getLogger } from '../services/logger'
 import { renderLoginPage, LoginPageData } from '../templates/pages/auth-login.template'
 import { renderRegisterPage, RegisterPageData } from '../templates/pages/auth-register.template'
@@ -840,9 +840,9 @@ authRoutes.get('/accept-invitation', async (c) => {
               <h2 class="text-3xl font-bold">Accept Invitation</h2>
               <p class="mt-2 text-gray-400">Complete your account setup</p>
               <p class="mt-4 text-sm">
-                You've been invited as <strong>${invitedUser.first_name} ${invitedUser.last_name}</strong><br>
-                <span class="text-gray-400">${invitedUser.email}</span><br>
-                <span class="text-blue-400 capitalize">${invitedUser.role}</span>
+                You've been invited as <strong>${escapeHtml(invitedUser.first_name || '')} ${escapeHtml(invitedUser.last_name || '')}</strong><br>
+                <span class="text-gray-400">${escapeHtml(invitedUser.email || '')}</span><br>
+                <span class="text-blue-400 capitalize">${escapeHtml(invitedUser.role || '')}</span>
               </p>
             </div>
 
@@ -1177,8 +1177,8 @@ authRoutes.get('/reset-password', async (c) => {
               <h2 class="text-3xl font-bold">Reset Password</h2>
               <p class="mt-2 text-gray-400">Choose a new password for your account</p>
               <p class="mt-4 text-sm">
-                Reset password for <strong>${user.first_name} ${user.last_name}</strong><br>
-                <span class="text-gray-400">${user.email}</span>
+                Reset password for <strong>${escapeHtml(user.first_name || '')} ${escapeHtml(user.last_name || '')}</strong><br>
+                <span class="text-gray-400">${escapeHtml(user.email || '')}</span>
               </p>
             </div>
 

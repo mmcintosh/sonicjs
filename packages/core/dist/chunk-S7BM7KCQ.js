@@ -1,5 +1,5 @@
 import { syncCollections, PluginBootstrapService, getLogger } from './chunk-SJRJ6IR3.js';
-import { MigrationService } from './chunk-VSOR5OFS.js';
+import { MigrationService } from './chunk-F3ICRC6J.js';
 import { metricsTracker } from './chunk-FICTAGD4.js';
 import { sign, verify } from 'hono/jwt';
 import { setCookie, getCookie } from 'hono/cookie';
@@ -1216,5 +1216,5 @@ async function logActivityFromContext(c, action, resourceType, resourceId, detai
 }
 
 export { AuthManager, PermissionManager, VALID_SCOPES, bootstrapMiddleware, cacheHeaders, compressionMiddleware, createContentFromSubmission, csrfProtection, detailedLoggingMiddleware, generateCsrfToken, getActivePlugins, hashApiKey, isPluginActive, logActivity, logActivityFromContext, loggingMiddleware, metricsMiddleware, optionalApiKey, optionalAuth, performanceLoggingMiddleware, rateLimit, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireApiKey, requireAuth, requirePermission, requireRole, securityHeadersMiddleware, securityLoggingMiddleware, setRequestLoggingEnabled, setSecurityLoggingEnabled, syncFormCollection, validateCsrfToken, verifySecurityConfig };
-//# sourceMappingURL=chunk-5ZBXUKYI.js.map
-//# sourceMappingURL=chunk-5ZBXUKYI.js.map
+//# sourceMappingURL=chunk-S7BM7KCQ.js.map
+//# sourceMappingURL=chunk-S7BM7KCQ.js.map

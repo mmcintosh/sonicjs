@@ -1,7 +1,7 @@
 import { getCacheService, CACHE_CONFIGS, getAppInstance, generateOpenAPISpec, clearCollectionSchemaCache, SettingsService, buildRouteList, CATEGORY_INFO } from './chunk-Q56KXRTA.js';
-import { requireAuth, logActivityFromContext, isPluginActive, requireRole, rateLimit, AuthManager, logActivity, syncFormCollection, createContentFromSubmission, VALID_SCOPES, hashApiKey, generateCsrfToken } from './chunk-5ZBXUKYI.js';
+import { requireAuth, logActivityFromContext, isPluginActive, requireRole, rateLimit, AuthManager, logActivity, syncFormCollection, createContentFromSubmission, VALID_SCOPES, hashApiKey, generateCsrfToken } from './chunk-S7BM7KCQ.js';
 import { getLogger, PluginService } from './chunk-SJRJ6IR3.js';
-import { MigrationService } from './chunk-VSOR5OFS.js';
+import { MigrationService } from './chunk-F3ICRC6J.js';
 import { init_admin_layout_catalyst_template, renderDesignPage, renderCheckboxPage, renderTestimonialsList, renderCodeExamplesList, renderAlert, renderTable, renderPagination, renderConfirmationDialog, getConfirmationDialogScript, renderAdminLayoutCatalyst, renderAdminLayout, renderForm } from './chunk-BUAQZ6RR.js';
 import { PluginBuilder, TurnstileService } from './chunk-6VOURUYJ.js';
 import { QueryFilterBuilder, validateUploadedFile, getContentDisposition, getCoreVersion, getBlocksFieldConfig, parseBlocksValue } from './chunk-AMDYTGK7.js';
@@ -3086,7 +3086,7 @@ adminApiRoutes.delete("/collections/:id", async (c) => {
 });
 adminApiRoutes.get("/migrations/status", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-NCVLAD22.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-YTFSHR3P.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const status = await migrationService.getMigrationStatus();
@@ -3111,7 +3111,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
         error: "Unauthorized. Admin access required."
       }, 403);
     }
-    const { MigrationService: MigrationService2 } = await import('./migrations-NCVLAD22.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-YTFSHR3P.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const result = await migrationService.runPendingMigrations();
@@ -3130,7 +3130,7 @@ adminApiRoutes.post("/migrations/run", async (c) => {
 });
 adminApiRoutes.get("/migrations/validate", async (c) => {
   try {
-    const { MigrationService: MigrationService2 } = await import('./migrations-NCVLAD22.js');
+    const { MigrationService: MigrationService2 } = await import('./migrations-YTFSHR3P.js');
     const db = c.env.DB;
     const migrationService = new MigrationService2(db);
     const validation = await migrationService.validateSchema();
@@ -4215,9 +4215,9 @@ authRoutes.get("/accept-invitation", async (c) => {
               <h2 class="text-3xl font-bold">Accept Invitation</h2>
               <p class="mt-2 text-gray-400">Complete your account setup</p>
               <p class="mt-4 text-sm">
-                You've been invited as <strong>${invitedUser.first_name} ${invitedUser.last_name}</strong><br>
-                <span class="text-gray-400">${invitedUser.email}</span><br>
-                <span class="text-blue-400 capitalize">${invitedUser.role}</span>
+                You've been invited as <strong>${escapeHtml(invitedUser.first_name || "")} ${escapeHtml(invitedUser.last_name || "")}</strong><br>
+                <span class="text-gray-400">${escapeHtml(invitedUser.email || "")}</span><br>
+                <span class="text-blue-400 capitalize">${escapeHtml(invitedUser.role || "")}</span>
               </p>
             </div>
 
@@ -4507,8 +4507,8 @@ authRoutes.get("/reset-password", async (c) => {
               <h2 class="text-3xl font-bold">Reset Password</h2>
               <p class="mt-2 text-gray-400">Choose a new password for your account</p>
               <p class="mt-4 text-sm">
-                Reset password for <strong>${user.first_name} ${user.last_name}</strong><br>
-                <span class="text-gray-400">${user.email}</span>
+                Reset password for <strong>${escapeHtml(user.first_name || "")} ${escapeHtml(user.last_name || "")}</strong><br>
+                <span class="text-gray-400">${escapeHtml(user.email || "")}</span>
               </p>
             </div>
 
@@ -39100,5 +39100,5 @@ var ROUTES_INFO = {
 };
 
 export { AISearchService, BENCHMARK_DATASETS, BenchmarkService, ChunkingService, EmbeddingService, FTS5Service, FacetService, IndexManager, QueryRulesService, ROUTES_INFO, RankingPipelineService, RelatedSearchService, SynonymService, TrendingSearchService, adminApiKeyRoutes, adminCheckboxRoutes, adminCollectionsRoutes, adminDesignRoutes, adminFormsRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSearchRoutes, adminSettingsRoutes, admin_api_default, admin_code_examples_default, admin_content_default, admin_testimonials_default, api_content_crud_default, api_default, api_media_default, api_system_default, auth_default, getConfirmationDialogScript2 as getConfirmationDialogScript, public_forms_default, renderConfirmationDialog2 as renderConfirmationDialog, renderSearchDashboard, router, router2, router3, test_cleanup_default, userRoutes };
-//# sourceMappingURL=chunk-DMIGMJEA.js.map
-//# sourceMappingURL=chunk-DMIGMJEA.js.map
+//# sourceMappingURL=chunk-LXIEHAIZ.js.map
+//# sourceMappingURL=chunk-LXIEHAIZ.js.map
