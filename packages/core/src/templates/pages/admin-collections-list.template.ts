@@ -1,5 +1,6 @@
 import { renderAdminLayoutCatalyst, AdminLayoutCatalystData } from '../layouts/admin-layout-catalyst.template'
 import { renderTable } from '../components/table.template'
+import { escapeHtml } from '../../utils/sanitize'
 
 export interface Collection {
   id: string
@@ -37,7 +38,7 @@ export function renderCollectionsListPage(data: CollectionsListPageData): string
         render: (_value: any, collection: any) => `
             <div class="flex items-center gap-2 ml-2">
                 <span class="inline-flex items-center rounded-md bg-cyan-50 dark:bg-cyan-500/10 px-2.5 py-1 text-sm font-medium text-cyan-700 dark:text-cyan-300 ring-1 ring-inset ring-cyan-700/10 dark:ring-cyan-400/20">
-                  ${collection.name}
+                  ${escapeHtml(collection.name)}
                 </span>
                 ${collection.managed ? `
                   <span class="inline-flex items-center rounded-md bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300 ring-1 ring-inset ring-purple-700/10 dark:ring-purple-400/20" title="Config-managed collection (read-only in UI)">
@@ -61,7 +62,7 @@ export function renderCollectionsListPage(data: CollectionsListPageData): string
         label: 'Description',
         sortable: true,
         sortType: 'string',
-        render: (_value: any, collection: any) => collection.description || '<span class="text-zinc-500 dark:text-zinc-400">-</span>'
+        render: (_value: any, collection: any) => collection.description ? escapeHtml(collection.description) : '<span class="text-zinc-500 dark:text-zinc-400">-</span>'
       },
       {
         key: 'field_count',
@@ -169,7 +170,7 @@ export function renderCollectionsListPage(data: CollectionsListPageData): string
                       id="collections-search"
                       type="text"
                       placeholder="Search collections..."
-                      value="${data.search || ''}"
+                      value="${escapeHtml(data.search || '')}"
                       oninput="toggleClearButton()"
                       class="rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm px-4 py-2.5 pl-11 pr-10 text-sm w-72 text-zinc-950 dark:text-white border-2 border-cyan-200/50 dark:border-cyan-700/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-800 focus:shadow-lg focus:shadow-cyan-500/20 dark:focus:shadow-cyan-400/20 transition-all duration-300"
                     >

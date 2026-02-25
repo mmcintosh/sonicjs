@@ -1,3 +1,4 @@
+import { escapeHtml } from './chunk-RQKJ6NEX.js';
 import { __esm, __export, __toCommonJS } from './chunk-V4OQ3NZ2.js';
 
 // src/templates/components/logo.template.ts
@@ -1002,7 +1003,7 @@ function renderTable(data) {
           <svg class="mx-auto h-12 w-12 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">${data.emptyMessage || "No data available"}</p>
+          <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">${escapeHtml(data.emptyMessage || "No data available")}</p>
         </div>
       </div>
     `;
@@ -1011,7 +1012,7 @@ function renderTable(data) {
     <div class="${data.className || ""}" id="${tableId}">
       ${data.title ? `
         <div class="px-4 sm:px-0 mb-4">
-          <h3 class="text-base font-semibold text-zinc-950 dark:text-white">${data.title}</h3>
+          <h3 class="text-base font-semibold text-zinc-950 dark:text-white">${escapeHtml(data.title)}</h3>
         </div>
       ` : ""}
       <div class="overflow-x-auto">
@@ -3165,16 +3166,16 @@ function renderTestimonialsList(data) {
         id: testimonial.id,
         author: `
                 <div class="flex flex-col">
-                  <div class="font-medium text-zinc-950 dark:text-white">${testimonial.author_name}</div>
+                  <div class="font-medium text-zinc-950 dark:text-white">${escapeHtml(testimonial.author_name)}</div>
                   ${testimonial.author_title || testimonial.author_company ? `
                     <div class="text-xs text-zinc-500 dark:text-zinc-400">
-                      ${[testimonial.author_title, testimonial.author_company].filter(Boolean).join(" \xB7 ")}
+                      ${[testimonial.author_title, testimonial.author_company].filter(Boolean).map((s) => escapeHtml(s)).join(" \xB7 ")}
                     </div>
                   ` : ""}
                   ${rating ? `<div class="text-xs mt-1">${rating}</div>` : ""}
                 </div>
               `,
-        testimonial: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${truncated}</div>`,
+        testimonial: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${escapeHtml(truncated)}</div>`,
         status: testimonial.isPublished ? '<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/20">Published</span>' : '<span class="inline-flex items-center rounded-md bg-zinc-50 dark:bg-zinc-500/10 px-2 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/20 dark:ring-zinc-500/20">Draft</span>',
         sortOrder: testimonial.sortOrder.toString(),
         created_at: new Date(testimonial.created_at * 1e3).toLocaleDateString()
@@ -3372,9 +3373,9 @@ function renderCodeExamplesList(data) {
       const langColor = languageColors[example.language.toLowerCase()] || "bg-zinc-100 dark:bg-zinc-500/10 text-zinc-700 dark:text-zinc-400 ring-zinc-600/20 dark:ring-zinc-500/20";
       return {
         id: example.id,
-        title: `<div class="font-medium text-zinc-950 dark:text-white">${example.title}</div>`,
-        language: `<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${langColor}">${example.language}</span>`,
-        description: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${truncatedDesc}</div>`,
+        title: `<div class="font-medium text-zinc-950 dark:text-white">${escapeHtml(example.title)}</div>`,
+        language: `<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${langColor}">${escapeHtml(example.language)}</span>`,
+        description: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${escapeHtml(truncatedDesc)}</div>`,
         status: example.isPublished ? '<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/20">Published</span>' : '<span class="inline-flex items-center rounded-md bg-zinc-50 dark:bg-zinc-500/10 px-2 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/20 dark:ring-zinc-500/20">Draft</span>',
         sortOrder: example.sortOrder.toString(),
         created_at: new Date(example.created_at * 1e3).toLocaleDateString()
@@ -3434,8 +3435,8 @@ function renderForm(data) {
       ${data.csrfToken ? `<input type="hidden" name="_csrf" value="${data.csrfToken}">` : ""}
       ${data.title ? `
         <div class="mb-6">
-          <h2 class="text-lg font-medium text-gray-1">${data.title}</h2>
-          ${data.description ? `<p class="mt-1 text-sm text-gray-4">${data.description}</p>` : ""}
+          <h2 class="text-lg font-medium text-gray-1">${escapeHtml(data.title)}</h2>
+          ${data.description ? `<p class="mt-1 text-sm text-gray-4">${escapeHtml(data.description)}</p>` : ""}
         </div>
       ` : ""}
 
@@ -3465,7 +3466,7 @@ function renderFormField(field) {
   const fieldId = `field-${field.name}`;
   const required = field.required ? "required" : "";
   const readonly = field.readonly ? "readonly" : "";
-  const placeholder = field.placeholder ? `placeholder="${field.placeholder}"` : "";
+  const placeholder = field.placeholder ? `placeholder="${escapeHtml(field.placeholder)}"` : "";
   let fieldHTML = "";
   switch (field.type) {
     case "text":
@@ -3477,7 +3478,7 @@ function renderFormField(field) {
           type="${field.type === "date" ? "datetime-local" : field.type}"
           id="${fieldId}"
           name="${field.name}"
-          value="${field.value || ""}"
+          value="${escapeHtml(String(field.value ?? ""))}"
           class="form-input ${field.className || ""}"
           ${placeholder}
           ${required}
@@ -3490,14 +3491,14 @@ function renderFormField(field) {
       break;
     case "textarea":
       fieldHTML = `
-        <textarea 
+        <textarea
           id="${fieldId}"
-          name="${field.name}" 
-          class="form-textarea ${field.className || ""}" 
+          name="${field.name}"
+          class="form-textarea ${field.className || ""}"
           rows="${field.rows || 4}"
           ${placeholder}
           ${required}
-        >${field.value || ""}</textarea>
+        >${escapeHtml(String(field.value ?? ""))}</textarea>
       `;
       break;
     case "rich_text":
@@ -3536,8 +3537,8 @@ function renderFormField(field) {
           ${required}
         >
           ${field.options ? field.options.map((option) => `
-            <option value="${option.value}" ${option.selected || field.value === option.value ? "selected" : ""}>
-              ${option.label}
+            <option value="${escapeHtml(option.value)}" ${option.selected || field.value === option.value ? "selected" : ""}>
+              ${escapeHtml(option.label)}
             </option>
           `).join("") : ""}
         </select>
@@ -3545,16 +3546,16 @@ function renderFormField(field) {
       break;
     case "multi_select":
       fieldHTML = `
-        <select 
+        <select
           id="${fieldId}"
-          name="${field.name}" 
-          class="form-input ${field.className || ""}" 
-          multiple 
+          name="${field.name}"
+          class="form-input ${field.className || ""}"
+          multiple
           ${required}
         >
           ${field.options ? field.options.map((option) => `
-            <option value="${option.value}" ${option.selected ? "selected" : ""}>
-              ${option.label}
+            <option value="${escapeHtml(option.value)}" ${option.selected ? "selected" : ""}>
+              ${escapeHtml(option.label)}
             </option>
           `).join("") : ""}
         </select>
@@ -3576,11 +3577,11 @@ function renderFormField(field) {
       break;
     default:
       fieldHTML = `
-        <input 
-          type="text" 
+        <input
+          type="text"
           id="${fieldId}"
-          name="${field.name}" 
-          value="${field.value || ""}"
+          name="${field.name}"
+          value="${escapeHtml(String(field.value ?? ""))}"
           class="form-input ${field.className || ""}" 
           ${placeholder} 
           ${required}
@@ -3594,7 +3595,7 @@ function renderFormField(field) {
         <div class="flex items-center">
           ${fieldHTML}
         </div>
-        ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1 ml-6">${field.helpText}</p>` : ""}
+        ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1 ml-6">${escapeHtml(field.helpText)}</p>` : ""}
       </div>
     `;
   }
@@ -3604,11 +3605,11 @@ function renderFormField(field) {
         ${field.label}${field.required ? " *" : ""}
       </label>
       ${fieldHTML}
-      ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">${field.helpText}</p>` : ""}
+      ${field.helpText ? `<p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">${escapeHtml(field.helpText)}</p>` : ""}
     </div>
   `;
 }
 
 export { adminLayoutV2, getConfirmationDialogScript, init_admin_layout_catalyst_template, init_logo_template, renderAdminLayout, renderAdminLayoutCatalyst, renderAlert, renderCheckboxPage, renderCodeExamplesList, renderConfirmationDialog, renderDesignPage, renderForm, renderFormField, renderLogo, renderPagination, renderTable, renderTestimonialsList };
-//# sourceMappingURL=chunk-ALNWMXLD.js.map
-//# sourceMappingURL=chunk-ALNWMXLD.js.map
+//# sourceMappingURL=chunk-X2TVCZGS.js.map
+//# sourceMappingURL=chunk-X2TVCZGS.js.map

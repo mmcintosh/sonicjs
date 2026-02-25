@@ -56,3 +56,27 @@ export function sanitizeObject<T extends Record<string, any>>(
 
   return sanitized
 }
+
+/**
+ * Recursively sanitize all string values in arbitrary JSON data.
+ * HTML-encodes entities (e.g., < becomes &lt;) to prevent stored XSS
+ * when data is rendered in templates.
+ * @param value - The value to sanitize (string, array, object, or primitive)
+ * @returns The sanitized value with all strings HTML-escaped
+ */
+export function sanitizeDeep(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return sanitizeInput(value)
+  }
+  if (Array.isArray(value)) {
+    return value.map(sanitizeDeep)
+  }
+  if (value !== null && typeof value === 'object') {
+    const result: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value)) {
+      result[k] = sanitizeDeep(v)
+    }
+    return result
+  }
+  return value // numbers, booleans, null pass through
+}

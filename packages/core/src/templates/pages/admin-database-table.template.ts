@@ -1,4 +1,5 @@
 import { renderAdminLayoutCatalyst, AdminLayoutCatalystData } from '../layouts/admin-layout-catalyst.template'
+import { escapeHtml } from '../../utils/sanitize'
 
 export interface DatabaseTablePageData {
   user?: {
@@ -322,17 +323,6 @@ function generatePageNumbers(currentPage: number, totalPages: number): string {
       </button>
     `
   }).join('')
-}
-
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  }
-  return String(text).replace(/[&<>"']/g, m => map[m] || m)
 }
 
 function formatCellValue(value: any): string {

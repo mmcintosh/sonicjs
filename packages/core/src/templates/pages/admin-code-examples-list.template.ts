@@ -2,6 +2,7 @@ import { renderAdminLayoutCatalyst, AdminLayoutCatalystData } from '../layouts/a
 import { renderPagination } from '../pagination.template'
 import { renderAlert } from '../alert.template'
 import { renderTable } from '../table.template'
+import { escapeHtml } from '../../utils/sanitize'
 
 interface CodeExample {
   id: number
@@ -184,9 +185,9 @@ export function renderCodeExamplesList(data: CodeExamplesListData): string {
 
             return {
               id: example.id,
-              title: `<div class="font-medium text-zinc-950 dark:text-white">${example.title}</div>`,
-              language: `<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${langColor}">${example.language}</span>`,
-              description: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${truncatedDesc}</div>`,
+              title: `<div class="font-medium text-zinc-950 dark:text-white">${escapeHtml(example.title)}</div>`,
+              language: `<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${langColor}">${escapeHtml(example.language)}</span>`,
+              description: `<div class="text-sm text-zinc-700 dark:text-zinc-300 max-w-md">${escapeHtml(truncatedDesc)}</div>`,
               status: example.isPublished
                 ? '<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/20">Published</span>'
                 : '<span class="inline-flex items-center rounded-md bg-zinc-50 dark:bg-zinc-500/10 px-2 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/20 dark:ring-zinc-500/20">Draft</span>',

@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../utils/sanitize'
+
 export interface ContentVersion {
   id: string
   version: number
@@ -179,15 +181,4 @@ export function renderVersionHistory(data: VersionHistoryData): string {
       }
     </script>
   `
-}
-
-function escapeHtml(text: string): string {
-  if (typeof text !== 'string') return String(text || '')
-  return text.replace(/[&<>"']/g, (char) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[char] || char))
 }

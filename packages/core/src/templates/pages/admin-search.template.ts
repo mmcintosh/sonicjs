@@ -363,6 +363,4 @@ export function renderFeatureToggle(name: string, isOn: boolean): string {
   `
 }
 
-export function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
+export { escapeHtml } from '../../utils/sanitize'

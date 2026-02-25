@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { escapeHtml, sanitizeInput, sanitizeObject } from '../../utils/sanitize'
+import { escapeHtml, sanitizeInput, sanitizeObject, sanitizeDeep } from '../../utils/sanitize'
 
 describe('escapeHtml', () => {
   it('should escape HTML special characters', () => {
@@ -117,5 +117,91 @@ describe('sanitizeObject', () => {
   it('should handle empty objects', () => {
     const result = sanitizeObject({}, [])
     expect(result).toEqual({})
+  })
+})
+
+describe('sanitizeDeep', () => {
+  it('should sanitize strings', () => {
+    expect(sanitizeDeep('<script>alert(1)</script>'))
+      .toBe('&lt;script&gt;alert(1)&lt;/script&gt;')
+  })
+
+  it('should sanitize strings in flat objects', () => {
+    const result = sanitizeDeep({
+      name: '<b>Bold</b>',
+      email: 'test@example.com',
+    })
+    expect(result).toEqual({
+      name: '&lt;b&gt;Bold&lt;/b&gt;',
+      email: 'test@example.com',
+    })
+  })
+
+  it('should sanitize nested objects', () => {
+    const result = sanitizeDeep({
+      user: {
+        name: '<script>xss</script>',
+        profile: {
+          bio: '<img onerror=alert(1)>',
+        },
+      },
+    })
+    expect(result).toEqual({
+      user: {
+        name: '&lt;script&gt;xss&lt;/script&gt;',
+        profile: {
+          bio: '&lt;img onerror=alert(1)&gt;',
+        },
+      },
+    })
+  })
+
+  it('should sanitize arrays of strings', () => {
+    const result = sanitizeDeep(['<b>one</b>', '<i>two</i>'])
+    expect(result).toEqual(['&lt;b&gt;one&lt;/b&gt;', '&lt;i&gt;two&lt;/i&gt;'])
+  })
+
+  it('should sanitize arrays of objects', () => {
+    const result = sanitizeDeep([
+      { name: '<script>a</script>' },
+      { name: '<script>b</script>' },
+    ])
+    expect(result).toEqual([
+      { name: '&lt;script&gt;a&lt;/script&gt;' },
+      { name: '&lt;script&gt;b&lt;/script&gt;' },
+    ])
+  })
+
+  it('should pass through numbers, booleans, and null', () => {
+    expect(sanitizeDeep(42)).toBe(42)
+    expect(sanitizeDeep(true)).toBe(true)
+    expect(sanitizeDeep(false)).toBe(false)
+    expect(sanitizeDeep(null)).toBe(null)
+  })
+
+  it('should handle mixed-type objects', () => {
+    const result = sanitizeDeep({
+      name: '<b>test</b>',
+      count: 5,
+      active: true,
+      tags: ['<i>tag1</i>', 'tag2'],
+      metadata: null,
+    })
+    expect(result).toEqual({
+      name: '&lt;b&gt;test&lt;/b&gt;',
+      count: 5,
+      active: true,
+      tags: ['&lt;i&gt;tag1&lt;/i&gt;', 'tag2'],
+      metadata: null,
+    })
+  })
+
+  it('should trim strings like sanitizeInput', () => {
+    expect(sanitizeDeep('  hello  ')).toBe('hello')
+  })
+
+  it('should handle empty objects and arrays', () => {
+    expect(sanitizeDeep({})).toEqual({})
+    expect(sanitizeDeep([])).toEqual([])
   })
 })

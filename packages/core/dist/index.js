@@ -1,21 +1,23 @@
-import { AISearchService, IndexManager, FTS5Service, renderSearchDashboard, BENCHMARK_DATASETS, RankingPipelineService, SynonymService, QueryRulesService, RelatedSearchService, FacetService, BenchmarkService, EmbeddingService, ChunkingService, TrendingSearchService, renderConfirmationDialog, getConfirmationDialogScript, api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminFormsRoutes, adminSettingsRoutes, public_forms_default, router2, router3, admin_content_default, adminMediaRoutes, adminSearchRoutes, adminApiKeyRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-LMHFFZDZ.js';
-export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-LMHFFZDZ.js';
+import { AISearchService, IndexManager, FTS5Service, renderSearchDashboard, BENCHMARK_DATASETS, RankingPipelineService, SynonymService, QueryRulesService, RelatedSearchService, FacetService, BenchmarkService, EmbeddingService, ChunkingService, TrendingSearchService, renderConfirmationDialog, getConfirmationDialogScript, api_default, api_media_default, api_system_default, admin_api_default, router, adminCollectionsRoutes, adminFormsRoutes, adminSettingsRoutes, public_forms_default, router2, router3, admin_content_default, adminMediaRoutes, adminSearchRoutes, adminApiKeyRoutes, adminPluginRoutes, adminLogsRoutes, userRoutes, auth_default, test_cleanup_default } from './chunk-7WG2FQEE.js';
+export { ROUTES_INFO, admin_api_default as adminApiRoutes, adminCheckboxRoutes, admin_code_examples_default as adminCodeExamplesRoutes, adminCollectionsRoutes, admin_content_default as adminContentRoutes, router as adminDashboardRoutes, adminDesignRoutes, adminLogsRoutes, adminMediaRoutes, adminPluginRoutes, adminSettingsRoutes, admin_testimonials_default as adminTestimonialsRoutes, userRoutes as adminUsersRoutes, api_content_crud_default as apiContentCrudRoutes, api_media_default as apiMediaRoutes, api_default as apiRoutes, api_system_default as apiSystemRoutes, auth_default as authRoutes } from './chunk-7WG2FQEE.js';
 import { SettingsService, registerPluginOpenAPI, setAppInstance, schema_exports } from './chunk-TJF53S32.js';
 export { Logger, apiTokens, collections, content, contentVersions, getLogger, initLogger, insertCollectionSchema, insertContentSchema, insertLogConfigSchema, insertMediaSchema, insertPluginActivityLogSchema, insertPluginAssetSchema, insertPluginHookSchema, insertPluginRouteSchema, insertPluginSchema, insertSystemLogSchema, insertUserSchema, insertWorkflowHistorySchema, logConfig, media, pluginActivityLog, pluginAssets, pluginHooks, pluginRoutes, plugins, selectCollectionSchema, selectContentSchema, selectLogConfigSchema, selectMediaSchema, selectPluginActivityLogSchema, selectPluginAssetSchema, selectPluginHookSchema, selectPluginRouteSchema, selectPluginSchema, selectSystemLogSchema, selectUserSchema, selectWorkflowHistorySchema, systemLogs, users, workflowHistory } from './chunk-TJF53S32.js';
-import { requireAuth, optionalAuth, optionalApiKey, AuthManager, metricsMiddleware, bootstrapMiddleware, securityHeadersMiddleware, csrfProtection } from './chunk-RIBUDCC4.js';
-export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeadersMiddleware as securityHeaders, securityLoggingMiddleware } from './chunk-RIBUDCC4.js';
+import { requireAuth, optionalAuth, optionalApiKey, AuthManager, metricsMiddleware, bootstrapMiddleware, securityHeadersMiddleware, csrfProtection } from './chunk-FG53WOQC.js';
+export { AuthManager, PermissionManager, bootstrapMiddleware, cacheHeaders, compressionMiddleware, detailedLoggingMiddleware, getActivePlugins, isPluginActive, logActivity, loggingMiddleware, optionalAuth, performanceLoggingMiddleware, requireActivePlugin, requireActivePlugins, requireAnyPermission, requireAuth, requirePermission, requireRole, securityHeadersMiddleware as securityHeaders, securityLoggingMiddleware } from './chunk-FG53WOQC.js';
 export { PluginBootstrapService, PluginService as PluginServiceClass, cleanupRemovedCollections, fullCollectionSync, getAvailableCollectionNames, getManagedCollections, isCollectionManaged, loadCollectionConfig, loadCollectionConfigs, registerCollections, syncCollection, syncCollections, validateCollectionConfig } from './chunk-TVIJ7U2H.js';
-export { MigrationService } from './chunk-RJH24CS4.js';
-export { renderFilterBar } from './chunk-XRAPOKXL.js';
-import { init_admin_layout_catalyst_template, renderAdminLayoutCatalyst, renderAdminLayout } from './chunk-ALNWMXLD.js';
-export { getConfirmationDialogScript, renderAlert, renderConfirmationDialog, renderForm, renderFormField, renderPagination, renderTable } from './chunk-ALNWMXLD.js';
+export { MigrationService } from './chunk-TY5PDKJT.js';
+export { renderFilterBar } from './chunk-MKKXVOEM.js';
+import { init_admin_layout_catalyst_template, renderAdminLayoutCatalyst, renderAdminLayout } from './chunk-X2TVCZGS.js';
+export { getConfirmationDialogScript, renderAlert, renderConfirmationDialog, renderForm, renderFormField, renderPagination, renderTable } from './chunk-X2TVCZGS.js';
 export { HookSystemImpl, HookUtils, PluginManager as PluginManagerClass, PluginRegistryImpl, PluginValidator as PluginValidatorClass, ScopedHookSystem as ScopedHookSystemClass } from './chunk-N7YQ36GO.js';
 import { PluginBuilder } from './chunk-6VOURUYJ.js';
 export { PluginBuilder, PluginHelpers } from './chunk-6VOURUYJ.js';
-import { package_default, getCoreVersion } from './chunk-K33ILDZW.js';
-export { QueryFilterBuilder, SONICJS_VERSION, TemplateRenderer, buildQuery, escapeHtml, getCoreVersion, renderTemplate, sanitizeInput, sanitizeObject, templateRenderer } from './chunk-K33ILDZW.js';
+import { package_default, getCoreVersion } from './chunk-AMDYTGK7.js';
+export { QueryFilterBuilder, SONICJS_VERSION, TemplateRenderer, buildQuery, getCoreVersion, renderTemplate, templateRenderer } from './chunk-AMDYTGK7.js';
 import './chunk-X7ZAEI5S.js';
 export { metricsTracker } from './chunk-FICTAGD4.js';
+import { escapeHtml } from './chunk-RQKJ6NEX.js';
+export { escapeHtml, sanitizeInput, sanitizeObject } from './chunk-RQKJ6NEX.js';
 export { HOOKS } from './chunk-LOUJRBXV.js';
 import './chunk-V4OQ3NZ2.js';
 import { Hono } from 'hono';
@@ -327,7 +329,7 @@ function renderDatabaseTablePage(data) {
               ${data.rows.length > 0 ? data.rows.map((row, idx) => `
                   <tr class="${idx % 2 === 0 ? "bg-white dark:bg-zinc-900" : "bg-zinc-50 dark:bg-zinc-900/50"}">
                     ${data.columns.map((col) => `
-                      <td class="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 whitespace-nowrap max-w-xs overflow-hidden text-ellipsis" title="${escapeHtml2(String(row[col] ?? ""))}">
+                      <td class="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 whitespace-nowrap max-w-xs overflow-hidden text-ellipsis" title="${escapeHtml(String(row[col] ?? ""))}">
                         ${formatCellValue(row[col])}
                       </td>
                     `).join("")}
@@ -533,16 +535,6 @@ function generatePageNumbers(currentPage, totalPages) {
     `;
   }).join("");
 }
-function escapeHtml2(text) {
-  const map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  };
-  return String(text).replace(/[&<>"']/g, (m) => map[m] || m);
-}
 function formatCellValue(value) {
   if (value === null || value === void 0) {
     return '<span class="text-zinc-400 dark:text-zinc-500 italic">null</span>';
@@ -555,9 +547,9 @@ function formatCellValue(value) {
   }
   const str = String(value);
   if (str.length > 100) {
-    return escapeHtml2(str.substring(0, 100)) + "...";
+    return escapeHtml(str.substring(0, 100)) + "...";
   }
-  return escapeHtml2(str);
+  return escapeHtml(str);
 }
 
 // src/plugins/core-plugins/database-tools-plugin/admin-routes.ts

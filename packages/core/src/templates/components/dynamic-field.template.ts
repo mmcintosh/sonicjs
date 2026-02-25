@@ -1,4 +1,5 @@
 import { getDragSortableScript } from './drag-sortable.template'
+import { escapeHtml } from '../../utils/sanitize'
 
 /**
  * Returns shared readFieldValue function used by both blocks and structured fields.
@@ -1658,15 +1659,4 @@ function getBlocksFieldScript(): string {
       }
     </script>
   `
-}
-
-function escapeHtml(text: string): string {
-  if (typeof text !== 'string') return String(text || '')
-  return text.replace(/[&<>"']/g, (char) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[char] || char))
 }

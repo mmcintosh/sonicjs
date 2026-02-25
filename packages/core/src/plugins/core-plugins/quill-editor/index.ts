@@ -7,6 +7,7 @@
 
 import { PluginBuilder } from '../../sdk/plugin-builder'
 import type { Plugin } from '@sonicjs-cms/core'
+import { escapeHtml } from '../../../utils/sanitize'
 
 /**
  * Quill Editor Configuration Options
@@ -66,16 +67,6 @@ export function renderQuillField(
     height = 300,
     toolbar = 'full'
   } = options
-
-  // Escape HTML for hidden input
-  const escapeHtml = (str: string) => {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;')
-  }
 
   return `
     <div class="quill-editor-container" data-field-id="${fieldId}">
