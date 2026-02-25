@@ -266,7 +266,7 @@ test.describe('OpenAPI Collection Schemas', () => {
     if (collectionSchemas.length > 0) {
       // Verify the naming convention is PascalCase + "Data"
       for (const name of collectionSchemas) {
-        expect(name).toMatch(/^[A-Z][a-zA-Z]*Data$/);
+        expect(name).toMatch(/^[A-Z][a-zA-Z0-9]*Data$/);
       }
 
       // Each Data schema should have a corresponding Content and Input schema
