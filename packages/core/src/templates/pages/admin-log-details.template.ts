@@ -1,5 +1,5 @@
 import { html } from 'hono/html'
-import { adminLayoutV2 } from '../layouts/admin-layout-v2.template'
+import { renderAdminLayoutCatalyst, AdminLayoutCatalystData } from '../layouts/admin-layout-catalyst.template'
 import { LogEntry } from './admin-logs-list.template'
 
 interface BaseUser {
@@ -163,7 +163,7 @@ export function renderLogDetailsPage(data: LogDetailsPageData) {
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                   ${tag}
                 </span>
-              `).join('')}
+              `)}
             </div>
           </div>
         </div>
@@ -225,9 +225,13 @@ export function renderLogDetailsPage(data: LogDetailsPageData) {
     </div>
   `
 
-  return adminLayoutV2({
+  const layoutData: AdminLayoutCatalystData = {
     title: `Log Details - ${log.id}`,
+    pageTitle: 'Log Details',
+    currentPath: '/admin/logs',
     user,
     content: content as string
-  })
+  }
+
+  return renderAdminLayoutCatalyst(layoutData)
 }

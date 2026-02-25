@@ -1,5 +1,5 @@
 import { html } from 'hono/html'
-import { adminLayoutV2 } from '../layouts/admin-layout-v2.template'
+import { renderAdminLayoutCatalyst, AdminLayoutCatalystData } from '../layouts/admin-layout-catalyst.template'
 import type { LogConfig } from '../../db/schema'
 
 interface BaseUser {
@@ -256,9 +256,13 @@ export function renderLogConfigPage(data: LogConfigPageData) {
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
   `
 
-  return adminLayoutV2({
+  const layoutData: AdminLayoutCatalystData = {
     title: 'Log Configuration',
+    pageTitle: 'Log Configuration',
+    currentPath: '/admin/logs',
     user,
     content: content as string
-  })
+  }
+
+  return renderAdminLayoutCatalyst(layoutData)
 }
