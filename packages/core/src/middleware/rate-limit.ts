@@ -49,7 +49,7 @@ export function rateLimit(options: RateLimitOptions) {
         // Store the updated count even when rejecting
         await kv.put(key, JSON.stringify(entry), { expirationTtl: Math.max(ttlSeconds, 1) })
 
-        try { const logger = getLogger((c.env as any)?.DB); await logger.logSecurity('rate-limit-exceeded', 'medium', { ipAddress: ip, userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { keyPrefix, count: entry.count, max }) } catch {}
+        try { const logger = getLogger((c.env as any)?.DB); await logger.logSecurity('rate-limit-exceeded', 'medium', { ipAddress: ip, userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, keyPrefix, count: entry.count, max } as any) } catch {}
 
         const retryAfter = Math.ceil((entry.resetAt - now) / 1000)
         c.header('Retry-After', String(retryAfter))

@@ -460,7 +460,7 @@ adminSettingsRoutes.post('/api/database-tools/truncate', async (c) => {
 
     // Log database truncate (security event — awaited)
     const truncatedTables = results.filter(r => r.success).map(r => r.table)
-    try { const logger = getLogger(db); await logger.logSecurity('database-truncate', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: (c.get('user') as any)?.userId }, { tables: truncatedTables, count: truncatedTables.length }) } catch {}
+    try { const logger = getLogger(db); await logger.logSecurity('database-truncate', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: (c.get('user') as any)?.userId, tables: truncatedTables, count: truncatedTables.length } as any) } catch {}
     try { c.executionCtx?.waitUntil(logActivityFromContext(c, 'settings.truncate', 'settings', undefined, { tables: truncatedTables, count: truncatedTables.length })) } catch {}
 
     return c.json({

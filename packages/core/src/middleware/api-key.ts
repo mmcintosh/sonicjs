@@ -145,7 +145,7 @@ export const requireApiKey = (scope: string) => {
     if (apiKey) {
       c.set('apiKey', apiKey)
       if (!apiKey.scopes.includes(scope)) {
-        try { const logger = getLogger((c.env as any)?.DB); await logger.logSecurity('api-key-insufficient-scope', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { keyId: apiKey.id, requiredScope: scope, actualScopes: apiKey.scopes }) } catch {}
+        try { const logger = getLogger((c.env as any)?.DB); await logger.logSecurity('api-key-insufficient-scope', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, keyId: apiKey.id, requiredScope: scope, actualScopes: apiKey.scopes } as any) } catch {}
         return c.json({ error: `Insufficient scope. Required: ${scope}` }, 403)
       }
       return next()

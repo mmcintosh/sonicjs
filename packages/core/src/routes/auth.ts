@@ -255,14 +255,14 @@ authRoutes.post('/login',
       }
 
       if (!user) {
-        try { const logger = getLogger(db); await logger.logAuth('login', undefined, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { email: normalizedEmail, reason: 'user-not-found' }) } catch {}
+        try { const logger = getLogger(db); await logger.logAuth('login', undefined, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, email: normalizedEmail, reason: 'user-not-found' } as any) } catch {}
         return c.json({ error: 'Invalid email or password' }, 401)
       }
 
       // Verify password
       const isValidPassword = await AuthManager.verifyPassword(password, user.password_hash)
       if (!isValidPassword) {
-        try { const logger = getLogger(db); await logger.logAuth('login', user.id, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { email: normalizedEmail, reason: 'bad-password' }) } catch {}
+        try { const logger = getLogger(db); await logger.logAuth('login', user.id, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, email: normalizedEmail, reason: 'bad-password' } as any) } catch {}
         return c.json({ error: 'Invalid email or password' }, 401)
       }
 
@@ -577,7 +577,7 @@ authRoutes.post('/login/form',
       .first() as any
     
     if (!user) {
-      try { const logger = getLogger(db); await logger.logAuth('login', undefined, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { email: normalizedEmail, reason: 'user-not-found' }) } catch {}
+      try { const logger = getLogger(db); await logger.logAuth('login', undefined, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, email: normalizedEmail, reason: 'user-not-found' } as any) } catch {}
       return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           Invalid email or password
@@ -588,7 +588,7 @@ authRoutes.post('/login/form',
     // Verify password
     const isValidPassword = await AuthManager.verifyPassword(password, user.password_hash)
     if (!isValidPassword) {
-      try { const logger = getLogger(db); await logger.logAuth('login', user.id, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { email: normalizedEmail, reason: 'bad-password' }) } catch {}
+      try { const logger = getLogger(db); await logger.logAuth('login', user.id, false, { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, email: normalizedEmail, reason: 'bad-password' } as any) } catch {}
       return c.html(html`
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           Invalid email or password
@@ -697,7 +697,7 @@ authRoutes.post('/seed-admin',
         .bind(passwordHash, Date.now(), existingAdmin.id)
         .run()
 
-      try { const logger = getLogger(db); await logger.logSecurity('seed-admin-reset', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { existingId: existingAdmin.id }) } catch {}
+      try { const logger = getLogger(db); await logger.logSecurity('seed-admin-reset', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, existingId: existingAdmin.id } as any) } catch {}
 
       return c.json({
         message: 'Admin user already exists (password updated)',
@@ -734,7 +734,7 @@ authRoutes.post('/seed-admin',
       now
     ).run()
 
-    try { const logger = getLogger(db); await logger.logSecurity('seed-admin-created', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method }, { userId }) } catch {}
+    try { const logger = getLogger(db); await logger.logSecurity('seed-admin-created', 'critical', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId } as any) } catch {}
 
     return c.json({
       message: 'Admin user created successfully',
@@ -1075,7 +1075,7 @@ authRoutes.post('/request-password-reset',
     ).run()
 
     // Log password reset request (security event — awaited)
-    try { const logger = getLogger(db); await logger.logSecurity('password-reset-requested', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.id }, { email }) } catch {}
+    try { const logger = getLogger(db); await logger.logSecurity('password-reset-requested', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.id, email } as any) } catch {}
 
     // In a real implementation, you would send an email here
     // For now, we'll return the reset link for development
@@ -1321,7 +1321,7 @@ authRoutes.post('/reset-password', async (c) => {
     ).run()
 
     // Log password reset completion (both security + activity)
-    try { const logger = getLogger(db); await logger.logSecurity('password-reset-completed', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.id }, { email: user.email }) } catch {}
+    try { const logger = getLogger(db); await logger.logSecurity('password-reset-completed', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.id, email: user.email } as any) } catch {}
     c.executionCtx?.waitUntil(logActivityFromContext(c, 'user.password_reset', 'user', user.id, { email: user.email }))
 
     // Redirect to login with success message

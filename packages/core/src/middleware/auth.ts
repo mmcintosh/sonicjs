@@ -254,7 +254,7 @@ export const requireRole = (requiredRole: string | string[]) => {
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
     
     if (!roles.includes(user.role)) {
-      try { const logger = getLogger(c.env?.DB); await logger.logSecurity('insufficient-role', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.userId }, { requiredRole: roles, actualRole: user.role }) } catch {}
+      try { const logger = getLogger(c.env?.DB); await logger.logSecurity('insufficient-role', 'medium', { ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown', userAgent: c.req.header('user-agent') || '', url: c.req.url, method: c.req.method, userId: user.userId } as any) } catch {}
       // Check if this is a browser request (HTML accept header)
       const acceptHeader = c.req.header('Accept') || ''
       if (acceptHeader.includes('text/html')) {
